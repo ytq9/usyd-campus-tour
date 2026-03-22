@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@plugin "daisyui" {
+  themes: light --default;
+  prefix: "d-";
+}
+
+@theme {
+  --color-ochre: #e64626;
+}
+
+.pnlm-sprite {
+  background-image: none !important;
+}
+
+.pnlm-hotspot:hover {
+  background-color: transparent !important;
+}
+
+.pnlm-controls-container {
+  display: none;
+}
+
+.d-modal-action {
+  margin: 0 !important;
+}
