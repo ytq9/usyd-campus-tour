@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@plugin "daisyui" {
+  themes: light --default;
+  prefix: "d-";
+}
+
+@theme {
+  /* Custom Coloring */
+  --color-ochre: #e64626;
+  --font-display: "Apercu Pro", "sans-serif";
+}
+
+/* Custom Font */
+@font-face {
+  font-family: Apercu Pro;
+  font-style: normal;
+  src: url("../font/ApercuPro.otf") format("opentype");
+}
+
+@font-face {
+  font-family: Apercu Pro Bold;
+  font-style: bold;
+  src: url("../font/ApercuProBold.otf") format("opentype");
+}
+
+.pnlm-sprite {
+  background-image: none !important;
+}
+
+.pnlm-hotspot:hover {
+  background-color: transparent !important;
+}
+
+.pnlm-controls-container {
+  display: none;
+}
+
+.d-modal-action {
+  margin: 0 !important;
+}
+
+.collapseCheckbox {
+  min-height: 0;
+  padding: 0;
+}

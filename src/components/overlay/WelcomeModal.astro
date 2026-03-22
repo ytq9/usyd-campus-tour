@@ -1,0 +1,23 @@
+---
+const { isIndex, welcomeText = "", welcomeTitle = "" } = Astro.props;
+---
+
+<dialog id="welcome_modal" class="d-modal">
+  <div class="d-modal-box">
+    <h3 class="text-lg font-bold">{welcomeTitle}</h3>
+    <div class="prose prose-sm py-4" set:html={welcomeText} />
+    <button class="d-btn w-full bg-ochre text-white" onclick="welcome_modal.close()">Take the tour</button>
+  </div>
+  <form method="dialog" class="d-modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+<script data-isindex={isIndex}>
+  const isIndex = document.currentScript.dataset.isindex === "true";
+
+  document.addEventListener("astro:page-load", () => {
+    if (isIndex && welcome_modal) {
+      welcome_modal?.showModal();
+    }
+  });
+</script>

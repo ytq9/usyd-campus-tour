@@ -1,0 +1,23 @@
+---
+const titleDummy = "Entrance";
+
+const { title = titleDummy, sceneDescription } = Astro.props;
+---
+
+<div class="bg-black/65 rounded-sm p-2 bg-opacity-50">
+  <div class="text-md md:text-lg" set:html={title} />
+
+  {
+    sceneDescription && (
+      <div class="d-collapse bg-base-none text-black pointer-events-auto">
+        <input class="collapseCheckbox" type="checkbox" />
+        <div class="d-collapse-title bg-blue-600 text-white text-sm p-2 min-h-0 my-2">
+          Room Description
+        </div>
+        <div class="d-collapse-content text-sm bg-none text-white text-left">
+          {sceneDescription}
+        </div>
+      </div>
+    )
+  }
+</div>

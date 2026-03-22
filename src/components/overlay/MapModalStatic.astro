@@ -1,0 +1,123 @@
+---
+const { globalConfig , sceneId } = Astro.props;
+
+const svgs = import.meta.glob("../../../public/**/*.svg", {
+  query: '?raw',
+      eager: true,
+    })
+function getSvgString(svgPath: string) {
+  const svgRaw = svgs[`../../../public${svgPath}`]
+  return String(svgRaw.default)
+}
+---
+
+<button
+  onclick="mapModal.showModal()"
+  class="bg-ochre hover:bg-orange-700 p-2 size-14 rounded-full cursor-pointer d-btn-neutral text-white flex items-center justify-center"
+>
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+</svg>
+
+</button>
+<dialog id="mapModal" class="d-modal">
+  <div class="d-modal-box relative w-full xs:max-w-sm lg:max-w-5xl bg-white/50">
+    
+    <div class="d-tabs d-tabs-lift ">
+      {
+        globalConfig.floorplans.map((floorplanData) => {
+
+        const defaultChecked = floorplanData.hotSpotPoints.findIndex(e=>e.sceneId === sceneId) > -1;
+        return (
+            <input type="radio" name="my_tabs_3" class="d-tab border-none p-4" aria-label={floorplanData.floorName} 
+                checked={defaultChecked ? "checked" : undefined}
+            />
+            <div class="d-tab-content bg-base-100 border-base-300 p-6">
+                <div
+                    data-floorplan={JSON.stringify(floorplanData)}
+                    data-currentSceneId={sceneId}
+                    class="overflow-hidden [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:h-full"
+                    set:html={getSvgString(floorplanData.floorplan)}
+                />
+            </div>
+        )})
+      }
+    </div>
+    <form method="dialog">
+      <button class="d-btn d-btn-sm d-btn-circle d-btn-ghost absolute right-2 top-2">✕</button>
+    </form>
+  </div>
+<form method="dialog" class="d-modal-backdrop">
+  <button>close</button>
+</form>
+  
+</dialog>
+
+<script is:inline >
+
+    const MapPoint = (props) => {
+        const { sceneId, cx, cy, fill, floorId, isCurrentScene } = props;
+        const circle = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "circle"
+        );
+
+        circle.setAttribute("hotspot-id", sceneId);
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        
+        circle.setAttribute("r", isCurrentScene ? "44" : "32");
+        circle.setAttribute("fill", isCurrentScene? "#000000" : fill);
+        circle.setAttribute("stroke-width", "3");
+
+        if (isCurrentScene) {
+
+        } else {
+            circle.setAttribute("style", "cursor: pointer;");
+            circle.addEventListener("click", () => {
+                window.location.assign(`/${floorId}/${sceneId}`);
+            });
+        }
+        return circle;
+    };
+
+  const handleLoad = () => {
+    document
+      .querySelectorAll("div[data-floorplan]")
+      .forEach((floorplanContainer) => {
+        const svgElement = floorplanContainer;
+        const floorplanData = JSON.parse(
+          svgElement.getAttribute("data-floorplan")
+        );
+        const sceneId =  svgElement.getAttribute("data-currentSceneId")
+        if (!svgElement) {
+          console.warn("SVG element not found inside #map1");
+          return;
+        }
+
+        // Find the container group by using the floorId from floorplanData.
+        const pointsGroup = svgElement.querySelector(
+          `#${floorplanData.floorId}-hotspot-container`
+        );
+        if (!pointsGroup) {
+          console.warn(
+            `Hotspot container with id "${floorplanData.floorId}-hotspot-container" not found in the SVG`
+          );
+          return;
+        }
+
+        // Clear previous children (if reloading)
+        pointsGroup.innerHTML = "";
+
+        // Create and append each MapPoint into the pointsGroup.
+        floorplanData.hotSpotPoints.forEach((e) => {
+
+            const isCurrentScene = sceneId === e.sceneId
+            const circleEl = MapPoint({ ...e, floorId: floorplanData.floorId, isCurrentScene });
+            pointsGroup.appendChild(circleEl);
+        });
+      });
+  };
+
+  document.addEventListener("astro:page-load", handleLoad);
+</script>

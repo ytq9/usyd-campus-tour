@@ -1,0 +1,509 @@
+{
+  "foyer3.1": {
+    "title": "Foyer 1 - Level 3",
+    "panorama": "/tour/panoramas/level3/a1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -25,
+        "yaw": 195,
+        "type": "scene",
+        "text": "Downstairs - Level 2",
+        "sceneId": "level2/foyer2.1",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -10,
+        "yaw": 73,
+        "type": "scene",
+        "text": "Foyer 2 - Level 3",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -10,
+        "yaw": 243,
+        "type": "scene",
+        "text": "310 - Energy and Machines Lab 1",
+        "sceneId": "310.1"
+      }
+    ]
+  },
+  "foyer3.2": {
+    "title": "Foyer 2 - Level 3",
+    "panorama": "/tour/panoramas/level3/b1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 25,
+        "type": "scene",
+        "text": "Foyer 1 - Level 3",
+        "sceneId": "foyer3.1"
+      },
+      {
+        "pitch": -10,
+        "yaw": 225,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 1",
+        "sceneId": "301.1"
+      },
+      {
+        "pitch": -5,
+        "yaw": -8,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 1",
+        "sceneId": "309.1"
+      }
+    ]
+  },
+  "301.1": {
+    "title": "301 - Digital Systems & Comm's Modelling 1",
+    "sceneDesc": "The Digital and Communications Systems Lab equips students with practical skills through hands-on experiments in embedded systems, digital logic (using modern FPGAs), communication systems modeling with TIMS, optical communication systems, and digital communication systems with software-defined radios. This lab is designed to provide students with a comprehensive understanding of digital and communication systems and their applications. By working with advanced tools and technologies, students gain valuable experience in designing, implementing, and testing complex digital systems, preparing them for careers in the rapidly evolving field of digital and communication technologies.",
+    "panorama": "/tour/panoramas/level3/c1.jpg",
+    "yaw": 280,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 75,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -25,
+        "yaw": 190,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 2",
+        "sceneId": "301.2"
+      },
+      {
+        "pitch": 5,
+        "yaw": 295,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 3",
+        "sceneId": "301.3"
+      },
+      {
+        "pitch": -7,
+        "yaw": 273,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 4",
+        "sceneId": "301.4"
+      }
+    ]
+  },
+  "301.2": {
+    "title": "301 - Digital Systems & Comm's Modelling 2",
+    "sceneDesc": "The Digital and Communications Systems Lab equips students with practical skills through hands-on experiments in embedded systems, digital logic (using modern FPGAs), communication systems modeling with TIMS, optical communication systems, and digital communication systems with software-defined radios. This lab is designed to provide students with a comprehensive understanding of digital and communication systems and their applications. By working with advanced tools and technologies, students gain valuable experience in designing, implementing, and testing complex digital systems, preparing them for careers in the rapidly evolving field of digital and communication technologies.",
+    "panorama": "/tour/panoramas/level3/c2.jpg",
+    "yaw": 90,
+    "rotation": 90,
+    "pitch": -5,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -20,
+        "yaw": 0,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 1",
+        "sceneId": "301.1"
+      },
+      {
+        "code": "c2.1",
+        "pitch": -15,
+        "yaw": 90,
+        "type": "info",
+        "text": "Soldering and rework station",
+        "description": "A soldering and rework station is used for precise soldering, desoldering, and repairing electronic components, ensuring reliable connections and efficient rework of circuit boards.",
+        "highlight": ""
+      }
+    ]
+  },
+  "301.3": {
+    "title": "301 - Digital Systems & Comm's Modelling 3",
+    "sceneDesc": "The Digital and Communications Systems Lab equips students with practical skills through hands-on experiments in embedded systems, digital logic (using modern FPGAs), communication systems modeling with TIMS, optical communication systems, and digital communication systems with software-defined radios. This lab is designed to provide students with a comprehensive understanding of digital and communication systems and their applications. By working with advanced tools and technologies, students gain valuable experience in designing, implementing, and testing complex digital systems, preparing them for careers in the rapidly evolving field of digital and communication technologies.",
+    "panorama": "/tour/panoramas/level3/c3.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": 0,
+        "yaw": -110,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 1",
+        "sceneId": "301.1"
+      },
+      {
+        "pitch": -10,
+        "yaw": -85,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 4",
+        "sceneId": "301.4"
+      },
+      {
+        "code": "c3.1",
+        "pitch": -20,
+        "yaw": -60,
+        "type": "info",
+        "text": "Group Desks",
+        "description": "A designated area for project work and group discussions to facilitate effective teamwork and communication.",
+        "highlight": ""
+      },
+      {
+        "code": "c3.2",
+        "pitch": 0,
+        "yaw": -50,
+        "type": "info",
+        "text": "Storage Cupboards",
+        "description": "The cupboard storage contains all the items (e.g. devices, consumables, TIMS cards and parts) needed to support individual UoS.",
+        "highlight": ""
+      }
+    ]
+  },
+  "301.4": {
+    "title": "301 - Digital Systems & Comm's Modelling 4",
+    "sceneDesc": "The Digital and Communications Systems Lab equips students with practical skills through hands-on experiments in embedded systems, digital logic (using modern FPGAs), communication systems modeling with TIMS, optical communication systems, and digital communication systems with software-defined radios. This lab is designed to provide students with a comprehensive understanding of digital and communication systems and their applications. By working with advanced tools and technologies, students gain valuable experience in designing, implementing, and testing complex digital systems, preparing them for careers in the rapidly evolving field of digital and communication technologies.",
+    "panorama": "/tour/panoramas/level3/c4.jpg",
+    "yaw": 190,
+    "rotation": 90,
+    "pitch": -3,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -8,
+        "yaw": 85,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 1",
+        "sceneId": "301.1"
+      },
+      {
+        "pitch": -15,
+        "yaw": -5,
+        "type": "scene",
+        "text": "301 - Digital Systems & Comm's Modelling 3",
+        "sceneId": "301.3"
+      },
+      {
+        "code": "c4.1",
+        "pitch": -15,
+        "yaw": 156,
+        "type": "info",
+        "text": "TIMS (Telecommunications Modelling System)",
+        "description": "TIMS is a telecommunications modelling system. It models mathematical equations representing electrical signals, or block diagrams representing telecommunications systems. Physically, TIMS is a dual rack system. The top rack accepts up to 12 Eurocard sized, compatible 'black boxes', or modules. The lower rack houses a number of fixed modules, as well as the system power supply. Modules are patched together via the front panel sockets using interconnecting leads, to model the system under investigation.",
+        "highlight": ""
+      },
+      {
+        "code": "c4.2",
+        "pitch": -10,
+        "yaw": -30,
+        "type": "info",
+        "text": "Group Desks",
+        "description": "A designated area for project work and group discussions to facilitate effective teamwork and communication.",
+        "highlight": ""
+      },
+      {
+        "code": "b4.3",
+        "pitch": 2,
+        "yaw": 140,
+        "type": "info",
+        "text": "DC (Direct Current) Power Supply",
+        "description": "A DC (Direct Current) power supply is an essential piece of equipment in an electronics lab. It provides a constant voltage or current to power electronic circuits and devices. The voltage outputs can be adjusted as needed.",
+        "highlight": ""
+      },
+      {
+        "code": "b4.4",
+        "pitch": 20,
+        "yaw": 160,
+        "type": "info",
+        "text": "Oscilloscope",
+        "description": "An oscilloscope is a valuable tool for analyzing both analog and digital signals. It enables students and staff to quickly identify and troubleshoot issues in complex designs.",
+        "highlight": ""
+      },
+      {
+        "code": "b4.5",
+        "pitch": 17,
+        "yaw": 185,
+        "type": "info",
+        "text": "Function Generator",
+        "description": "A function generator can provide reconfigurable testing of electronics devices and common modulated signals, allowing for comprehensive investigation alongside digital electronics and systems.",
+        "highlight": ""
+      },
+      {
+        "code": "b4.6",
+        "pitch": 18,
+        "yaw": 140,
+        "type": "info",
+        "text": "Digital Multimeter",
+        "description": "A digital multimeter is used to measure common electrical variables, including voltage (volts), current (amps), and resistance (ohms).",
+        "highlight": ""
+      }
+    ]
+  },
+  "310.1": {
+    "title": "310 - Energy and Machines Lab 1",
+    "sceneDesc": "The Energy and Machines Lab provides students with practical skills in advanced power electronics and energy systems. This includes hands-on experience with renewable energy systems and three-phase electrical machinery. The lab is designed to offer a comprehensive understanding of modern energy technologies, enabling students to design, analyze, and optimize various power and energy systems. By working with cutting-edge equipment and technologies, students are prepared for careers in the evolving field of energy engineering, focusing on sustainable and efficient energy solutions.",
+    "panorama": "/tour/panoramas/level3/d1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -6,
+        "yaw": -45,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.1"
+      },
+      {
+        "pitch": -15,
+        "yaw": 110,
+        "type": "scene",
+        "text": "310 - Energy and Machines Lab 1",
+        "sceneId": "310.2"
+      },
+      {
+        "code": "d1.1",
+        "pitch": 3,
+        "yaw": 190,
+        "type": "info",
+        "text": "Advanced testing instruments",
+        "description": "Each workbench is equipped with advanced testing instruments, including Tektronix oscilloscopes, multi-channel function generators, high-capacity DC power supply units, and Tektronix current probes. These tools are essential for supporting the teaching of various units of study in electrical engineering and power engineering. The lab provides a comprehensive environment for students to gain hands-on experience with cutting-edge equipment, enhancing their practical skills and understanding of complex electrical and power systems.",
+        "highlight": ""
+      },
+      {
+        "code": "d1.2",
+        "pitch": 8,
+        "yaw": 230,
+        "type": "info",
+        "text": "Labvolt modules",
+        "description": "Lab 310 is equipped with a comprehensive range of Labvolt modules, covering areas from power electronics and renewable energy to three-phase electrical machinery. This includes IGBT inverters, thyristors, rectifiers, batteries, and DC, induction, and synchronous machines.",
+        "highlight": ""
+      },
+      {
+        "code": "d1.3",
+        "pitch": -2,
+        "yaw": 255,
+        "type": "info",
+        "text": "Test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment.",
+        "highlight": ""
+      }
+    ]
+  },
+  "310.2": {
+    "title": "310 - Energy and Machines Lab 2",
+    "sceneDesc": "The Energy and Machines Lab provides students with practical skills in advanced power electronics and energy systems. This includes hands-on experience with renewable energy systems and three-phase electrical machinery. The lab is designed to offer a comprehensive understanding of modern energy technologies, enabling students to design, analyze, and optimize various power and energy systems. By working with cutting-edge equipment and technologies, students are prepared for careers in the evolving field of energy engineering, focusing on sustainable and efficient energy solutions.",
+    "panorama": "/tour/panoramas/level3/d2.jpg",
+    "yaw": 160,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.1"
+      },
+      {
+        "pitch": -6,
+        "yaw": 143,
+        "type": "scene",
+        "text": "310 - Energy and Machines Lab 1",
+        "sceneId": "310.1"
+      },
+      {
+        "code": "d1.1",
+        "pitch": -30,
+        "yaw": 150,
+        "type": "info",
+        "text": "Group Desks",
+        "description": "A designated area for project work and group discussions to facilitate effective teamwork and communication.",
+        "highlight": ""
+      }
+    ]
+  },
+  "309.1": {
+    "title": "309 - RF Chamber Room 1",
+    "sceneDesc": "The RF Chamber is a specially designed, shielded room that eliminates electromagnetic interference. It is crucial in RF engineering because electromagnetic radiation is everywhere, from both natural and artificial sources. Testing in an RF chamber ensures devices comply with communication regulations by preventing unwanted interference and avoiding regulatory violations.",
+    "panorama": "/tour/panoramas/level3/e1.jpg",
+    "yaw": 250,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -15,
+        "yaw": 125,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -15,
+        "yaw": 290,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 2",
+        "sceneId": "309.2"
+      },
+      {
+        "code": "e1.1",
+        "pitch": -10,
+        "yaw": 275,
+        "type": "info",
+        "text": "309 - RF Chamber",
+        "description": "The RF Chamber is a specially designed, shielded room that eliminates electromagnetic interference. Its interior is lined with materials that absorb radiation, creating a controlled environment for precise testing and measurement of radio frequency (RF) devices. This chamber allows for rigorous testing of RF emissions, immunity, and other RF-related characteristics.",
+        "highlight": ""
+      },
+      {
+        "code": "e1.2",
+        "pitch": 2,
+        "yaw": 226,
+        "type": "info",
+        "text": "Signal Analyzer",
+        "description": "Used for analyzing the performance and characteristics of RF signals.",
+        "highlight": ""
+      },
+      {
+        "code": "e1.3",
+        "pitch": -6,
+        "yaw": 226,
+        "type": "info",
+        "text": "Vector Network Analyzer",
+        "description": "Measures the network characteristics of RF devices, enabling a detailed analysis of performance.",
+        "highlight": ""
+      },
+      {
+        "code": "e1.4",
+        "pitch": -14,
+        "yaw": 236,
+        "type": "info",
+        "text": "Vector Signal Generator",
+        "description": "Generates high-quality signals for testing and analysis.",
+        "highlight": ""
+      }
+    ]
+  },
+  "309.2": {
+    "title": "309 - RF Chamber Room 2",
+    "sceneDesc": "The RF Chamber is a specially designed, shielded room that eliminates electromagnetic interference. It is crucial in RF engineering because electromagnetic radiation is everywhere, from both natural and artificial sources. Testing in an RF chamber ensures devices comply with communication regulations by preventing unwanted interference and avoiding regulatory violations.",
+    "panorama": "/tour/panoramas/level3/e3.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -20,
+        "yaw": 153,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 1",
+        "sceneId": "309.1"
+      },
+      {
+        "pitch": -15,
+        "yaw": 210,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 3",
+        "sceneId": "309.3"
+      },
+      {
+        "code": "e3.1",
+        "pitch": -10,
+        "yaw": 225,
+        "type": "info",
+        "text": "Antenna Mast",
+        "description": "The antenna mast is a structure that supports and positions antennas at various heights and angles within the RF chamber.",
+        "highlight": ""
+      },
+      {
+        "code": "e3.2",
+        "pitch": -35,
+        "yaw": 225,
+        "type": "info",
+        "text": "DUT Table",
+        "description": "The DUT table is a platform where the device under test is placed during measurements. It is typically made of non-conductive materials to avoid interference with the RF signals.",
+        "highlight": ""
+      }
+    ]
+  },
+  "309.3": {
+    "title": "309 - RF Chamber Room 3",
+    "sceneDesc": "The RF Chamber is a specially designed, shielded room that eliminates electromagnetic interference. It is crucial in RF engineering because electromagnetic radiation is everywhere, from both natural and artificial sources. Testing in an RF chamber ensures devices comply with communication regulations by preventing unwanted interference and avoiding regulatory violations.",
+    "panorama": "/tour/panoramas/level3/e4.jpg",
+    "yaw": 0,
+    "rotation": 90,
+    "pitch": -10,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer3.2"
+      },
+      {
+        "pitch": -10,
+        "yaw": 55,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 1",
+        "sceneId": "309.1"
+      },
+      {
+        "pitch": -15,
+        "yaw": 35,
+        "type": "scene",
+        "text": "309 - RF Chamber Room 2",
+        "sceneId": "309.2"
+      },
+      {
+        "code": "e3.1",
+        "pitch": -10,
+        "yaw": -30,
+        "type": "info",
+        "text": "Antenna Mast",
+        "description": "The antenna mast is a structure that supports and positions antennas at various heights and angles within the RF chamber.",
+        "highlight": ""
+      },
+      {
+        "code": "e3.2",
+        "pitch": -10,
+        "yaw": 25,
+        "type": "info",
+        "text": "DUT Table",
+        "description": "The DUT table is a platform where the device under test is placed during measurements. It is typically made of non-conductive materials to avoid interference with the RF signals.",
+        "highlight": ""
+      }
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "landingPageTitle": "USYD Shepherd Street Building (J15)",
+  "welcomeTitle": "Welcome to the Shepherd Street Building (J15)",
+  "welcomeText": "Welcome to the J15 Shepherd Street Building! This premier facility features seven state-of-the-art laboratories dedicated to the discipline of electrical and computer engineering (ECE). Engineered to spark innovation and hands-on learning, the J15 ECE Labs are outfitted with the latest instruments and resources, empowering both students and academics to achieve unparalleled excellence.",
+  "defaultFloor": 0,
+  "floorplans": [
+    {
+      "floorName": "Courtyard",
+      "config": "courtyard.json",
+      "floorplan": "/tour/floorplan/courtyard.svg",
+      "initialSceneId": "courtyard1.1",
+      "hotSpotPoints": [
+        {
+          "sceneId": "courtyard1.1",
+          "cx": "2800",
+          "cy": "1200",
+          "fill": "#E64626"
+        },
+        {
+          "sceneId": "buildingEntrance",
+          "cx": "2000",
+          "cy": "400",
+          "fill": "#E64626"
+        }
+      ]
+    },
+    {
+      "floorName": "Level 1",
+      "config": "level1.json",
+      "floorplan": "/tour/floorplan/lvl1.svg",
+      "initialSceneId": "foyer1.1",
+      "hotSpotPoints": [
+        {
+          "sceneId": "foyer1.1",
+          "cx": "3050",
+          "cy": "1000",
+          "fill": "#E64626"
+        },
+        { "sceneId": "foyer1.2", "cx": "2050", "cy": "950", "fill": "#E64626" },
+        { "sceneId": "101.1", "cx": "1380", "cy": "1140", "fill": "#E64626" },
+        { "sceneId": "101.2", "cx": "380", "cy": "880", "fill": "#E64626" },
+        { "sceneId": "110.1", "cx": "3700", "cy": "930", "fill": "#E64626" },
+        { "sceneId": "110.2", "cx": "3700", "cy": "1450", "fill": "#E64626" },
+        { "sceneId": "110.3", "cx": "3850", "cy": "430", "fill": "#E64626" },
+        { "sceneId": "110.4", "cx": "4200", "cy": "930", "fill": "#E64626" },
+        { "sceneId": "110.5", "cx": "4580", "cy": "1160", "fill": "#E64626" },
+        { "sceneId": "110.6", "cx": "4480", "cy": "1400", "fill": "#E64626" },
+        { "sceneId": "110.7", "cx": "4690", "cy": "1400", "fill": "#E64626" }
+      ]
+    },
+    {
+      "floorName": "Level 2",
+      "config": "level2.json",
+      "floorplan": "/tour/floorplan/level2.svg",
+      "initialSceneId": "foyer2.1",
+      "hotSpotPoints": [
+        { "sceneId": "foyer2.1", "cx": "3050", "cy": "850", "fill": "#E64626" },
+        { "sceneId": "201.1", "cx": "1950", "cy": "850", "fill": "#E64626" },
+        { "sceneId": "201.2", "cx": "1000", "cy": "950", "fill": "#E64626" },
+        { "sceneId": "201.3", "cx": "200", "cy": "600", "fill": "#E64626" },
+        { "sceneId": "210.1", "cx": "4400", "cy": "1000", "fill": "#E64626" },
+        { "sceneId": "210.2", "cx": "3700", "cy": "600", "fill": "#E64626" },
+        { "sceneId": "210.3", "cx": "4750", "cy": "680", "fill": "#E64626" }
+      ]
+    },
+    {
+      "floorName": "Level 3",
+      "config": "level3.json",
+      "floorplan": "/tour/floorplan/level3.svg",
+      "initialSceneId": "foyer3.1",
+      "hotSpotPoints": [
+        { "sceneId": "foyer3.1", "cx": "3100", "cy": "950", "fill": "#E64626" },
+        { "sceneId": "foyer3.2", "cx": "2000", "cy": "950", "fill": "#E64626" },
+        { "sceneId": "301.1", "cx": "1350", "cy": "950", "fill": "#E64626" },
+        { "sceneId": "301.2", "cx": "1350", "cy": "1400", "fill": "#E64626" },
+        { "sceneId": "301.3", "cx": "200", "cy": "580", "fill": "#E64626" },
+        { "sceneId": "301.4", "cx": "350", "cy": "1050", "fill": "#E64626" },
+        { "sceneId": "310.1", "cx": "3800", "cy": "970", "fill": "#E64626" },
+        { "sceneId": "310.2", "cx": "4600", "cy": "380", "fill": "#E64626" },
+        { "sceneId": "309.1", "cx": "2350", "cy": "580", "fill": "#E64626" },
+        { "sceneId": "309.2", "cx": "2250", "cy": "310", "fill": "#E64626" },
+        { "sceneId": "309.3", "cx": "1900", "cy": "350", "fill": "#E64626" }
+      ]
+    }
+  ]
+}

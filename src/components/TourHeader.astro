@@ -1,0 +1,13 @@
+---
+import ClientRouter from "astro/components/ClientRouter.astro";
+
+const { title = "tour" } = Astro.props;
+---
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <ClientRouter />
+  <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+  <title>{title}</title>
+</head>

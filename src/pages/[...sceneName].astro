@@ -1,0 +1,206 @@
+---
+import PannellumViewer from "@components/PannellumViewer";
+import PannellumViewerLoading from "@components/viewer/PannellumViewerLoading.astro";
+import TourHeader from "@components/TourHeader.astro";
+import Layout from "@/layouts/BaseLayout.astro";
+import PannellumOverlay from "@components/PannellumOverlay.astro";
+import WelcomeModal from "@components/overlay/WelcomeModal.astro";
+
+type floorplanConfigT = {
+  floorName: string;
+  config: string;
+  floorplan: string;
+  initialSceneId: string;
+};
+
+type globalConfigT = {
+  landingPageTitle: string;
+  defaultFloor: number;
+  floorplans: floorplanConfigT[];
+};
+
+type sceneId = string;
+
+type hotSpotsT = {
+  pitch: number;
+  yaw: number;
+  type: "scene";
+  text: string;
+  sceneId: sceneId;
+  cssClass: "ipf-up-circle";
+};
+type floorPlanConfigRecordT = Record<
+  sceneId,
+  {
+    title?: string;
+    panorama: `/tour/panoramas/${string}.jpg`;
+    yaw: number;
+    rotation: number;
+    pitch: number;
+    hfov: number;
+    hotSpots: hotSpotsT[];
+  }
+>;
+const configFiles = import.meta.glob("../config/**/*.json", {
+  eager: true,
+});
+const configs = Object.entries(configFiles).map(([filePath, fileModule]) => {
+  return { filePath, data: fileModule };
+});
+const readJSON = (pathFromSrc = "") => {
+  const data = configs.find(
+    (elem) => elem.filePath === `../${pathFromSrc}`
+  )?.data;
+  return data?.default;
+};
+export const prerender = true;
+// statically build all files in the
+export function getStaticPaths() {
+  const configFiles = Object(
+    import.meta.glob("../config/**/*.json", {
+      eager: true,
+    })
+  );
+  const configs = Object.entries(configFiles).map(([filePath, fileModule]) => {
+    return { filePath, data: fileModule };
+  });
+  const readJSON = (pathFromSrc = "") => {
+    const data = configs.find(
+      (elem) => elem.filePath === `../${pathFromSrc}`
+    )?.data;
+    return data?.default;
+  };
+
+  const globalConfig: globalConfigT = readJSON("config/tour.json");
+
+  let floorPaths: any[] = [];
+
+  globalConfig.floorplans.forEach(function (floorPlan, i) {
+    // pageProp
+    const floorPlanConfigRecord: floorPlanConfigRecordT = readJSON(
+      `config/floorplans/${floorPlan.config}`
+    );
+    const floorNameSlug = floorPlan.config.replace(".json", "");
+    const currFloorPaths = Object.entries(floorPlanConfigRecord).map(
+      ([sceneId, sceneData]) => ({
+        params: {
+          sceneName: `${floorNameSlug}/${sceneId}`,
+        },
+        props: {
+          title: sceneData.title,
+          floorName: floorNameSlug,
+          sceneId,
+          panorama: sceneData.panorama,
+          yaw: sceneData.yaw,
+          rotation: sceneData.rotation,
+          pitch: sceneData.pitch,
+          hfov: sceneData.hfov,
+          sceneDescription: sceneData?.sceneDesc,
+          hotSpots: sceneData.hotSpots,
+        },
+      })
+    );
+
+    if (i === globalConfig.defaultFloor) {
+      const initialFloorSceneConfig = currFloorPaths.find(
+        (e) => e.props.sceneId === floorPlan.initialSceneId
+      );
+
+      if (initialFloorSceneConfig) {
+        const initSceneConfig = {
+          ...initialFloorSceneConfig,
+          params: {
+            sceneName: undefined,
+          },
+        };
+        floorPaths.push(initSceneConfig);
+      }
+    }
+
+    floorPaths = [...floorPaths, ...currFloorPaths];
+  });
+
+  return floorPaths;
+}
+
+const props = Astro.props;
+
+const floorConfigData = readJSON(`config/floorplans/${props.floorName}.json`);
+
+const adjacentEntries = Object.entries(floorConfigData);
+const nextScenes = Object.fromEntries(
+  adjacentEntries.map(([currSceneId, configVal]) => [
+    currSceneId,
+    {
+      hfov: configVal.hfov,
+      pitch: configVal.pitch,
+      yaw: configVal.yaw,
+      type: "equirectangular",
+      panorama: configVal.panorama,
+      hotSpots: configVal.hotSpots?.filter((e) => !!e?.pitch),
+    },
+  ])
+);
+
+const adjacentHotspots = adjacentEntries
+  .filter(([sceneId, _]) => sceneId === props.sceneId) // TODO: adjust for floor and index
+  .map(([_, hostpotData]) => hostpotData)[0]
+  ?.hotSpots.map((e) => ({ ...e, floorId: props.floorName }));
+
+const globalConfigRaw: globalConfigT = readJSON("config/tour.json");
+const globalConfig = {
+  ...globalConfigRaw,
+  floorplans: globalConfigRaw.floorplans.map((e) => ({
+    ...e,
+    floorId: e.config.replace(".json", ""),
+  })),
+};
+const roomthing =
+  `${props.floorName} - ${props.sceneId}` || globalConfig.landingPageTitle;
+const sceneTitle = props.title || globalConfig.landingPageTitle;
+
+const { welcomeTitle, welcomeText } = globalConfig;
+const isIndex = !Astro.params.sceneName;
+---
+
+<Layout>
+  <TourHeader title={`${roomthing}`} />
+  <body>
+    <div
+      class="flex items-center justify-center h-dvh w-dvw relative font-display"
+    >
+      <PannellumViewer
+        transition:persist={props.floorName}
+        client:only="react"
+        floor={props.floorName}
+        initialScene={{ sceneId: props.sceneId }}
+        restScenes={nextScenes}
+      >
+        <PannellumViewerLoading slot="fallback" />
+      </PannellumViewer>
+      <PannellumOverlay
+        title={sceneTitle}
+        sceneId={props.sceneId}
+        sceneDescription={props.sceneDescription}
+        floorId={props.floorName}
+        nextHotSpots={adjacentHotspots || []}
+        globalConfig={globalConfig}
+      />
+      {
+        isIndex && (
+          <WelcomeModal
+            isIndex={isIndex}
+            welcomeTitle={welcomeTitle}
+            welcomeText={welcomeText}
+          />
+        )
+      }
+    </div>
+  </body>
+</Layout>
+<script>
+  window.addEventListener("popstate", () => {
+    // on back navigation, reload the page
+    location.reload();
+  });
+</script>

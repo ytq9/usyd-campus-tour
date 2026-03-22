@@ -1,0 +1,15 @@
+---
+import Layout from "@/layouts/BaseLayout.astro";
+import PannellumViewerLoading from "@components/viewer/PannellumViewerLoading.astro";
+---
+
+<Layout>
+  <div class="flex items-center justify-center h-dvh w-dvw relative">
+    <PannellumViewerLoading />
+    <div
+      class="h-dvh w-dvw absolute pointer-events-none flex flex-col justify-center"
+    >
+      <div class="w-full text-center text-7xl">404 you are lost</div>
+    </div>
+  </div>
+</Layout>

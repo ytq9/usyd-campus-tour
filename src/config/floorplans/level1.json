@@ -1,0 +1,545 @@
+{
+  "foyer1.1": {
+    "title": "Foyer 1 - Level 1",
+    "panorama": "/tour/panoramas/level1/a1.jpg",
+    "yaw": 50,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 25,
+        "type": "scene",
+        "text": "Upstairs - Level 2",
+        "sceneId": "level2/foyer2.1",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -10,
+        "yaw": 186,
+        "type": "scene",
+        "text": "Building Entrance",
+        "sceneId": "courtyard/buildingEntrance",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -8,
+        "yaw": 280,
+        "type": "scene",
+        "text": "Foyer 2 - Level 1",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -10,
+        "yaw": 90,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab",
+        "sceneId": "110.1"
+      }
+    ]
+  },
+  "foyer1.2": {
+    "title": "Foyer 2 - Level 1",
+    "panorama": "/tour/panoramas/level1/b1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -8,
+        "yaw": 175,
+        "type": "scene",
+        "text": "101 - Computer and Software Engineering Lab 1",
+        "sceneId": "101.1"
+      },
+      {
+        "pitch": -20,
+        "yaw": -23,
+        "type": "scene",
+        "text": "Foyer 1 - Level 1",
+        "sceneId": "foyer1.1"
+      }
+    ]
+  },
+  "101.1": {
+    "title": "101 - Computer and Software Engineering Lab 1",
+    "sceneDesc": "The Computer and Software Engineering Lab is outfitted with high-performance computers featuring advanced NVIDIA GPUs. This lab offers students hands-on experience in cutting-edge fields such as the Internet of Things (IoT), Artificial Intelligence (AI), Software Defined Networks (SDN), and Multidimensional Signal Processing.",
+    "panorama": "/tour/panoramas/level1/c1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -5,
+        "yaw": -58,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -5,
+        "yaw": 170,
+        "type": "scene",
+        "text": "101 - Computer and Software Engineering Lab 2",
+        "sceneId": "101.2"
+      },
+      {
+        "code": "c1",
+        "pitch": -20,
+        "yaw": 220,
+        "type": "info",
+        "text": "High-performance computers",
+        "description": "A high-performance computer equipped with a state-of-the-art NVIDIA GPU, designed to handle intensive tasks such as 3D rendering, and machine learning with exceptional speed and efficiency.",
+        "highlight": ""
+      },
+      {
+        "code": "c1.1",
+        "pitch": -7,
+        "yaw": 180,
+        "type": "info",
+        "text": "Group desks",
+        "description": "A designated area for project work and group discussions to facilitate effective teamwork and communication.",
+        "highlight": ""
+      }
+    ]
+  },
+  "101.2": {
+    "title": "101 - Computer and Software Engineering Lab 2",
+    "sceneDesc": "The Computer and Software Engineering Lab is outfitted with high-performance computers featuring advanced NVIDIA GPUs. This lab offers students hands-on experience in cutting-edge fields such as the Internet of Things (IoT), Artificial Intelligence (AI), Software Defined Networks (SDN), and Multidimensional Signal Processing.",
+    "panorama": "/tour/panoramas/level1/c2.jpg",
+    "yaw": 60,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -7,
+        "yaw": 73,
+        "type": "scene",
+        "text": "101 - Computer and Software Engineering Lab 1",
+        "sceneId": "101.1"
+      },
+      {
+        "code": "c2.1",
+        "pitch": -10,
+        "yaw": 30,
+        "type": "info",
+        "text": "Group desks",
+        "description": "A designated area for project work and group discussions to facilitate effective teamwork and communication.",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.1": {
+    "title": "110 - Raymond Kirby Engineering on Display Lab 1",
+    "sceneDesc": "The Project Lab provides a range of common electrical benchtop instruments, catering to both catch-up coursework students and those working on projects or theses. This lab offers a supportive environment for students to experiment with their designs and enhance their practical skills.",
+    "panorama": "/tour/panoramas/level1/d1.jpg",
+    "yaw": -40,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 50,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.1"
+      },
+      {
+        "pitch": -18,
+        "yaw": -22,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 2",
+        "sceneId": "110.2"
+      },
+      {
+        "pitch": -3,
+        "yaw": 188,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 3",
+        "sceneId": "110.3"
+      },
+      {
+        "pitch": -25,
+        "yaw": 230,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 4",
+        "sceneId": "110.4"
+      },
+      {
+        "pitch": -3,
+        "yaw": 260,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 1",
+        "sceneId": "110.5"
+      },
+      {
+        "code": "d1.2",
+        "pitch": -3,
+        "yaw": 290,
+        "type": "info",
+        "text": "Storage Area",
+        "description": "A storage area for common electronics consumables and microchips.",
+        "highlight": ""
+      },
+      {
+        "code": "d1.3",
+        "pitch": -15,
+        "yaw": 280,
+        "type": "info",
+        "text": "Collaborative Workbench",
+        "description": "A designated area with a collaborative and flexiable workbench for supporting various types of students' project work.",
+        "highlight": ""
+      },
+      {
+        "code": "d1.4",
+        "pitch": -5,
+        "yaw": -10,
+        "type": "info",
+        "text": "Soldering and rework station",
+        "description": "A soldering and rework station is used for precise soldering, desoldering, and repairing electronic components, ensuring reliable connections and efficient rework of circuit boards.",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.2": {
+    "title": "110 - Raymond Kirby Engineering on Display Lab 2",
+    "sceneDesc": "The Project Lab provides a range of common electrical benchtop instruments, catering to both catch-up coursework students and those working on projects or theses. This lab offers a supportive environment for students to experiment with their designs and enhance their practical skills.",
+    "panorama": "/tour/panoramas/level1/d2.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.1"
+      },
+      {
+        "pitch": -18,
+        "yaw": 150,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 1",
+        "sceneId": "110.1"
+      },
+      {
+        "code": "d2.1",
+        "pitch": -3,
+        "yaw": 220,
+        "type": "info",
+        "text": "Mechanical Support Room",
+        "description": "The Mechanical Support Room is equipped with a benchtop drill, a laser cutter, a CNC router, and various other tools to assist with projects",
+        "highlight": ""
+      },
+      {
+        "code": "d2.2",
+        "pitch": -8,
+        "yaw": 230,
+        "type": "info",
+        "text": "Storage Area",
+        "description": "A storage area for common electronics consumables and microchips.",
+        "highlight": ""
+      },
+      {
+        "code": "d2.3",
+        "pitch": -8,
+        "yaw": 70,
+        "type": "info",
+        "text": "Soldering and rework station",
+        "description": "A soldering and rework station is used for precise soldering, desoldering, and repairing electronic components, ensuring reliable connections and efficient rework of circuit boards.",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.3": {
+    "title": "110 - Raymond Kirby Engineering on Display Lab 3",
+    "sceneDesc": "The Project Lab provides a range of common electrical benchtop instruments, catering to both catch-up coursework students and those working on projects or theses. This lab offers a supportive environment for students to experiment with their designs and enhance their practical skills.",
+    "panorama": "/tour/panoramas/level1/d3.jpg",
+    "yaw": 0,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -18,
+        "yaw": 60,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 1",
+        "sceneId": "110.1"
+      },
+      {
+        "pitch": -18,
+        "yaw": -50,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 4",
+        "sceneId": "110.4"
+      },
+      {
+        "code": "d3.1",
+        "pitch": -12,
+        "yaw": 15,
+        "type": "info",
+        "text": "DC (Direct Current) Power Supply",
+        "description": "A DC (Direct Current) power supply is an essential piece of equipment in an electronics lab. It provides a constant voltage or current to power electronic circuits and devices. The voltage outputs can be adjusted as needed.",
+        "highlight": ""
+      },
+      {
+        "code": "d3.2",
+        "pitch": -12,
+        "yaw": 36,
+        "type": "info",
+        "text": "Oscilloscope",
+        "description": "An oscilloscope is a valuable tool for analyzing both analog and digital signals. It enables students and staff to quickly identify and troubleshoot issues in complex designs.",
+        "highlight": ""
+      },
+      {
+        "code": "d3.3",
+        "pitch": -2,
+        "yaw": 28,
+        "type": "info",
+        "text": "Function Generator",
+        "description": "A function generator can provide reconfigurable testing of electronics devices and common modulated signals, allowing for comprehensive investigation alongside digital electronics and systems.",
+        "highlight": ""
+      },
+      {
+        "code": "d3.4",
+        "pitch": -13,
+        "yaw": 28,
+        "type": "info",
+        "text": "Digital Multimeter",
+        "description": "A digital multimeter is used to measure common electrical variables, including voltage (volts), current (amps), and resistance (ohms).",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.4": {
+    "title": "110 - Raymond Kirby Engineering on Display Lab 4",
+    "sceneDesc": "The Project Lab provides a range of common electrical benchtop instruments, catering to both catch-up coursework students and those working on projects or theses. This lab offers a supportive environment for students to experiment with their designs and enhance their practical skills.",
+    "panorama": "/tour/panoramas/level1/d4.jpg",
+    "yaw": 50,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -18,
+        "yaw": 60,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 1",
+        "sceneId": "110.1"
+      },
+      {
+        "pitch": -25,
+        "yaw": 150,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 3",
+        "sceneId": "110.3"
+      },
+      {
+        "pitch": -5,
+        "yaw": -50,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 1",
+        "sceneId": "110.5"
+      }
+    ]
+  },
+  "110.5": {
+    "title": "118 - Mechanical Support Lab 1",
+    "sceneDesc": "The Mechanical Support Room is a fabrication space equipped with tools such as a CNC router, laser cutter, press drill,  bench grinder, and 3D printer. It facilitates rapid prototyping, precision machining, and custom part production to support engineering and design activities.",
+    "panorama": "/tour/panoramas/level1/e1.jpg",
+    "yaw": 10,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -5,
+        "yaw": 95,
+        "type": "scene",
+        "text": "110 - Raymond Kirby Engineering on Display Lab 4",
+        "sceneId": "110.4"
+      },
+      {
+        "pitch": -25,
+        "yaw": 20,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 2",
+        "sceneId": "110.6"
+      },
+      {
+        "pitch": -25,
+        "yaw": -20,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 3",
+        "sceneId": "110.7"
+      },
+      {
+        "code": "e1",
+        "pitch": -2,
+        "yaw": -40,
+        "type": "info",
+        "text": "CNC Router",
+        "description": "The Carbide 3D Shapeoko 5 Pro is a precision CNC router built for demanding hobbyists and light industrial applications. It has a rigid motion system with advanced linear components and is designed to deliver consistent, high-quality results across various materials, including wood, plastics, and soft metals.",
+        "highlight": ""
+      },
+      {
+        "code": "e2",
+        "pitch": -2,
+        "yaw": 40,
+        "type": "info",
+        "text": "Laser Cutter",
+        "description": "The Thunder Laser Thunder Bolt is a compact desktop laser cutter and engraver engineered for high-speed, high-detail work. It uses a professional-grade laser source to produce clean, accurate engravings and light cuts on materials like wood, acrylic, and leather.",
+        "highlight": ""
+      },
+      {
+        "code": "e3",
+        "pitch": -2,
+        "yaw": 140,
+        "type": "info",
+        "text": "3D Printer",
+        "description": "The Bambu Lab X1E is a professional 3D printer for advanced material printing and high-throughput prototyping. With a reinforced motion system, actively controlled chamber environment, and support for engineering-grade filaments, it offers consistent performance for users working with complex parts and demanding materials.",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.6": {
+    "title": "118 - Mechanical Support Lab 2",
+    "sceneDesc": "The Mechanical Support Room is a fabrication space equipped with tools such as a CNC router, laser cutter, press drill,  bench grinder, and 3D printer. It facilitates rapid prototyping, precision machining, and custom part production to support engineering and design activities.",
+    "panorama": "/tour/panoramas/level1/e3.jpg",
+    "yaw": 100,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -30,
+        "yaw": 210,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 1",
+        "sceneId": "110.5"
+      },
+      {
+        "pitch": -35,
+        "yaw": -70,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 3",
+        "sceneId": "110.7"
+      },
+      {
+        "code": "e1",
+        "pitch": -2,
+        "yaw": -100,
+        "type": "info",
+        "text": "CNC Router",
+        "description": "The Carbide 3D Shapeoko 5 Pro is a precision CNC router built for demanding hobbyists and light industrial applications. It has a rigid motion system with advanced linear components and is designed to deliver consistent, high-quality results across various materials, including wood, plastics, and soft metals.",
+        "highlight": ""
+      },
+      {
+        "code": "e2",
+        "pitch": -20,
+        "yaw": 170,
+        "type": "info",
+        "text": "Laser Cutter",
+        "description": "The Thunder Laser Thunder Bolt is a compact desktop laser cutter and engraver engineered for high-speed, high-detail work. It uses a professional-grade laser source to produce clean, accurate engravings and light cuts on materials like wood, acrylic, and leather.",
+        "highlight": ""
+      },
+      {
+        "code": "e3",
+        "pitch": -2,
+        "yaw": 190,
+        "type": "info",
+        "text": "3D Printer",
+        "description": "The Bambu Lab X1E is a professional 3D printer for advanced material printing and high-throughput prototyping. With a reinforced motion system, actively controlled chamber environment, and support for engineering-grade filaments, it offers consistent performance for users working with complex parts and demanding materials.",
+        "highlight": ""
+      }
+    ]
+  },
+  "110.7": {
+    "title": "118 - Mechanical Support Lab 3",
+    "sceneDesc": "The Mechanical Support Room is a fabrication space equipped with tools such as a CNC router, laser cutter, press drill,  bench grinder, and 3D printer. It facilitates rapid prototyping, precision machining, and custom part production to support engineering and design activities.",
+    "panorama": "/tour/panoramas/level1/e2.jpg",
+    "yaw": -60,
+    "rotation": 90,
+    "pitch": -20,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer1.2"
+      },
+      {
+        "pitch": -20,
+        "yaw": 150,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 1",
+        "sceneId": "110.5"
+      },
+      {
+        "pitch": -30,
+        "yaw": 90,
+        "type": "scene",
+        "text": "118 - Mechanical Support Lab 2",
+        "sceneId": "110.6"
+      },
+      {
+        "code": "e1",
+        "pitch": -2,
+        "yaw": -160,
+        "type": "info",
+        "text": "CNC Router",
+        "description": "The Carbide 3D Shapeoko 5 Pro is a precision CNC router built for demanding hobbyists and light industrial applications. It has a rigid motion system with advanced linear components and is designed to deliver consistent, high-quality results across various materials, including wood, plastics, and soft metals.",
+        "highlight": ""
+      },
+      {
+        "code": "e2",
+        "pitch": -2,
+        "yaw": 100,
+        "type": "info",
+        "text": "Laser Cutter",
+        "description": "The Thunder Laser Thunder Bolt is a compact desktop laser cutter and engraver engineered for high-speed, high-detail work. It uses a professional-grade laser source to produce clean, accurate engravings and light cuts on materials like wood, acrylic, and leather.",
+        "highlight": ""
+      },
+      {
+        "code": "e3",
+        "pitch": -2,
+        "yaw": 150,
+        "type": "info",
+        "text": "3D Printer",
+        "description": "The Bambu Lab X1E is a professional 3D printer for advanced material printing and high-throughput prototyping. With a reinforced motion system, actively controlled chamber environment, and support for engineering-grade filaments, it offers consistent performance for users working with complex parts and demanding materials.",
+        "highlight": ""
+      }
+    ]
+  }
+}

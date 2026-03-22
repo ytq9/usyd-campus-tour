@@ -1,0 +1,79 @@
+---
+import HotspotInfoModal from "./HotspotInfoModal.astro";
+
+import { BookmarkIcon } from "@heroicons/react/24/outline";
+
+const { nextHotSpots } = Astro.props;
+---
+
+<div
+  class="d-drawer d-drawer-end lg:d-drawer-open w-1/3 h-0 pointer-events-none"
+>
+  <input id="hotspot-drawer" type="checkbox" class="d-drawer-toggle" />
+  <div class="d-drawer-content flex items-center justify-end w-full">
+    <label
+      for="hotspot-drawer"
+      class="d-btn d-drawer-button bg-base-none border-none shadow-none bg-black/70 bg-base-none red-500 lg:hidden pointer-events-auto p-2"
+    >
+      <BookmarkIcon className="size-6 stroke-white fill-white/30"/>
+    </label>
+  </div>
+  <div class="d-drawer-side h-dvh lg:h-min">
+    <label
+      for="hotspot-drawer"
+      aria-label="close sidebar"
+      class="d-drawer-overlay"></label>
+
+    <div
+      class="space-y-4 sm:w-1/4 lg:w-sm bg-black/50 p-4 rounded-md border-2 pointer-events-auto"
+      transition:animate="slide"
+    >
+      {
+        nextHotSpots.map((e) => (
+          <>
+            {e.type === "info" ? (
+              <HotspotInfoModal {...e} />
+            ) : (
+              <button
+                class="d-btn-neutral p-3 w-full bg-ochre text-white text-center cursor-pointer pointer-events-auto"
+                data-a
+                data-sceneId={e.sceneId}
+                data-floorId={e.floorId}
+                data-isNewFloorScene={e?.navType}
+              >
+                {e.text}
+              </button>
+            )}
+          </>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  //   import { navigate } from "astro:transitions/client";
+  import { handleNavigation as navigate } from "@/utils/navigation";
+  document.addEventListener("astro:page-load", () => {
+    setupNavButtons();
+  });
+
+  function setupNavButtons() {
+    document.querySelectorAll("button[data-a]").forEach((btn) => {
+      btn.removeEventListener("click", handleNavigation);
+      btn.addEventListener("click", handleNavigation);
+    });
+  }
+
+  function handleNavigation(event) {
+    const sceneId = event.currentTarget.getAttribute("data-sceneId");
+    const floorId = event.currentTarget.getAttribute("data-floorId");
+    const isNewFloorScene = Boolean(
+      event.currentTarget.getAttribute("data-isNewFloorScene") ===
+        "newFloorScene"
+    );
+    navigate(sceneId, floorId, isNewFloorScene);
+  }
+
+  setupNavButtons(); // Initial setup on page load
+</script>
