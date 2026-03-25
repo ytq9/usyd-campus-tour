@@ -6,16 +6,18 @@ type Props = {
   hotspots: any[]
   tourSlug: string
   floorSlug: string
+  isDraft: boolean
 }
 
-export default function HotspotSidebar({ hotspots, tourSlug, floorSlug }: Props) {
+export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleNavigate = (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
       const targetFloorSlug = hs.targetFloor?.slug || floorSlug
+      const draftQuery = isDraft ? '?draft=true' : ''
       if (targetFloorSlug !== floorSlug) {
-        window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}`)
+        window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${draftQuery}`)
       } else if (window.pannellumViewer) {
         window.pannellumViewer.loadScene(hs.targetScene.slug)
       } else {

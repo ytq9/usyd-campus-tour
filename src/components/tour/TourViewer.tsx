@@ -18,6 +18,7 @@ type SceneData = {
   tourFloors: any[]
   tourSlug: string
   floorSlug: string
+  isDraft: boolean
 }
 
 export default function TourViewer({ data }: { data: SceneData }) {
@@ -38,6 +39,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
         initialSceneSlug={data.currentScene.slug}
         tourSlug={data.tourSlug}
         floorSlug={data.floorSlug}
+        isDraft={data.isDraft}
         onSceneChange={handleSceneChange}
       />
       <TourOverlay
@@ -48,6 +50,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
         tourFloors={data.tourFloors}
         tourSlug={data.tourSlug}
         floorSlug={data.floorSlug}
+        isDraft={data.isDraft}
       />
       {showWelcome && data.tour.welcomeTitle && (
         <WelcomeModal

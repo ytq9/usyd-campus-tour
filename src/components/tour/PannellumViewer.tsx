@@ -20,10 +20,11 @@ type Props = {
   initialSceneSlug: string
   tourSlug: string
   floorSlug: string
+  isDraft: boolean
   onSceneChange: (sceneSlug: string) => void
 }
 
-export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, onSceneChange }: Props) {
+export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, isDraft, onSceneChange }: Props) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumRef = useRef<any>(null)
 
@@ -40,7 +41,8 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
           onNavigate={(targetSlug: string, targetFloorSlug?: string) => {
             if (targetFloorSlug && targetFloorSlug !== floorSlug) {
               // Cross-floor navigation - full page load
-              window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}`)
+              const draftQuery = isDraft ? '?draft=true' : ''
+              window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
             } else {
               // Same floor - use Pannellum scene transition
               if (pannellumRef.current) {
@@ -52,7 +54,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         />
       )
     },
-    [tourSlug, floorSlug, onSceneChange]
+    [tourSlug, floorSlug, isDraft, onSceneChange]
   )
 
   useEffect(() => {
