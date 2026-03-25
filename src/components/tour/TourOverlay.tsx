@@ -12,9 +12,10 @@ type Props = {
   tourFloors: any[]
   tourSlug: string
   floorSlug: string
+  isDraft: boolean
 }
 
-export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug }: Props) {
+export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
 
   return (
@@ -49,6 +50,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
           hotspots={hotspots}
           tourSlug={tourSlug}
           floorSlug={floorSlug}
+          isDraft={isDraft}
         />
       </div>
 
@@ -75,6 +77,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             currentFloor={currentFloor}
             currentSceneSlug={currentScene.slug}
             tourSlug={tourSlug}
+            isDraft={isDraft}
           />
         </div>
       </div>
