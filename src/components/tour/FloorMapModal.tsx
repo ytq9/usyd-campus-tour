@@ -7,16 +7,18 @@ type Props = {
   currentFloor: any
   currentSceneSlug: string
   tourSlug: string
+  isDraft: boolean
 }
 
-export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug }: Props) {
+export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug, isDraft }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null)
   const [activeFloorIdx, setActiveFloorIdx] = useState(
     tourFloors.findIndex((f: any) => f.id === currentFloor.id)
   )
 
   const handleMapPointClick = (floorSlug: string, sceneSlug: string) => {
-    window.location.assign(`/tour/${tourSlug}/${floorSlug}/${sceneSlug}`)
+    const draftQuery = isDraft ? '?draft=true' : ''
+    window.location.assign(`/tour/${tourSlug}/${floorSlug}/${sceneSlug}${draftQuery}`)
   }
 
   return (

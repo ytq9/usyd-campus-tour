@@ -34,7 +34,7 @@ export default async function PreviewPage({ params }: { params: Params }) {
       ? defaultFloor.initialScene
       : null
     if (initialScene) {
-      redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}`)
+      redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}?draft=true`)
     }
   }
 

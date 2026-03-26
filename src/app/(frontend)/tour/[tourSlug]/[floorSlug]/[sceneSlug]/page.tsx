@@ -7,9 +7,12 @@ import TourViewer from '@/components/tour/TourViewer'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string; floorSlug: string; sceneSlug: string }>
+type SearchParams = Promise<{ draft?: string }>
 
-export default async function SceneViewerPage({ params }: { params: Params }) {
+export default async function SceneViewerPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug, floorSlug, sceneSlug } = await params
+  const { draft: draftParam } = await searchParams
+  const isDraft = draftParam === 'true'
   const payload = await getPayload({ config })
 
   // Fetch tour
@@ -18,6 +21,7 @@ export default async function SceneViewerPage({ params }: { params: Params }) {
     where: { slug: { equals: tourSlug } },
     depth: 2,
     limit: 1,
+    draft: isDraft,
   })
   const tour = tours.docs[0]
   if (!tour) notFound()
@@ -38,6 +42,7 @@ export default async function SceneViewerPage({ params }: { params: Params }) {
     where: { slug: { equals: sceneSlug } },
     depth: 2,
     limit: 1,
+    draft: isDraft,
   })
   const scene = scenes.docs[0]
   if (!scene) notFound()
@@ -48,6 +53,7 @@ export default async function SceneViewerPage({ params }: { params: Params }) {
     where: { floor: { equals: floor.id } },
     depth: 2,
     limit: 100,
+    draft: isDraft,
   })
 
   // Fetch all floors for the tour (for floor map)
@@ -156,6 +162,7 @@ export default async function SceneViewerPage({ params }: { params: Params }) {
     })),
     tourSlug,
     floorSlug,
+    isDraft,
   }
 
   return <TourViewer data={sceneData} />
