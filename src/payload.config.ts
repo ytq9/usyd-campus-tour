@@ -5,6 +5,7 @@ import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import sharp from 'sharp'
 
+import { migrations } from './migrations'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Tours } from './collections/Tours'
@@ -37,10 +38,10 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
-    push: true,
     pool: {
       connectionString: process.env.DATABASE_URI || 'postgresql://localhost:5432/usyd_campus_tour',
     },
+    prodMigrations: migrations,
   }),
   sharp,
 })
