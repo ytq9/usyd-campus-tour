@@ -44,6 +44,12 @@ export const Scenes: CollectionConfig = {
       type: 'upload',
       relationTo: 'media',
       required: true,
+      admin: {
+        description: 'Upload or select an equirectangular 360 panorama with a 2:1 aspect ratio, such as 7680x3840.',
+        components: {
+          afterInput: ['/components/admin/PanoramaValidationPreview'],
+        },
+      },
     },
     {
       name: 'initialYaw',
@@ -154,13 +160,38 @@ export const Scenes: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ data }) => {
+      async ({ data, req }) => {
         if (data?.title && !data?.slug) {
           data.slug = data.title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '')
         }
+
+        if (data?.panorama) {
+          const panoramaId = typeof data.panorama === 'object' ? data.panorama.id : data.panorama
+
+          if (panoramaId) {
+            const panorama = await req.payload.findByID({
+              collection: 'media',
+              id: panoramaId,
+              depth: 0,
+            })
+
+            const width = typeof panorama.width === 'number' ? panorama.width : 0
+            const height = typeof panorama.height === 'number' ? panorama.height : 0
+            const isValidPanorama = width > 0 && height > 0 && width === height * 2
+
+            if (!isValidPanorama) {
+              const dimensionText = width > 0 && height > 0 ? `${width}x${height}` : 'unknown dimensions'
+
+              throw new Error(
+                `The selected image is not a valid 360° panorama. Expected a 2:1 equirectangular image, but received ${dimensionText}.`
+              )
+            }
+          }
+        }
+
         return data
       },
     ],
