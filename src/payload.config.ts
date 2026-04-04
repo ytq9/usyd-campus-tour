@@ -17,10 +17,10 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
-    user: Users.slug,
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
+  user: Users.slug,
+  importMap: {
+    baseDir: path.resolve(dirname),
+  },
     livePreview: {
       url: ({ data, collectionConfig }) => {
         if (collectionConfig?.slug === 'tours') {
