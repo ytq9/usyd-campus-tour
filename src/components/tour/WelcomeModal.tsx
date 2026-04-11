@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useEffect } from 'react'
+import { extractPlainTextFromRichText } from '@/lib/contentWizard'
 
 type Props = {
   title: string
@@ -10,6 +11,7 @@ type Props = {
 
 export default function WelcomeModal({ title, text, onClose }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null)
+  const welcomeText = extractPlainTextFromRichText(text)
 
   useEffect(() => {
     modalRef.current?.showModal()
@@ -20,7 +22,7 @@ export default function WelcomeModal({ title, text, onClose }: Props) {
       <div className="d-modal-box bg-white">
         <h3 className="text-lg font-bold text-gray-900">{title}</h3>
         <div className="prose prose-sm py-4 text-gray-700">
-          {typeof text === 'string' ? <p>{text}</p> : <p>Welcome to the tour!</p>}
+          <p>{welcomeText || 'Welcome to the tour!'}</p>
         </div>
         <button
           onClick={() => {

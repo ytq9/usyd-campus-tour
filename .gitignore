@@ -6,3 +6,4 @@ next-env.d.ts
 dist/
 media/
 src/payload-types.ts
+.DS_Store

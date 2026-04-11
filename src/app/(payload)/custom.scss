@@ -1,1 +1,4 @@
-/* Custom admin styles */
+/* Keep the admin shell dark when the custom content wizard is active. */
+body:has([data-content-wizard]) {
+  background: #040816;
+}

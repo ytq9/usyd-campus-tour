@@ -1,0 +1,724 @@
+.page {
+  --bg: #040816;
+  --panel: #131925;
+  --panel-2: #181f2d;
+  --border: rgba(255, 255, 255, 0.09);
+  --muted: #b6bbc8;
+  --text: #f5f6fb;
+  --accent: #ff970f;
+  --accent-soft: rgba(255, 151, 15, 0.12);
+  min-height: 100vh;
+  background-color: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(255, 151, 15, 0.14), transparent 25%),
+    radial-gradient(circle at top right, rgba(84, 124, 255, 0.1), transparent 24%),
+    linear-gradient(180deg, #050917 0%, #070c1c 100%);
+  color: var(--text);
+  isolation: isolate;
+}
+
+.shell {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 32px 56px 72px;
+}
+
+.hero {
+  display: grid;
+  gap: 14px;
+}
+
+.kicker,
+.stepTag,
+.stepNumber {
+  margin: 0;
+  color: #ffbf6b;
+  font-size: 0.88rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(2.8rem, 4.8vw, 4.6rem);
+  line-height: 0.96;
+}
+
+.subtitle {
+  max-width: 960px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.heroActions,
+.successActions,
+.footerActions,
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stepActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.inlineActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.stepRail {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.stepCard,
+.stepCardActive {
+  padding: 22px 24px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: rgba(19, 25, 37, 0.9);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+}
+
+.stepCard strong,
+.stepCardActive strong {
+  display: block;
+  margin-top: 14px;
+  font-size: 1rem;
+}
+
+.stepCard:hover,
+.stepCardActive:hover {
+  transform: translateY(-1px);
+}
+
+.stepCardActive {
+  border-color: var(--accent);
+  background: rgba(255, 151, 15, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 151, 15, 0.18);
+}
+
+.panel,
+.errorPanel,
+.successPanel {
+  margin-top: 28px;
+  padding: 34px;
+  border-radius: 32px;
+  border: 1px solid var(--border);
+  background: rgba(19, 25, 37, 0.95);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.sectionIntro h2,
+.errorPanel h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.sectionIntro p,
+.errorPanel p,
+.reviewCard span,
+.summaryCard p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.sectionIntro p {
+  margin: 12px 0 0;
+  max-width: 960px;
+  font-size: 1.03rem;
+}
+
+.stepCanvas {
+  display: grid;
+  gap: 24px;
+  margin-top: 28px;
+  padding: 28px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(8, 13, 24, 0.9), rgba(13, 19, 33, 0.84));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.stepCanvas > :first-child {
+  margin-top: 0;
+}
+
+.uploadCard {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 320px;
+  margin-top: 28px;
+  padding: 32px;
+  border-radius: 34px;
+  border: 2px dashed rgba(255, 151, 15, 0.55);
+  background: rgba(35, 27, 29, 0.56);
+  text-align: center;
+  cursor: pointer;
+}
+
+.existingMediaPanel {
+  margin-top: 28px;
+  padding: 24px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 15, 24, 0.82);
+}
+
+.uploadCard strong {
+  font-size: 1.25rem;
+}
+
+.uploadCard span {
+  color: var(--muted);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.assetGrid,
+.existingMediaGrid,
+.floorGrid,
+.sceneGrid,
+.reviewGrid,
+.reviewSummary {
+  display: grid;
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.assetGrid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.existingMediaGrid {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.floorGrid,
+.reviewGrid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.sceneGrid {
+  grid-template-columns: 1fr;
+}
+
+.floorGrid {
+  grid-template-columns: 1fr;
+}
+
+.reviewSummary {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.assetCard,
+.existingMediaCard,
+.floorCard,
+.sceneCard,
+.assignmentCard,
+.sceneGroup,
+.reviewCard,
+.summaryCard,
+.toggleCard {
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(25, 32, 46, 0.98), rgba(18, 24, 36, 0.98));
+}
+
+.assetCard {
+  overflow: hidden;
+}
+
+.existingMediaCard {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.existingMediaCard input {
+  width: 18px;
+  height: 18px;
+}
+
+.assetPreviewWrap {
+  aspect-ratio: 16 / 9;
+  background: #0d1320;
+}
+
+.existingMediaPreviewWrap {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  background: #0d1320;
+}
+
+.assetPreview,
+.assignmentThumb,
+.sceneThumb,
+.floorplanPreview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.assetBody,
+.existingMediaBody,
+.floorCard,
+.sceneCard,
+.assignmentCard,
+.sceneGroup,
+.reviewCard,
+.summaryCard,
+.toggleCard {
+  padding: 20px;
+}
+
+.assetMeta {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  word-break: break-word;
+}
+
+.existingMediaBody {
+  padding: 0;
+}
+
+.existingMediaBody strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.existingMediaBody p,
+.existingMediaBody span {
+  margin: 8px 0 0;
+  color: var(--muted);
+  word-break: break-word;
+}
+
+.existingMediaBody span {
+  font-size: 0.88rem;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field span {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0f1421;
+  color: var(--text);
+  font: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: 2px solid rgba(255, 151, 15, 0.22);
+  border-color: rgba(255, 151, 15, 0.35);
+}
+
+.primaryButton,
+.secondaryButton,
+.inlineDanger {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.primaryButton {
+  background: var(--accent);
+  color: #1c1200;
+}
+
+.primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.secondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+.inlineDanger {
+  align-self: flex-start;
+  padding: 0;
+  background: transparent;
+  color: #ffb4a6;
+}
+
+.inlineDanger:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.floorHeader,
+.sceneGroupHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.floorHeader h3,
+.sceneGroup h3,
+.summaryCard h3,
+.successPanel h3 {
+  margin: 6px 0 0;
+  font-size: 1.2rem;
+}
+
+.floorplanPreview {
+  margin-top: 16px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #0b0f18;
+}
+
+.mapEditorHeader,
+.mapPointHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.mapEditorHeader {
+  margin-top: 20px;
+}
+
+.mapEditorHelp {
+  max-width: 780px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.floorplanStage {
+  position: relative;
+  width: 100%;
+  margin-top: 18px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  background: #0b0f18;
+  cursor: crosshair;
+}
+
+.floorplanStageImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    #0b0f18;
+}
+
+.floorplanSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.mapPointList,
+.hotspotList {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.mapPointCard,
+.mapPointCardActive,
+.hotspotCard {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(17, 23, 36, 0.92), rgba(13, 18, 29, 0.9));
+}
+
+.mapPointCardActive {
+  border-color: rgba(255, 151, 15, 0.62);
+  box-shadow: inset 0 0 0 1px rgba(255, 151, 15, 0.18);
+}
+
+.hotspotSection {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.assignmentList,
+.sceneGroups {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.assignmentCard {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 220px;
+  gap: 16px;
+  align-items: center;
+}
+
+.assignmentMedia {
+  overflow: hidden;
+  border-radius: 18px;
+  aspect-ratio: 4 / 3;
+  background: #0f1421;
+}
+
+.assignmentBody {
+  min-width: 0;
+}
+
+.assignmentBody strong,
+.assignmentBody small {
+  display: block;
+}
+
+.assignmentBody small {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.assignmentSelect {
+  display: grid;
+  gap: 8px;
+}
+
+.assignmentSelect span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.assignmentSelect select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0f1421;
+  color: var(--text);
+}
+
+.sceneThumb {
+  aspect-ratio: 16 / 9;
+  border-radius: 18px;
+  margin-bottom: 16px;
+}
+
+.reviewCard strong {
+  display: block;
+  margin-top: 12px;
+  font-size: 1.9rem;
+}
+
+.toggleCard {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+
+.toggleCard input {
+  width: 18px;
+  height: 18px;
+  margin-top: 5px;
+}
+
+.toggleCard p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.summaryCard p {
+  margin: 8px 0 0;
+}
+
+.summaryList {
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.summaryList li + li {
+  margin-top: 6px;
+}
+
+.successPanel {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-top: 24px;
+  border-color: rgba(117, 255, 190, 0.16);
+  background: linear-gradient(180deg, rgba(19, 35, 31, 0.96), rgba(24, 31, 45, 0.96));
+}
+
+.errorPanel {
+  border-color: rgba(255, 151, 15, 0.22);
+  background: rgba(36, 22, 18, 0.92);
+}
+
+.errorPanel ul {
+  margin: 16px 0 0;
+  padding-left: 22px;
+}
+
+.errorPanel li + li {
+  margin-top: 8px;
+}
+
+.footerBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footerStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  color: var(--muted);
+}
+
+.emptyState {
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  color: var(--muted);
+}
+
+.inlineError {
+  margin: 18px 0 0;
+  color: #ffb4a6;
+}
+
+.inlineHint {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 1200px) {
+  .stepRail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding: 24px 18px 56px;
+  }
+
+  .assignmentCard,
+  .footerBar,
+  .successPanel,
+  .floorHeader,
+  .sceneGroupHeader,
+  .mapEditorHeader,
+  .mapPointHeader {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldWide {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .stepRail,
+  .assetGrid,
+  .floorGrid,
+  .sceneGrid,
+  .reviewGrid,
+  .reviewSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .errorPanel,
+  .stepCanvas,
+  .successPanel {
+    padding: 22px;
+  }
+}

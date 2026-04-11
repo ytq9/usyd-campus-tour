@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import HotspotSidebar from './HotspotSidebar'
 import FloorMapModal from './FloorMapModal'
+import { extractPlainTextFromRichText } from '@/lib/contentWizard'
 
 type Props = {
   tour: any
@@ -17,6 +18,7 @@ type Props = {
 
 export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
+  const sceneDescription = extractPlainTextFromRichText(currentScene.description)
 
   return (
     <div className="h-dvh w-dvw absolute pointer-events-none flex flex-col justify-between z-10">
@@ -26,7 +28,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
         <div className="sm:w-1/3 lg:w-1/2 mt-4 text-white text-xl text-center">
           <div className="bg-black/65 rounded-sm p-2">
             <div className="text-md md:text-lg">{currentScene.title}</div>
-            {currentScene.description && (
+            {sceneDescription && (
               <div className="pointer-events-auto">
                 <button
                   onClick={() => setDescExpanded(!descExpanded)}
@@ -36,9 +38,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
                 </button>
                 {descExpanded && (
                   <div className="text-sm text-white text-left mt-1 p-2 bg-black/50 rounded">
-                    {typeof currentScene.description === 'string'
-                      ? currentScene.description
-                      : 'Description available'}
+                    {sceneDescription || 'Description available'}
                   </div>
                 )}
               </div>

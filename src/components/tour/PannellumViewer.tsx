@@ -97,6 +97,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         },
         scenes: pannellumScenes,
       } as any)
+      window.pannellumViewer = pannellumRef.current
 
       // Listen for scene changes
       pannellumRef.current.on('scenechange', (sceneId: string) => {
@@ -111,6 +112,8 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         pannellumRef.current.destroy()
         pannellumRef.current = null
       }
+
+      window.pannellumViewer = null
     }
   }, []) // Only run once on mount
 
