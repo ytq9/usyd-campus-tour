@@ -90,7 +90,8 @@ The first time you open the admin panel, Payload CMS will ask you to create the 
 The admin panel at `/admin` is where you manage all content for the campus tour.
 
 ### Content Creation Wizard
-1. Go to [http://localhost:3000/admin/content-wizard](http://localhost:3000/admin/content-wizard)
+To use content creation wizard go to [http://localhost:3000/admin/content-wizard](http://localhost:3000/admin/content-wizard)
+
 
 ### Collections overview
 
