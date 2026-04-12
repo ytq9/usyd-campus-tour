@@ -989,8 +989,7 @@ export default function ContentWizard() {
           <div className={styles.sectionIntro}>
             <h2>1. Bulk upload panorama files</h2>
             <p>
-              Select multiple panorama images or pull from your existing media library. Each item
-              becomes one draft scene with an auto-filled title, slug, and alt text.
+              Select multiple panorama images or pull from your existing media library. 
             </p>
           </div>
 
@@ -1022,7 +1021,7 @@ export default function ContentWizard() {
               onChange={handlePanoramaUpload}
             />
             <strong>Choose panorama files</strong>
-            <span>JPG files are a good starting point. You can select many files at once.</span>
+            <span>Upload one or more anorama images to begin creating your tour.</span>
           </label>
 
           {isExistingMediaOpen && (
@@ -2145,8 +2144,7 @@ export default function ContentWizard() {
           <p className={styles.kicker}>Manage tours</p>
           <h1 className={styles.title}>Tour creation wizard</h1>
           <p className={styles.subtitle}>
-            We build this one small step at a time: upload panoramas, group them into floors, tune the
-            scenes, then publish the tour once the structure looks right.
+            Create and organise virtual tours in a structured workflow. Upload panoramas, assign them to floors, configure scenes, and publish when the tour is ready.
           </p>
           <div className={styles.heroActions}>
             <Link href="/admin" className={styles.secondaryButton}>

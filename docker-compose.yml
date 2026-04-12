@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5435:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3002:3000"
+      - "3000:3000"
     environment:
       DATABASE_URI: postgresql://postgres:postgres@postgres:5432/usyd_campus_tour
       PAYLOAD_SECRET: docker-dev-secret-change-in-production
