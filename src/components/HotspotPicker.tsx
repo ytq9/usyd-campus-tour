@@ -101,11 +101,17 @@ export default function HotspotPicker({ path }: Props) {
       }
       ;(markerEl as HTMLElement).style.opacity = '0'
 
-      // 持续记录 onMove 里最后一次有效坐标
-      // 避免在 onUp 里直接用 document mouseup event 算坐标（可能受页面滚动/嵌套影响不准）
-      let lastCoords: [number, number] | null = null
+      // 追踪鼠标原始位置（clientX/Y），在 onUp 时才转换为 pitch/yaw
+      // 不在 onMove 里存储 mouseEventToCoords 结果——鼠标移到 viewer 外时会返回极端值
+      let lastClientX = me.clientX
+      let lastClientY = me.clientY
+      let hasMoved = false
 
       const onMove = (moveEvent: MouseEvent) => {
+        lastClientX = moveEvent.clientX
+        lastClientY = moveEvent.clientY
+        hasMoved = true
+
         // 直接更新 overlay 位置——完全绕开 Pannellum 渲染
         if (overlayRef.current) {
           // 用实时 getBoundingClientRect 而不是 mousedown 时的快照，兼容页面滚动
@@ -113,13 +119,12 @@ export default function HotspotPicker({ path }: Props) {
           overlayRef.current.style.left = `${moveEvent.clientX - currentRect.left}px`
           overlayRef.current.style.top = `${moveEvent.clientY - currentRect.top}px`
         }
-        // 实时换算坐标并缓存，直接写 DOM 避免 setState 重渲染
-        const coords = viewer.mouseEventToCoords(moveEvent)
-        if (coords && !isNaN(coords[0]) && !isNaN(coords[1])) {
-          lastCoords = [coords[0], coords[1]]
+        // 仅用于显示状态文字，不存储为最终坐标
+        const previewCoords = viewer.mouseEventToCoords(moveEvent)
+        if (previewCoords && !isNaN(previewCoords[0]) && !isNaN(previewCoords[1])) {
           if (statusSpanRef.current) {
             statusSpanRef.current.textContent =
-              `拖拽中 → Pitch: ${coords[0].toFixed(1)}°  Yaw: ${coords[1].toFixed(1)}°`
+              `Dragging → Pitch: ${previewCoords[0].toFixed(1)}°  Yaw: ${previewCoords[1].toFixed(1)}°`
           }
         }
       }
@@ -133,14 +138,23 @@ export default function HotspotPicker({ path }: Props) {
         if (overlayRef.current) overlayRef.current.style.display = 'none'
         if (statusSpanRef.current) statusSpanRef.current.textContent = ''
 
-        // 优先用 onMove 过程中缓存的最后坐标（更可靠）
-        if (!lastCoords) {
+        if (!hasMoved) {
           // 没有拖动过，直接恢复 marker 可见性退出
           ;(markerEl as HTMLElement).style.opacity = '1'
           return
         }
-        const newPitch = Math.round(lastCoords[0] * 100) / 100
-        const newYaw = Math.round(lastCoords[1] * 100) / 100
+
+        // 用最后记录的鼠标位置一次性转换为 pitch/yaw，避免中途出现极端值
+        const finalCoords = viewer.mouseEventToCoords({ clientX: lastClientX, clientY: lastClientY })
+        if (!finalCoords || isNaN(finalCoords[0]) || isNaN(finalCoords[1])) {
+          ;(markerEl as HTMLElement).style.opacity = '1'
+          return
+        }
+        // clamp 到合法范围，防止极端边界值
+        const clampedPitch = Math.max(-85, Math.min(85, finalCoords[0]))
+        const clampedYaw = Math.max(-180, Math.min(180, finalCoords[1]))
+        const newPitch = Math.round(clampedPitch * 100) / 100
+        const newYaw = Math.round(clampedYaw * 100) / 100
 
         // mouseup 之后浏览器会触发 click，提前设 flag 阻止 click handler 误触发放置逻辑
         suppressNextClickRef.current = true
@@ -278,7 +292,7 @@ export default function HotspotPicker({ path }: Props) {
             cursor: 'pointer', fontSize: 13, fontWeight: 500,
           }}
         >
-          {isOpen ? '▲ 关闭放置工具' : '◎ 打开可视化放置工具'}
+          {isOpen ? '▲ Close Placement Tool' : '◎ Open Visual Placement Tool'}
         </button>
         {/* 拖拽时直接写 DOM，不走 React state */}
         <span ref={statusSpanRef} style={{ fontSize: 12, color: '#f90', fontWeight: 600 }} />
@@ -291,7 +305,7 @@ export default function HotspotPicker({ path }: Props) {
         <div style={{ marginTop: 8, border: '1px solid #333', borderRadius: 6, overflow: 'hidden' }}>
           {!panoramaUrl ? (
             <div style={{ padding: 16, background: '#1a1a1a', color: '#888', fontSize: 13 }}>
-              ⚠ 请先在上方的 <strong>Panorama</strong> 字段上传全景图，再打开此工具。
+              ⚠ Please upload a panorama image first, then reopen this tool.
             </div>
           ) : (
             <div style={{ position: 'relative' }}>
@@ -301,7 +315,7 @@ export default function HotspotPicker({ path }: Props) {
                 padding: '4px 10px', borderRadius: 4, fontSize: 12,
                 pointerEvents: 'none', userSelect: 'none',
               }}>
-                点击放置 · 拖动红色标记调整位置 · 拖拽视角可旋转全景
+                Click to place · Drag the red marker to adjust position · Drag to rotate the panorama
               </div>
 
               <div ref={viewerRef} style={{ width: '100%', height: 380 }} />
