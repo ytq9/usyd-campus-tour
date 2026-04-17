@@ -13,7 +13,7 @@ export const Media: CollectionConfig = {
     ],
     adminThumbnail: 'thumbnail',
   },
-  // ✅ 注册自定义组件到 Media 列表页顶部
+  //  Register a custom component at the top of the Media list page
   admin: {
     components: {
       beforeList: ['@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList'],
@@ -28,7 +28,7 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
-    // ✅ 兜底：如果 alt 为空，自动用文件名填充
+    //  If alt is empty, automatically fill it with the filename.
     beforeOperation: [
       ({ args, operation }) => {
         if ((operation === 'create' || operation === 'update') && args.req?.file) {
