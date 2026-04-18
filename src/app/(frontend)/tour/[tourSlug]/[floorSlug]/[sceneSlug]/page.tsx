@@ -36,11 +36,11 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const floor = floors.docs[0]
   if (!floor) notFound()
 
-  // Fetch current scene
+  // Fetch current scene with depth 3 to populate hotspots.targetScene
   const scenes = await payload.find({
     collection: 'scenes',
     where: { slug: { equals: sceneSlug } },
-    depth: 2,
+    depth: 3,
     limit: 1,
     draft: isDraft,
   })
@@ -48,10 +48,11 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   if (!scene) notFound()
 
   // Fetch all scenes on this floor for Pannellum multi-scene config
+  // depth 3 needed for hotspots array relations
   const floorScenes = await payload.find({
     collection: 'scenes',
     where: { floor: { equals: floor.id } },
-    depth: 2,
+    depth: 3,
     limit: 100,
     draft: isDraft,
   })
