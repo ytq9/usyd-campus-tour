@@ -43,7 +43,8 @@ export const Scenes: CollectionConfig = {
       name: 'panorama',
       type: 'upload',
       relationTo: 'media',
-      required: true,
+      required: false,
+      admin: { description: 'Required for viewer - upload a 360° equirectangular image' },
     },
     {
       name: 'initialYaw',

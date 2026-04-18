@@ -11,6 +11,7 @@
  * - public/tour/floorplan/ (floorplan SVGs)
  */
 
+import 'dotenv/config'
 import { getPayload } from 'payload'
 import config from '../payload.config'
 import path from 'path'
@@ -34,6 +35,31 @@ async function seed() {
   console.log('Starting seed...')
 
   const payload = await getPayload({ config })
+
+  // Clean up existing data first
+  console.log('Cleaning up existing data...')
+  try {
+    // Include drafts in cleanup
+    const existingScenes = await payload.find({ collection: 'scenes', limit: 1000, draft: true })
+    for (const doc of existingScenes.docs) {
+      await payload.delete({ collection: 'scenes', id: doc.id })
+    }
+    console.log(`  Deleted ${existingScenes.totalDocs} scenes`)
+    
+    const existingFloors = await payload.find({ collection: 'floors', limit: 1000 })
+    for (const doc of existingFloors.docs) {
+      await payload.delete({ collection: 'floors', id: doc.id })
+    }
+    console.log(`  Deleted ${existingFloors.totalDocs} floors`)
+    
+    const existingTours = await payload.find({ collection: 'tours', limit: 1000, draft: true })
+    for (const doc of existingTours.docs) {
+      await payload.delete({ collection: 'tours', id: doc.id })
+    }
+    console.log(`  Deleted ${existingTours.totalDocs} tours`)
+  } catch (e: any) {
+    console.log('  Cleanup error:', e.message)
+  }
 
   // Create admin user if none exists
   const existingUsers = await payload.find({ collection: 'users', limit: 1 })
@@ -136,7 +162,34 @@ async function seed() {
     }
   }
 
-  // 2. Create Tour
+  // 2. Upload cover image for tour
+  console.log('Uploading cover image...')
+  let coverImageId: string | number | undefined
+  const coverPath = path.resolve(__dirname, '../../public/tour/cover.jpg')
+  if (fs.existsSync(coverPath)) {
+    const existing = await payload.find({
+      collection: 'media',
+      where: { filename: { equals: 'cover.jpg' } },
+      limit: 1,
+    })
+    if (existing.totalDocs === 0) {
+      try {
+        const coverMedia = await payload.create({
+          collection: 'media',
+          data: { alt: 'Tour cover image' },
+          filePath: coverPath,
+        })
+        coverImageId = coverMedia.id
+        console.log('  Uploaded cover image')
+      } catch (err) {
+        console.error('  Failed to upload cover:', err)
+      }
+    } else {
+      coverImageId = existing.docs[0].id
+    }
+  }
+
+  // 3. Create Tour
   console.log('Creating tour...')
   const tour = await payload.create({
     collection: 'tours',
@@ -146,6 +199,7 @@ async function seed() {
       welcomeTitle: tourConfig.welcomeTitle,
       welcomeText: { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: tourConfig.welcomeText }] }] } },
       tags: [{ tag: 'engineering' }, { tag: 'campus' }],
+      coverImage: coverImageId || undefined,
       _status: 'published',
     },
   })

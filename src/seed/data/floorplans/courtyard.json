@@ -1,0 +1,44 @@
+{
+  "courtyard1.1": {
+    "title": "Courtyard",
+    "panorama": "/tour/panoramas/courtyard/courtyard2.jpg",
+    "yaw": 90,
+    "rotation": 80,
+    "pitch": 5,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -2,
+        "yaw": 60,
+        "type": "scene",
+        "text": "Building Entrance",
+        "sceneId": "buildingEntrance"
+      }
+    ]
+  },
+  "buildingEntrance": {
+    "title": "Building Entrance",
+    "panorama": "/tour/panoramas/courtyard/courtyard1.jpg",
+    "yaw": 90,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 80,
+        "type": "scene",
+        "text": "Shepherd St Building - Level 1",
+        "sceneId": "level1/foyer1.1",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -5,
+        "yaw": 223,
+        "type": "scene",
+        "text": "Courtyard",
+        "sceneId": "courtyard1.1"
+      }
+    ]
+  }
+}
