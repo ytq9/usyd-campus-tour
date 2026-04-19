@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importMap && next build",
     "start": "next start",
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload.config.ts payload generate:types",
     "seed": "tsx src/seed/index.ts"

@@ -13,6 +13,12 @@ export const Media: CollectionConfig = {
     ],
     adminThumbnail: 'thumbnail',
   },
+  //  Register a custom component at the top of the Media list page
+  admin: {
+    components: {
+      beforeList: ['@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList'],
+    },
+  },
   fields: [
     { name: 'alt', type: 'text', required: true },
     {
@@ -22,10 +28,23 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
+    //  If alt is empty, automatically fill it with the filename.
+    beforeOperation: [
+      ({ args, operation }) => {
+        if ((operation === 'create' || operation === 'update') && args.req?.file) {
+          const file = args.req.file
+          if (!args.data?.alt && file.name) {
+            const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '')
+            if (!args.data) args.data = {}
+            args.data.alt = nameWithoutExt
+          }
+        }
+        return args
+      },
+    ],
     beforeDelete: [
       async ({ req, id }) => {
         const { payload } = req
-        // Check if media is referenced by any scene panorama
         const scenesUsingMedia = await payload.find({
           collection: 'scenes',
           where: { panorama: { equals: id } },
@@ -34,10 +53,9 @@ export const Media: CollectionConfig = {
         })
         if (scenesUsingMedia.totalDocs > 0) {
           throw new Error(
-            `Cannot delete: this media is used as a panorama in scene "${scenesUsingMedia.docs[0].title}". Remove the reference first.`
+            `Cannot delete: this media is used as a panorama in scene "${scenesUsingMedia.docs[0].title}". Remove the reference first.`,
           )
         }
-        // Check if media is used as tour cover image
         const toursUsingMedia = await payload.find({
           collection: 'tours',
           where: { coverImage: { equals: id } },
@@ -46,10 +64,9 @@ export const Media: CollectionConfig = {
         })
         if (toursUsingMedia.totalDocs > 0) {
           throw new Error(
-            `Cannot delete: this media is used as a cover image in tour "${toursUsingMedia.docs[0].title}". Remove the reference first.`
+            `Cannot delete: this media is used as a cover image in tour "${toursUsingMedia.docs[0].title}". Remove the reference first.`,
           )
         }
-        // Check floors floorplan
         const floorsUsingMedia = await payload.find({
           collection: 'floors',
           where: { floorplan: { equals: id } },
@@ -58,7 +75,7 @@ export const Media: CollectionConfig = {
         })
         if (floorsUsingMedia.totalDocs > 0) {
           throw new Error(
-            `Cannot delete: this media is used as a floorplan in floor "${floorsUsingMedia.docs[0].name}". Remove the reference first.`
+            `Cannot delete: this media is used as a floorplan in floor "${floorsUsingMedia.docs[0].name}". Remove the reference first.`,
           )
         }
       },
