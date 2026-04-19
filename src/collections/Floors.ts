@@ -41,6 +41,11 @@ export const Floors: CollectionConfig = {
     {
       name: 'mapPoints',
       type: 'array',
+      admin: {
+        components: {
+          Field: '@/components/payload/MapPointsEditor#MapPointsEditor',
+        },
+      },
       fields: [
         {
           name: 'scene',
