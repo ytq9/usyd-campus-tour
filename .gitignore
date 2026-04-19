@@ -10,3 +10,4 @@ src/payload-types.ts
 .claude/
 skills-lock.json
 weekly-report.md
+.env.local

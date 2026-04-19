@@ -98,6 +98,15 @@ export const Scenes: CollectionConfig = {
           admin: { description: 'Horizontal position (-180 to 180)' },
         },
         {
+          name: 'visualPicker',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: '@/components/HotspotPicker',
+            },
+          },
+        },
+        {
           name: 'text',
           type: 'text',
           required: true,
