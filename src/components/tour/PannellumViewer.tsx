@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import HotspotButton from './HotspotButton'
-import { SceneTransition, useSceneTransition, useTransitionSettings } from './transition'
 
 type Scene = {
   slug: string
@@ -28,36 +27,6 @@ type Props = {
 export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, isDraft, onSceneChange }: Props) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumRef = useRef<any>(null)
-  const { state: transitionState, startTransition, isTransitioning } = useSceneTransition()
-  const { getConfig } = useTransitionSettings()
-
-  const handleSceneNavigation = useCallback(async (
-    targetSlug: string,
-    targetFloorSlug?: string,
-    clickPosition?: { x: number; y: number }
-  ) => {
-    const isSameFloor = !targetFloorSlug || targetFloorSlug === floorSlug
-    const draftQuery = isDraft ? '?draft=true' : ''
-    const transitionConfig = getConfig(isSameFloor)
-
-    await startTransition({
-      targetSceneSlug: targetSlug,
-      targetFloorSlug,
-      isSameFloor,
-      originPosition: clickPosition,
-      customConfig: transitionConfig,
-      onMidpoint: async () => {
-        if (isSameFloor) {
-          if (pannellumRef.current) {
-            pannellumRef.current.loadScene(targetSlug)
-            onSceneChange(targetSlug)
-          }
-        } else {
-          window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
-        }
-      }
-    })
-  }, [floorSlug, isDraft, tourSlug, onSceneChange, startTransition, getConfig])
 
   const createTooltip = useCallback(
     (hotSpotDiv: HTMLDivElement, args: any) => {
@@ -69,16 +38,23 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
           hotspot={args}
           tourSlug={tourSlug}
           floorSlug={floorSlug}
-          onNavigate={(targetSlug: string, targetFloorSlug?: string, clickEvent?: MouseEvent) => {
-            const clickPosition = clickEvent
-              ? { x: clickEvent.clientX, y: clickEvent.clientY }
-              : undefined
-            handleSceneNavigation(targetSlug, targetFloorSlug, clickPosition)
+          onNavigate={(targetSlug: string, targetFloorSlug?: string) => {
+            if (targetFloorSlug && targetFloorSlug !== floorSlug) {
+              // Cross-floor navigation - full page load
+              const draftQuery = isDraft ? '?draft=true' : ''
+              window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
+            } else {
+              // Same floor - use Pannellum scene transition
+              if (pannellumRef.current) {
+                pannellumRef.current.loadScene(targetSlug)
+                onSceneChange(targetSlug)
+              }
+            }
           }}
         />
       )
     },
-    [tourSlug, floorSlug, handleSceneNavigation]
+    [tourSlug, floorSlug, isDraft, onSceneChange]
   )
 
   useEffect(() => {
@@ -117,7 +93,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         autoLoad: true,
         default: {
           firstScene: initialSceneSlug,
-          sceneFadeDuration: 0,
+          sceneFadeDuration: 500,
         },
         scenes: pannellumScenes,
       } as any)
@@ -139,18 +115,11 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
   }, []) // Only run once on mount
 
   return (
-    <>
-      <div
-        ref={viewerRef}
-        className="h-dvh w-dvw inset-0 absolute"
-        id="panorama"
-        style={{
-          filter: isTransitioning ? 'brightness(0.95)' : 'none',
-          transition: 'filter 0.3s ease',
-        }}
-      />
-      <SceneTransition state={transitionState} />
-    </>
+    <div
+      ref={viewerRef}
+      className="h-dvh w-dvw inset-0 absolute"
+      id="panorama"
+    />
   )
 }
 

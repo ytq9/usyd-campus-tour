@@ -7,7 +7,7 @@ type Props = {
   hotspot: any
   tourSlug: string
   floorSlug: string
-  onNavigate: (targetSlug: string, targetFloorSlug?: string, clickEvent?: MouseEvent) => void
+  onNavigate: (targetSlug: string, targetFloorSlug?: string) => void
 }
 
 export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate }: Props) {
@@ -25,11 +25,11 @@ export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate
     return <InfoHotspot hotspot={hotspot} />
   }
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     const targetSlug = hotspot.targetScene?.slug
     const targetFloorSlug = hotspot.targetFloor?.slug
     if (targetSlug) {
-      onNavigate(targetSlug, targetFloorSlug, e.nativeEvent)
+      onNavigate(targetSlug, targetFloorSlug)
     }
   }
 
