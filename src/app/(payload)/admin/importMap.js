@@ -1,3 +1,4 @@
+import { MediaBeforeList as MediaBeforeList_ce5186712fb9e7ba723a43fcc1f570c0 } from '@/components/MediaBulkUpload/BeforeListComponent'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { LexicalDiffComponent as LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -22,10 +23,12 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { MapPointsEditor as MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c } from '@/components/payload/MapPointsEditor'
+import { default as default_b07e440ca7c71a23a3512f458ad2ecb4 } from '../../../components/admin/PanoramaValidationPreview'
 import { default as default_bc3f34de8b25c6a3a9514200b79af636 } from '@/components/HotspotPicker'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
+  "@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList": MediaBeforeList_ce5186712fb9e7ba723a43fcc1f570c0,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#LexicalDiffComponent": LexicalDiffComponent_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -50,6 +53,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/payload/MapPointsEditor#MapPointsEditor": MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c,
+  "/components/admin/PanoramaValidationPreview#default": default_b07e440ca7c71a23a3512f458ad2ecb4,
   "@/components/HotspotPicker#default": default_bc3f34de8b25c6a3a9514200b79af636,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
