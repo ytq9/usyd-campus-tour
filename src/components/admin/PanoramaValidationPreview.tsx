@@ -231,6 +231,8 @@ const titleStyle: React.CSSProperties = {
   display: 'block',
   marginBottom: 8,
   fontSize: 16,
+  fontWeight: 600,
+  color: '#1a1a1a',
 }
 
 const helperStyle: React.CSSProperties = {
