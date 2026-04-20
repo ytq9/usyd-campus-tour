@@ -45,7 +45,6 @@ export const Scenes: CollectionConfig = {
       relationTo: 'media',
       required: true,
       admin: {
-        description: 'Upload or select an equirectangular 360 panorama with a 2:1 aspect ratio, such as 7680x3840.',
         components: {
           afterInput: ['/components/admin/PanoramaValidationPreview'],
         },

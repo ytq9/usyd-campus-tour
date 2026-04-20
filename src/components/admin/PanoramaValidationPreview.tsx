@@ -223,7 +223,7 @@ const titleStyle: React.CSSProperties = {
   marginBottom: 8,
   fontSize: 16,
   fontWeight: 600,
-  color: '#1a1a1a',
+  color: '#9ba3af',
 }
 
 const helperStyle: React.CSSProperties = {
