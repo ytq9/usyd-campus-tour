@@ -148,9 +148,6 @@ export default function PanoramaValidationPreview() {
       <>
         <div style={panelStyle}>
           <strong style={titleStyle}>360 Panorama Validation</strong>
-          <p style={helperStyle}>
-            Select or upload a panorama image to validate its 2:1 aspect ratio and preview it interactively.
-          </p>
         </div>
         {modalMessage && (
           <ValidationModal
@@ -174,12 +171,7 @@ export default function PanoramaValidationPreview() {
         {state.status === 'error' && <p style={errorStyle}>{state.message}</p>}
 
         {state.status === 'invalid' && (
-          <>
-            <p style={errorStyle}>{state.message}</p>
-            <p style={helperStyle}>
-              Please upload an equirectangular panorama with a 2:1 aspect ratio, for example 7680x3840.
-            </p>
-          </>
+          <p style={errorStyle}>{state.message}</p>
         )}
 
         {state.status === 'valid' && (
@@ -220,11 +212,10 @@ function ValidationModal({ message, onClose }: { message: string; onClose: () =>
 }
 
 const panelStyle: React.CSSProperties = {
-  border: '1px solid #d9e2ec',
   borderRadius: 12,
   padding: 16,
   marginTop: 12,
-  background: '#fff',
+  background: 'transparent',
 }
 
 const titleStyle: React.CSSProperties = {
