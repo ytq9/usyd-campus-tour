@@ -1,0 +1,398 @@
+{
+  "foyer2.1": {
+    "title": "Foyer - Level 2",
+    "panorama": "/tour/panoramas/level2/a1.jpg",
+    "yaw": 200,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": -100,
+        "type": "scene",
+        "text": "Upstairs - Level 3",
+        "sceneId": "level3/foyer3.1",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -13,
+        "yaw": -65,
+        "type": "scene",
+        "text": "Downstairs - Level 1",
+        "sceneId": "level1/foyer1.1",
+        "navType": "newFloorScene"
+      },
+      {
+        "pitch": -6,
+        "yaw": 170,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 1",
+        "sceneId": "201.1"
+      },
+      {
+        "pitch": -5,
+        "yaw": -26,
+        "type": "scene",
+        "text": "210 - Electronics and Comms Lab 1",
+        "sceneId": "210.1"
+      }
+    ]
+  },
+  "201.1": {
+    "title": "201 - Analog and Digital Lab 1",
+    "sceneDesc": "The Analog and Digital Lab provides students with practical skills through hands-on experiments, covering fundamental principles of electronics, computer systems, circuit theories, and digital systems. This lab is designed to enhance students' understanding and application of these core concepts, preparing them for real-world challenges in the field of electronics and computer engineering.",
+    "panorama": "/tour/panoramas/level2/c1.jpg",
+    "yaw": 0,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -8,
+        "yaw": 195,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": -8,
+        "yaw": -26,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 2",
+        "sceneId": "201.2"
+      },
+      {
+        "pitch": -3,
+        "yaw": 8,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 3",
+        "sceneId": "201.3"
+      },
+      {
+        "code": "c1.1",
+        "pitch": -10,
+        "yaw": -10,
+        "type": "info",
+        "text": "Assorted test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment. ",
+        "highlight": ""
+      }
+    ]
+  },
+  "201.2": {
+    "title": "201 - Analog and Digital Lab 2",
+    "sceneDesc": "The Analog and Digital Lab provides students with practical skills through hands-on experiments, covering fundamental principles of electronics, computer systems, circuit theories, and digital systems. This lab is designed to enhance students' understanding and application of these core concepts, preparing them for real-world challenges in the field of electronics and computer engineering.",
+    "panorama": "/tour/panoramas/level2/c2.jpg",
+    "yaw": -20,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": -7,
+        "yaw": 50,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 1",
+        "sceneId": "201.1"
+      },
+      {
+        "pitch": -10,
+        "yaw": -120,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 3",
+        "sceneId": "201.3"
+      },
+      {
+        "code": "c2.1",
+        "pitch": 2,
+        "yaw": -63,
+        "type": "info",
+        "text": "DC (Direct Current) Power Supply",
+        "description": "A DC (Direct Current) power supply is an essential piece of equipment in an electronics lab. It provides a constant voltage or current to power electronic circuits and devices. The voltage outputs can be adjusted as needed.",
+        "highlight": ""
+      },
+      {
+        "code": "c2.2",
+        "pitch": 2,
+        "yaw": -50,
+        "type": "info",
+        "text": "Digital Multimeter",
+        "description": "A digital multimeter is used to measure common electrical variables, including voltage (volts), current (amps), and resistance (ohms).",
+        "highlight": ""
+      },
+      {
+        "code": "b2.3",
+        "pitch": 10,
+        "yaw": -30,
+        "type": "info",
+        "text": "Oscilloscope",
+        "description": "An oscilloscope is a valuable tool for analyzing both analog and digital signals. It enables students and staff to quickly identify and troubleshoot issues in complex designs.",
+        "highlight": ""
+      },
+      {
+        "code": "c2.4",
+        "pitch": 15,
+        "yaw": -50,
+        "type": "info",
+        "text": "Function Generator",
+        "description": "A function generator can provide reconfigurable testing of electronics devices and common modulated signals, allowing for comprehensive investigation alongside digital electronics and systems.",
+        "highlight": ""
+      },
+
+      {
+        "code": "c2.5",
+        "pitch": -23,
+        "yaw": -48,
+        "type": "info",
+        "text": "NI ELVIS II prototyping platform",
+        "description": "The NI ELVIS II prototyping platform is a modular educational laboratory device that integrates commonly used instruments, including an oscilloscope, digital multimeter, function generator, variable power supply, and Bode analyzer. Students can connect a PC to these instruments via USB plug-and-play capabilities and build circuits on a detachable protoboard.",
+        "highlight": ""
+      }
+    ]
+  },
+  "201.3": {
+    "title": "201 - Analog and Digital Lab 3",
+    "sceneDesc": "The Analog and Digital Lab provides students with practical skills through hands-on experiments, covering fundamental principles of electronics, computer systems, circuit theories, and digital systems. This lab is designed to enhance students' understanding and application of these core concepts, preparing them for real-world challenges in the field of electronics and computer engineering.",
+    "panorama": "/tour/panoramas/level2/c3.jpg",
+    "yaw": 260,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": 0,
+        "yaw": 275,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 1",
+        "sceneId": "201.1"
+      },
+      {
+        "pitch": -2,
+        "yaw": -50,
+        "type": "scene",
+        "text": "201 - Analog and Digital Lab 2",
+        "sceneId": "201.2"
+      },
+      {
+        "code": "c3.1",
+        "pitch": -10,
+        "yaw": -60,
+        "type": "info",
+        "text": "Assorted test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment. ",
+        "highlight": ""
+      },
+      {
+        "code": "c3.2",
+        "pitch": -20,
+        "yaw": -10,
+        "type": "info",
+        "text": "Robotics Maze",
+        "description": "A Robotics Maze is a specially designed area where robots can navigate through a series of paths and obstacles. It's used for testing and developing robotic algorithms, particularly those related to navigation, obstacle avoidance, and autonomous decision-making",
+        "highlight": ""
+      },
+      {
+        "code": "c3.3",
+        "pitch": 5,
+        "yaw": 5,
+        "type": "info",
+        "text": "Storage Cupboards",
+        "description": "The cupboard storage contains all the items (e.g. devices, consumables, PCB boards and parts) needed to support individual UoS.",
+        "highlight": ""
+      }
+    ]
+  },
+  "210.1": {
+    "title": "210 - Electronics & Comm's Lab 1",
+    "sceneDesc": "The Electronics and Communications Lab provides students with practical skills through hands-on experiments in RF Engineering, Communication Electronics, Antennas and Propagation, and Wireless Communications. This lab is equipped with advanced tools and equipment, allowing students to explore and understand the complexities of modern communication systems. By engaging in these experiments, students gain valuable experience in designing, testing, and optimizing electronic and communication devices, preparing them for careers in the rapidly evolving field of electronics and communications.",
+    "panorama": "/tour/panoramas/level2/b1.jpg",
+    "yaw": -1,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": -20,
+        "yaw": 90,
+        "type": "scene",
+        "text": "210 - Electronics & Comm's Lab 2",
+        "sceneId": "210.2"
+      },
+      {
+        "pitch": -10,
+        "yaw": 220,
+        "type": "scene",
+        "text": "210 - Electronics & Comm's Lab  3",
+        "sceneId": "210.3"
+      },
+      {
+        "code": "b1.1",
+        "pitch": -12,
+        "yaw": -6,
+        "type": "info",
+        "text": "DC (Direct Current) Power Supply",
+        "description": "A DC (Direct Current) power supply is an essential piece of equipment in an electronics lab. It provides a constant voltage or current to power electronic circuits and devices. The voltage outputs can be adjusted as needed.",
+        "highlight": ""
+      },
+      {
+        "code": "b1.2",
+        "pitch": -1,
+        "yaw": 20,
+        "type": "info",
+        "text": "Oscilloscope",
+        "description": "An oscilloscope is a valuable tool for analyzing both analog and digital signals. It enables students and staff to quickly identify and troubleshoot issues in complex designs.",
+        "highlight": ""
+      },
+      {
+        "code": "b1.3",
+        "pitch": -13,
+        "yaw": 5,
+        "type": "info",
+        "text": "Function Generator",
+        "description": "A function generator can provide reconfigurable testing of electronics devices and common modulated signals, allowing for comprehensive investigation alongside digital electronics and systems.",
+        "highlight": ""
+      },
+      {
+        "code": "b1.4",
+        "pitch": -1,
+        "yaw": 5,
+        "type": "info",
+        "text": "Digital Multimeter",
+        "description": "A digital multimeter is used to measure common electrical variables, including voltage (volts), current (amps), and resistance (ohms).",
+        "highlight": ""
+      },
+      {
+        "code": "b1.5",
+        "pitch": -1,
+        "yaw": -18,
+        "type": "info",
+        "text": "Spectrum Analyzer",
+        "description": "A spectrum analyzer is a device that measures and displays the frequency spectrum of electrical signals. It shows the magnitude of an input signal across the instrument's entire frequency range. This enables users to observe the power of both known and unknown signals, identify dominant frequencies, and analyze other spectral components",
+        "highlight": ""
+      },
+      {
+        "code": "b1.6",
+        "pitch": -5,
+        "yaw": -80,
+        "type": "info",
+        "text": "Cupboard Storage",
+        "description": "The cupboard storage contains all the items (e.g. PCB boards, devices, consumables, and parts) needed to support individual UoS.",
+        "highlight": ""
+      },
+      {
+        "code": "b1.7",
+        "pitch": -5,
+        "yaw": 65,
+        "type": "info",
+        "text": "Cupboard Storage",
+        "description": "The cupboard storage contains all the items (e.g. PCB boards, devices, consumables, and parts) needed to support individual UoS.",
+        "highlight": ""
+      }
+    ]
+  },
+  "210.2": {
+    "title": "210 - Electronics & Comm's Lab 2",
+    "sceneDesc": "The Electronics and Communications Lab provides students with practical skills through hands-on experiments in RF Engineering, Communication Electronics, Antennas and Propagation, and Wireless Communications. This lab is equipped with advanced tools and equipment, allowing students to explore and understand the complexities of modern communication systems. By engaging in these experiments, students gain valuable experience in designing, testing, and optimizing electronic and communication devices, preparing them for careers in the rapidly evolving field of electronics and communications.",
+    "panorama": "/tour/panoramas/level2/b2.jpg",
+    "yaw": 0,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "pitch": -10,
+        "yaw": 62,
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": -20,
+        "yaw": 0,
+        "type": "scene",
+        "text": "210 - Electronics & Comm's Lab 1",
+        "sceneId": "210.1"
+      },
+      {
+        "pitch": 0,
+        "yaw": -60,
+        "type": "scene",
+        "text": "210 - Electronics & Comm's Lab 3",
+        "sceneId": "210.3"
+      },
+      {
+        "code": "b2.1",
+        "pitch": -15,
+        "yaw": -15,
+        "type": "info",
+        "text": "Assorted test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment. ",
+        "highlight": ""
+      },
+      {
+        "code": "b2.2",
+        "pitch": -10,
+        "yaw": 25,
+        "type": "info",
+        "text": "Assorted test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment. ",
+        "highlight": ""
+      }
+    ]
+  },
+  "210.3": {
+    "title": "210 - Electronics & Comm's Lab 3",
+    "sceneDesc": "The Electronics and Communications Lab provides students with practical skills through hands-on experiments in RF Engineering, Communication Electronics, Antennas and Propagation, and Wireless Communications. This lab is equipped with advanced tools and equipment, allowing students to explore and understand the complexities of modern communication systems. By engaging in these experiments, students gain valuable experience in designing, testing, and optimizing electronic and communication devices, preparing them for careers in the rapidly evolving field of electronics and communications.",
+    "panorama": "/tour/panoramas/level2/b3.jpg",
+    "yaw": 250,
+    "rotation": 90,
+    "pitch": 0,
+    "hfov": 120,
+    "hotSpots": [
+      {
+        "type": "scene",
+        "text": "Exit to foyer",
+        "sceneId": "foyer2.1"
+      },
+      {
+        "pitch": -15,
+        "yaw": 232,
+        "type": "scene",
+        "text": "201 - Electronics & Comm's Lab 1",
+        "sceneId": "210.1"
+      },
+      {
+        "pitch": -5,
+        "yaw": 280,
+        "type": "scene",
+        "text": "201 - Electronics & Comm's Labs 2",
+        "sceneId": "210.2"
+      },
+      {
+        "code": "b4.1",
+        "pitch": -10,
+        "yaw": 250,
+        "type": "info",
+        "text": "Assorted test leads and hook-up cables",
+        "description": "Assorted test leads and hook-up cables are used to establish temporary or permanent connections between electronic components, devices, and testing equipment. ",
+        "highlight": ""
+      }
+    ]
+  }
+}

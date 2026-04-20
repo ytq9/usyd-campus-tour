@@ -22,7 +22,10 @@
     "@heroicons/react": "^2.2.0",
     "sharp": "^0.33.0",
     "graphql": "^16.8.0",
-    "cross-env": "^7.0.0"
+    "cross-env": "^7.0.0",
+    "@theatre/core": "^0.5.1",
+    "@theatre/studio": "^0.5.1",
+    "framer-motion": "^11.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

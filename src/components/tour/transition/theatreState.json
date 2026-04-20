@@ -1,0 +1,86 @@
+{
+  "sheetsById": {
+    "Scene Transition": {
+      "staticOverrides": {
+        "byObject": {
+          "Camera": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "rotation": {
+              "x": 0,
+              "y": 0,
+              "z": 0
+            },
+            "fov": 120
+          },
+          "Transition": {
+            "opacity": 0,
+            "scale": 1,
+            "blur": 0,
+            "brightness": 1
+          }
+        }
+      },
+      "sequence": {
+        "subUnitsPerUnit": 30,
+        "length": 2,
+        "tracksByObject": {
+          "Camera": {
+            "trackData": {
+              "position": {
+                "x": {
+                  "type": "BasicKeyframedTrack",
+                  "keyframes": [
+                    { "position": 0, "value": 0, "type": "bezier", "handles": [0.5, 1, 0.5, 1] },
+                    { "position": 1, "value": 0, "type": "bezier", "handles": [0.5, 1, 0.5, 1] }
+                  ]
+                }
+              }
+            }
+          },
+          "Transition": {
+            "trackData": {
+              "opacity": {
+                "type": "BasicKeyframedTrack",
+                "keyframes": [
+                  { "position": 0, "value": 0, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 0.5, "value": 1, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 1, "value": 0, "type": "bezier", "handles": [0.87, 0, 0.13, 1] }
+                ]
+              },
+              "scale": {
+                "type": "BasicKeyframedTrack",
+                "keyframes": [
+                  { "position": 0, "value": 1, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 0.5, "value": 3, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 1, "value": 1, "type": "bezier", "handles": [0.87, 0, 0.13, 1] }
+                ]
+              },
+              "blur": {
+                "type": "BasicKeyframedTrack",
+                "keyframes": [
+                  { "position": 0, "value": 0, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 0.5, "value": 20, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 1, "value": 0, "type": "bezier", "handles": [0.87, 0, 0.13, 1] }
+                ]
+              },
+              "brightness": {
+                "type": "BasicKeyframedTrack",
+                "keyframes": [
+                  { "position": 0, "value": 1, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 0.5, "value": 1.5, "type": "bezier", "handles": [0.87, 0, 0.13, 1] },
+                  { "position": 1, "value": 1, "type": "bezier", "handles": [0.87, 0, 0.13, 1] }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": ["initial"]
+}
