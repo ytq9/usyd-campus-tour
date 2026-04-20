@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import HotspotButton from './HotspotButton'
+import { SceneTransition, useSceneTransition, useTransitionSettings } from './transition'
 
 type Scene = {
   slug: string
@@ -27,6 +28,41 @@ type Props = {
 export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, isDraft, onSceneChange }: Props) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumRef = useRef<any>(null)
+  const { state: transitionState, startTransition, isTransitioning } = useSceneTransition()
+  const { getConfig } = useTransitionSettings()
+
+  // 处理场景导航（带过渡动画）
+  const handleSceneNavigation = useCallback(async (
+    targetSlug: string, 
+    targetFloorSlug?: string,
+    clickPosition?: { x: number; y: number }
+  ) => {
+    const isSameFloor = !targetFloorSlug || targetFloorSlug === floorSlug
+    const draftQuery = isDraft ? '?draft=true' : ''
+
+    // 从全局设置获取过渡效果配置
+    const transitionConfig = getConfig(isSameFloor)
+
+    await startTransition({
+      targetSceneSlug: targetSlug,
+      targetFloorSlug: targetFloorSlug,
+      isSameFloor,
+      originPosition: clickPosition,
+      customConfig: transitionConfig,
+      onMidpoint: async () => {
+        if (isSameFloor) {
+          // 同楼层 - 使用 Pannellum 内部切换
+          if (pannellumRef.current) {
+            pannellumRef.current.loadScene(targetSlug)
+            onSceneChange(targetSlug)
+          }
+        } else {
+          // 跨楼层 - 页面跳转
+          window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
+        }
+      }
+    })
+  }, [floorSlug, isDraft, tourSlug, onSceneChange, startTransition, getConfig])
 
   const createTooltip = useCallback(
     (hotSpotDiv: HTMLDivElement, args: any) => {
@@ -38,23 +74,18 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
           hotspot={args}
           tourSlug={tourSlug}
           floorSlug={floorSlug}
-          onNavigate={(targetSlug: string, targetFloorSlug?: string) => {
-            if (targetFloorSlug && targetFloorSlug !== floorSlug) {
-              // Cross-floor navigation - full page load
-              const draftQuery = isDraft ? '?draft=true' : ''
-              window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
-            } else {
-              // Same floor - use Pannellum scene transition
-              if (pannellumRef.current) {
-                pannellumRef.current.loadScene(targetSlug)
-                onSceneChange(targetSlug)
-              }
-            }
+          onNavigate={(targetSlug: string, targetFloorSlug?: string, clickEvent?: MouseEvent) => {
+            // 获取点击位置用于定向动画
+            const clickPosition = clickEvent 
+              ? { x: clickEvent.clientX, y: clickEvent.clientY }
+              : undefined
+            
+            handleSceneNavigation(targetSlug, targetFloorSlug, clickPosition)
           }}
         />
       )
     },
-    [tourSlug, floorSlug, isDraft, onSceneChange]
+    [tourSlug, floorSlug, handleSceneNavigation]
   )
 
   useEffect(() => {
@@ -93,7 +124,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         autoLoad: true,
         default: {
           firstScene: initialSceneSlug,
-          sceneFadeDuration: 500,
+          sceneFadeDuration: 0,  // 禁用 Pannellum 内置过渡，使用自定义过渡动画
         },
         scenes: pannellumScenes,
       } as any)
@@ -115,11 +146,22 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
   }, []) // Only run once on mount
 
   return (
-    <div
-      ref={viewerRef}
-      className="h-dvh w-dvw inset-0 absolute"
-      id="panorama"
-    />
+    <>
+      {/* Pannellum 360° 查看器 */}
+      <div
+        ref={viewerRef}
+        className="h-dvh w-dvw inset-0 absolute"
+        id="panorama"
+        style={{
+          // 过渡动画时略微降低亮度增强效果
+          filter: isTransitioning ? 'brightness(0.95)' : 'none',
+          transition: 'filter 0.3s ease'
+        }}
+      />
+      
+      {/* 场景过渡动画层 */}
+      <SceneTransition state={transitionState} />
+    </>
   )
 }
 
