@@ -47,7 +47,7 @@ export default function SceneTransition({ state, children }: SceneTransitionProp
           position: 'fixed',
           inset: 0,
           zIndex: 1000,
-          pointerEvents: phase !== 'idle' ? 'all' : 'none',
+          pointerEvents: 'all',
           ...overlayStyle
         }}
       >
