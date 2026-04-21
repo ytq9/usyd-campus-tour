@@ -11,3 +11,4 @@ src/payload-types.ts
 skills-lock.json
 weekly-report.md
 .env.local
+*.sql
