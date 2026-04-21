@@ -59,7 +59,7 @@ class TheatreTransitionController {
         blur: types.number(0, { range: [0, 50] }),
         brightness: types.number(1, { range: [0.5, 2] }),
         rotation: types.number(0, { range: [-180, 180] })
-      })
+      }) as unknown as TheatreObject
 
       // 监听值变化
       this.transitionObject.onValuesChange((values) => {
