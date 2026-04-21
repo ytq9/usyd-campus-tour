@@ -12,3 +12,6 @@ skills-lock.json
 weekly-report.md
 .env.local
 *.sql
+test-plan.md
+test-report.md
+test-report.docx
