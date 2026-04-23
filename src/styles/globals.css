@@ -1,0 +1,137 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@plugin "daisyui" {
+  themes: light --default;
+  prefix: "d-";
+}
+
+@theme {
+  --color-ochre: #e64626;
+}
+
+/* ============================================
+   Pannellum 基础样式覆盖
+   ============================================ */
+.pnlm-sprite {
+  background-image: none !important;
+}
+
+/* 确保热点容器不阻挡子元素的点击 */
+.pnlm-hotspot {
+  pointer-events: none !important;
+  background-color: transparent !important;
+}
+
+.pnlm-hotspot:hover {
+  background-color: transparent !important;
+}
+
+/* 热点内的按钮需要能够接收点击 */
+.pnlm-hotspot .hotspot-portal-button,
+.pnlm-hotspot button,
+.pnlm-hotspot .pointer-events-auto {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.pnlm-controls-container {
+  display: none;
+}
+
+.d-modal-action {
+  margin: 0 !important;
+}
+
+/* ============================================
+   场景过渡动画样式 - 模糊过渡效果
+   ============================================ */
+
+/* 过渡动画层基础样式 - GPU加速 */
+.scene-transition-overlay {
+  will-change: opacity, filter;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* 热点按钮样式 */
+.hotspot-portal-button {
+  position: relative;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.hotspot-portal-button:focus {
+  outline: none;
+}
+
+.hotspot-portal-button:focus-visible {
+  outline: 2px solid #E64626;
+  outline-offset: 4px;
+  border-radius: 50%;
+}
+
+/* 加载指示器旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scene-transition-loading .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 应用于 Pannellum 容器的过渡效果 */
+#panorama {
+  transition: filter 0.3s ease-out;
+}
+
+/* 过渡期间的全局效果 */
+body.scene-transitioning {
+  overflow: hidden;
+}
+
+body.scene-transitioning #panorama {
+  pointer-events: none;
+}
+
+/* 主题色变量 */
+:root {
+  --transition-primary: #E64626;
+}
+
+/* 移动端触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+  .hotspot-portal-button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .hotspot-portal-button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 减少动画偏好的用户 */
+@media (prefers-reduced-motion: reduce) {
+  .scene-transition-overlay,
+  .hotspot-portal-button,
+  #panorama {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .scene-transition-overlay {
+    background-color: black !important;
+  }
+  
+  .hotspot-portal-button svg {
+    filter: drop-shadow(0 0 2px white);
+  }
+}
