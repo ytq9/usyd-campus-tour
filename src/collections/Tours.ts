@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
 import { publishedOrAdmin } from '../access/publishedOrAdmin'
 
 export const Tours: CollectionConfig = {
@@ -179,8 +180,9 @@ export const Tours: CollectionConfig = {
         }
 
         if (errors.length > 0) {
-          throw new Error(
+          throw new APIError(
             `Cannot publish tour. Fix the following issues first:\n\n${errors.map((e) => `• ${e}`).join('\n')}`,
+            400,
           )
         }
 
