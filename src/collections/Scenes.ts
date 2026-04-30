@@ -70,10 +70,20 @@ export const Scenes: CollectionConfig = {
       admin: { description: 'Image rotation offset in degrees' },
     },
     {
+      name: 'hotspotEditor',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/HotspotVisualEditor',
+        },
+      },
+    },
+    {
       name: 'hotspots',
       type: 'array',
       admin: {
-        description: 'Floating items: portals (scene navigation) and info items (content modals)',
+        initCollapsed: true,
+        description: 'Floating items: portals (scene navigation) and info items (content modals). Use the Visual Editor above for click-and-drag placement.',
       },
       fields: [
         {
