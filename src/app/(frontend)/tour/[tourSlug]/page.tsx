@@ -46,7 +46,7 @@ export default async function TourLandingPage({ params }: { params: Params }) {
       <div className="relative h-[60vh] overflow-hidden">
         {tour.coverImage && typeof tour.coverImage === 'object' ? (
           <img
-            src={tour.coverImage.url}
+            src={tour.coverImage.url ?? ''}
             alt={tour.coverImage.alt || tour.title}
             className="absolute inset-0 w-full h-full object-cover"
           />

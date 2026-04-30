@@ -24,11 +24,61 @@ type HotspotRef = {
   sceneLocalId: string
   floorLocalId: string
   hotspot: any
-  sceneDbId: string | number
+  sceneDbId: number
 }
 
 // ID maps use string keys to simplify cross-referencing
-type IdMap = Record<string, string | number>
+type IdMap = Record<string, number>
+
+type RichTextValue = {
+  root: {
+    type: string
+    children: {
+      type: any
+      version: number
+      [key: string]: unknown
+    }[]
+    direction: ('ltr' | 'rtl') | null
+    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+    indent: number
+    version: number
+  }
+  [key: string]: unknown
+}
+
+function createRichText(text: string): RichTextValue {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              text,
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          textStyle: '',
+          version: 1,
+        },
+      ],
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  }
+}
 
 async function seed() {
   console.log('Starting seed...')
@@ -140,11 +190,12 @@ async function seed() {
   console.log('Creating tour...')
   const tour = await payload.create({
     collection: 'tours',
+    draft: false,
     data: {
       title: tourConfig.landingPageTitle,
       slug: 'shepherd-street-j15',
       welcomeTitle: tourConfig.welcomeTitle,
-      welcomeText: { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: tourConfig.welcomeText }] }] } },
+      welcomeText: createRichText(tourConfig.welcomeText),
       tags: [{ tag: 'engineering' }, { tag: 'campus' }],
       _status: 'published',
     },
@@ -188,17 +239,24 @@ async function seed() {
 
     for (const [sceneLocalId, sceneData] of Object.entries(floorConfig) as [string, any][]) {
       const sceneSlug = sceneLocalId.replace(/\./g, '-')
+      const panoramaId = mediaMap[sceneData.panorama]
+
+      if (!panoramaId) {
+        console.warn(`  Skipping scene without panorama media: ${sceneData.title || sceneLocalId}`)
+        continue
+      }
 
       const scene = await payload.create({
         collection: 'scenes',
+        draft: false,
         data: {
           title: sceneData.title || sceneLocalId,
           slug: sceneSlug,
           floor: floorMap[floorSlug],
           description: sceneData.sceneDesc
-            ? { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: sceneData.sceneDesc }] }] } }
+            ? createRichText(sceneData.sceneDesc)
             : undefined,
-          panorama: mediaMap[sceneData.panorama] || undefined,
+          panorama: panoramaId,
           initialYaw: sceneData.yaw || 0,
           initialPitch: sceneData.pitch || 0,
           initialHfov: sceneData.hfov || 120,
@@ -268,9 +326,7 @@ async function seed() {
     }
 
     if (hs.type === 'info' && hs.description) {
-      hotspotData.infoContent = {
-        root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: hs.description }] }] }
-      }
+      hotspotData.infoContent = createRichText(hs.description)
     }
 
     sceneHotspots[ref.sceneDbId].push(hotspotData)
@@ -346,6 +402,7 @@ async function createSampleTour(payload: any) {
   // Create a minimal sample tour for testing
   const tour = await payload.create({
     collection: 'tours',
+    draft: false,
     data: {
       title: 'Sample Campus Tour',
       slug: 'sample-tour',

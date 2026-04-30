@@ -91,7 +91,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   {tour.coverImage && typeof tour.coverImage === 'object' ? (
                     <img
-                      src={tour.coverImage.sizes?.preview?.url || tour.coverImage.url}
+                      src={tour.coverImage.sizes?.preview?.url ?? tour.coverImage.url ?? ''}
                       alt={tour.coverImage.alt || tour.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

@@ -54,19 +54,19 @@ export const Scenes: CollectionConfig = {
       name: 'initialYaw',
       type: 'number',
       defaultValue: 0,
-      admin: { description: 'Initial horizontal camera angle' },
+      admin: { description: 'Initial horizontal camera angle', hidden: true },
     },
     {
       name: 'initialPitch',
       type: 'number',
       defaultValue: 0,
-      admin: { description: 'Initial vertical camera angle' },
+      admin: { description: 'Initial vertical camera angle', hidden: true },
     },
     {
       name: 'initialHfov',
       type: 'number',
       defaultValue: 120,
-      admin: { description: 'Initial horizontal field of view' },
+      admin: { description: 'Initial horizontal field of view', hidden: true },
     },
     {
       name: 'rotation',

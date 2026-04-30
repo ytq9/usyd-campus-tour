@@ -84,7 +84,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       id: floor.id,
       name: floor.name,
       slug: floor.slug,
-      floorplan: floor.floorplan && typeof floor.floorplan === 'object' ? floor.floorplan.url : null,
+      floorplan: floor.floorplan && typeof floor.floorplan === 'object' ? (floor.floorplan.url ?? null) : null,
       mapPoints: floor.mapPoints || [],
     },
     currentScene: {
@@ -92,9 +92,9 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       title: scene.title,
       slug: scene.slug,
       description: scene.description || null,
-      panoramaUrl: scene.panorama && typeof scene.panorama === 'object' ? scene.panorama.url : '',
+      panoramaUrl: scene.panorama && typeof scene.panorama === 'object' ? (scene.panorama.url ?? '') : '',
       previewUrl: scene.panorama && typeof scene.panorama === 'object'
-        ? (scene.panorama.sizes?.preview?.url || scene.panorama.url)
+        ? (scene.panorama.sizes?.preview?.url ?? scene.panorama.url ?? '')
         : '',
       initialYaw: scene.initialYaw || 0,
       initialPitch: scene.initialPitch || 0,
@@ -121,7 +121,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       id: s.id,
       slug: s.slug,
       title: s.title,
-      panoramaUrl: s.panorama && typeof s.panorama === 'object' ? s.panorama.url : '',
+      panoramaUrl: s.panorama && typeof s.panorama === 'object' ? (s.panorama.url ?? '') : '',
       initialYaw: s.initialYaw || 0,
       initialPitch: s.initialPitch || 0,
       initialHfov: s.initialHfov || 120,
@@ -147,7 +147,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       id: f.id,
       name: f.name,
       slug: f.slug,
-      floorplan: f.floorplan && typeof f.floorplan === 'object' ? f.floorplan.url : null,
+      floorplan: f.floorplan && typeof f.floorplan === 'object' ? (f.floorplan.url ?? null) : null,
       initialScene: f.initialScene && typeof f.initialScene === 'object'
         ? { slug: f.initialScene.slug }
         : null,
