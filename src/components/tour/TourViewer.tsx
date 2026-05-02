@@ -1,10 +1,15 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import React, { useState, useCallback } from 'react'
 import PannellumViewer from './PannellumViewer'
 import TourOverlay from './TourOverlay'
 import WelcomeModal from './WelcomeModal'
 import { TransitionProvider, TransitionSelector } from './transition'
+
+const ThreePanoramaViewer = dynamic(() => import('./three/ThreePanoramaViewer'), {
+  ssr: false,
+})
 
 type SceneData = {
   tour: { id: string | number; title: string; slug: string; welcomeTitle: string; welcomeText: any }
@@ -20,6 +25,7 @@ type SceneData = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  viewerMode?: 'pannellum' | 'three'
 }
 
 export default function TourViewer({ data }: { data: SceneData }) {
@@ -29,6 +35,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
 
   const currentScene = data.floorScenes.find((s: any) => s.slug === currentSceneSlug) || data.currentScene
   const hotspots = currentScene.hotspots || []
+  const useThreeViewer = data.viewerMode === 'three'
 
   const handleSceneChange = useCallback((sceneSlug: string) => {
     setCurrentSceneSlug(sceneSlug)
@@ -37,14 +44,25 @@ export default function TourViewer({ data }: { data: SceneData }) {
   return (
     <TransitionProvider>
       <div className="flex items-center justify-center h-dvh w-dvw relative font-sans">
-        <PannellumViewer
-          scenes={data.floorScenes}
-          initialSceneSlug={data.currentScene.slug}
-          tourSlug={data.tourSlug}
-          floorSlug={data.floorSlug}
-          isDraft={data.isDraft}
-          onSceneChange={handleSceneChange}
-        />
+        {useThreeViewer ? (
+          <ThreePanoramaViewer
+            scenes={data.floorScenes}
+            initialSceneSlug={data.currentScene.slug}
+            tourSlug={data.tourSlug}
+            floorSlug={data.floorSlug}
+            isDraft={data.isDraft}
+            onSceneChange={handleSceneChange}
+          />
+        ) : (
+          <PannellumViewer
+            scenes={data.floorScenes}
+            initialSceneSlug={data.currentScene.slug}
+            tourSlug={data.tourSlug}
+            floorSlug={data.floorSlug}
+            isDraft={data.isDraft}
+            onSceneChange={handleSceneChange}
+          />
+        )}
         <TourOverlay
           tour={data.tour}
           currentScene={currentScene}
@@ -54,6 +72,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
           tourSlug={data.tourSlug}
           floorSlug={data.floorSlug}
           isDraft={data.isDraft}
+          viewerMode={data.viewerMode}
         />
         {showWelcome && data.tour.welcomeTitle && (
           <WelcomeModal

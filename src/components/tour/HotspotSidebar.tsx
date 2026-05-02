@@ -7,21 +7,25 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  viewerMode?: 'pannellum' | 'three'
 }
 
-export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft }: Props) {
+export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft, viewerMode }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleNavigate = (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
       const targetFloorSlug = hs.targetFloor?.slug || floorSlug
-      const draftQuery = isDraft ? '?draft=true' : ''
+      const query = new URLSearchParams()
+      if (isDraft) query.set('draft', 'true')
+      if (viewerMode === 'three') query.set('viewer', 'three')
+      const queryString = query.toString() ? `?${query.toString()}` : ''
       if (targetFloorSlug !== floorSlug) {
-        window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${draftQuery}`)
+        window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${queryString}`)
       } else if (window.pannellumViewer) {
         window.pannellumViewer.loadScene(hs.targetScene.slug)
       } else {
-        window.location.assign(`/tour/${tourSlug}/${floorSlug}/${hs.targetScene.slug}`)
+        window.location.assign(`/tour/${tourSlug}/${floorSlug}/${hs.targetScene.slug}${queryString}`)
       }
     } else if (hs.type === 'info') {
       // Look at hotspot and open modal

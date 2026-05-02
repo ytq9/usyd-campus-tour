@@ -1,0 +1,70 @@
+'use client'
+
+import type { PerspectiveCamera } from 'three'
+
+export type HotspotData = {
+  type: 'scene' | 'info'
+  pitch?: number
+  yaw?: number
+  text?: string
+  targetScene?: { slug?: string; title?: string } | null
+  targetFloor?: { slug?: string } | null
+  infoContent?: any
+  cssClass?: string
+  iconColor?: string
+  iconSize?: 'sm' | 'md' | 'lg' | string
+  [key: string]: any
+}
+
+export type ThreeSceneData = {
+  id?: string | number
+  slug: string
+  title: string
+  panoramaUrl: string
+  previewUrl?: string
+  initialYaw: number
+  initialPitch: number
+  initialHfov: number
+  rotation?: number
+  hotspots: HotspotData[]
+}
+
+export type CameraState = {
+  pitch: number
+  yaw: number
+  hfov: number
+}
+
+export type ProjectedHotspot = {
+  hotspot: HotspotData
+  x: number
+  y: number
+  visible: boolean
+}
+
+export type PitchYaw = {
+  pitch: number
+  yaw: number
+}
+
+export type ThreePanoramaViewerProps = {
+  scenes: ThreeSceneData[]
+  initialSceneSlug: string
+  tourSlug: string
+  floorSlug: string
+  isDraft: boolean
+  onSceneChange: (sceneSlug: string) => void
+}
+
+export type HotspotNavigationHandler = (
+  targetSlug: string,
+  targetFloorSlug?: string,
+  clickEvent?: MouseEvent,
+) => void
+
+export type ThreeViewerApi = {
+  camera: PerspectiveCamera | null
+  getCameraState: () => CameraState
+  loadScene: (sceneSlug: string) => void
+  lookAt: (pitch: number, yaw: number, hfov?: number) => void
+}

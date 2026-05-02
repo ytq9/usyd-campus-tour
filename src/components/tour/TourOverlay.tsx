@@ -13,9 +13,10 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  viewerMode?: 'pannellum' | 'three'
 }
 
-export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft }: Props) {
+export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, viewerMode }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
 
   return (
@@ -51,6 +52,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
           tourSlug={tourSlug}
           floorSlug={floorSlug}
           isDraft={isDraft}
+          viewerMode={viewerMode}
         />
       </div>
 
@@ -78,6 +80,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             currentSceneSlug={currentScene.slug}
             tourSlug={tourSlug}
             isDraft={isDraft}
+            viewerMode={viewerMode}
           />
         </div>
       </div>
