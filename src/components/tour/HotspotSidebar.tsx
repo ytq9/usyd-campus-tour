@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 type Props = {
   hotspots: any[]
@@ -8,17 +8,26 @@ type Props = {
   floorSlug: string
   isDraft: boolean
   viewerMode?: 'pannellum' | 'three'
+  debugHotspots?: boolean
 }
 
-export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft, viewerMode }: Props) {
+export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft, viewerMode, debugHotspots }: Props) {
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedInfoHotspot, setSelectedInfoHotspot] = useState<any | null>(null)
+  const infoModalRef = useRef<HTMLDialogElement>(null)
 
-  const handleNavigate = (hs: any) => {
+  const handleNavigate = async (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
+      if (viewerMode !== 'pannellum' && window.threePanoramaViewer?.navigateToHotspot) {
+        window.threePanoramaViewer.navigateToHotspot(hs)
+        return
+      }
+
       const targetFloorSlug = hs.targetFloor?.slug || floorSlug
       const query = new URLSearchParams()
       if (isDraft) query.set('draft', 'true')
-      if (viewerMode === 'three') query.set('viewer', 'three')
+      if (viewerMode === 'pannellum') query.set('viewer', 'pannellum')
+      if (debugHotspots) query.set('debugHotspots', 'true')
       const queryString = query.toString() ? `?${query.toString()}` : ''
       if (targetFloorSlug !== floorSlug) {
         window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${queryString}`)
@@ -28,10 +37,22 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
         window.location.assign(`/tour/${tourSlug}/${floorSlug}/${hs.targetScene.slug}${queryString}`)
       }
     } else if (hs.type === 'info') {
-      // Look at hotspot and open modal
-      if (window.pannellumViewer) {
+      setSelectedInfoHotspot(hs)
+      let shouldOpenInfo = true
+
+      if (viewerMode !== 'pannellum' && window.threePanoramaViewer?.focusInfoHotspot) {
+        shouldOpenInfo = await window.threePanoramaViewer.focusInfoHotspot(hs)
+      } else if (window.pannellumViewer) {
         window.pannellumViewer.lookAt(hs.pitch, hs.yaw, hs.initialHfov || 120, 2000)
       }
+
+      if (!shouldOpenInfo) return
+
+      requestAnimationFrame(() => {
+        if (infoModalRef.current && !infoModalRef.current.open) {
+          infoModalRef.current.showModal()
+        }
+      })
     }
   }
 
@@ -73,6 +94,31 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
           )}
         </div>
       </div>
+
+      <dialog ref={infoModalRef} className="d-modal d-modal-bottom md:d-modal-middle">
+        <div className="d-modal-box bg-white">
+          <div className="flex justify-between items-start">
+            <h3 className="text-lg font-bold text-gray-900">{selectedInfoHotspot?.text}</h3>
+            <form method="dialog">
+              <button className="d-btn d-btn-sm d-btn-circle d-btn-ghost">✕</button>
+            </form>
+          </div>
+          <div className="py-4 prose text-gray-700">
+            {selectedInfoHotspot?.infoContent ? (
+              <div>
+                {typeof selectedInfoHotspot.infoContent === 'string'
+                  ? selectedInfoHotspot.infoContent
+                  : 'Information available'}
+              </div>
+            ) : (
+              <p>{selectedInfoHotspot?.text}</p>
+            )}
+          </div>
+        </div>
+        <form method="dialog" className="d-modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </div>
   )
 }

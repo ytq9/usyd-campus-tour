@@ -11,4 +11,5 @@ declare module 'pannellum/build/pannellum.js' {
 interface Window {
   pannellum: any
   pannellumViewer: any
+  threePanoramaViewer?: any
 }

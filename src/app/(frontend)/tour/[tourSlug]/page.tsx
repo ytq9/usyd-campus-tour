@@ -7,9 +7,13 @@ import config from '@payload-config'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string }>
+type SearchParams = Promise<{ viewer?: string; debugHotspots?: string }>
 
-export default async function TourLandingPage({ params }: { params: Params }) {
+export default async function TourLandingPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug } = await params
+  const { viewer, debugHotspots } = await searchParams
+  const shouldPreservePannellumFallback = viewer === 'pannellum'
+  const shouldPreserveHotspotDebug = debugHotspots === 'true'
   const payload = await getPayload({ config })
 
   const tours = await payload.find({
@@ -40,6 +44,18 @@ export default async function TourLandingPage({ params }: { params: Params }) {
     }
   }
 
+  const appendViewerQuery = (href: string) => {
+    if (href === '#') return href
+
+    const query = new URLSearchParams()
+    if (shouldPreservePannellumFallback) query.set('viewer', 'pannellum')
+    if (shouldPreserveHotspotDebug) query.set('debugHotspots', 'true')
+    const queryString = query.toString()
+
+    if (!queryString) return href
+    return `${href}${href.includes('?') ? '&' : '?'}${queryString}`
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero Section */}
@@ -57,10 +73,10 @@ export default async function TourLandingPage({ params }: { params: Params }) {
         <div className="relative h-full flex items-center justify-center">
           <div className="text-center px-4">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
-            <Link
-              href={startHref}
-              className="d-btn d-btn-lg bg-ochre border-ochre text-white hover:bg-orange-700 text-lg px-8"
-            >
+              <Link
+                href={appendViewerQuery(startHref)}
+                className="d-btn d-btn-lg bg-ochre border-ochre text-white hover:bg-orange-700 text-lg px-8"
+              >
               Start Tour
             </Link>
           </div>
@@ -90,7 +106,7 @@ export default async function TourLandingPage({ params }: { params: Params }) {
                 const f = typeof floor === 'object' ? floor : null
                 if (!f) return null
                 const scene = f.initialScene && typeof f.initialScene === 'object' ? f.initialScene : null
-                const href = scene ? `/tour/${tourSlug}/${f.slug}/${scene.slug}` : '#'
+                const href = scene ? appendViewerQuery(`/tour/${tourSlug}/${f.slug}/${scene.slug}`) : '#'
                 return (
                   <Link
                     key={f.id}

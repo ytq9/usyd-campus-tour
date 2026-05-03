@@ -5,6 +5,7 @@ import React, { useState, useCallback } from 'react'
 import PannellumViewer from './PannellumViewer'
 import TourOverlay from './TourOverlay'
 import WelcomeModal from './WelcomeModal'
+import HotspotDebugPanel from './HotspotDebugPanel'
 import { TransitionProvider, TransitionSelector } from './transition'
 
 const ThreePanoramaViewer = dynamic(() => import('./three/ThreePanoramaViewer'), {
@@ -24,8 +25,12 @@ type SceneData = {
   tourFloors: any[]
   tourSlug: string
   floorSlug: string
+  routeTourSlug?: string
+  routeFloorSlug?: string
+  routeSceneSlug?: string
   isDraft: boolean
   viewerMode?: 'pannellum' | 'three'
+  debugHotspots?: boolean
 }
 
 export default function TourViewer({ data }: { data: SceneData }) {
@@ -35,7 +40,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
 
   const currentScene = data.floorScenes.find((s: any) => s.slug === currentSceneSlug) || data.currentScene
   const hotspots = currentScene.hotspots || []
-  const useThreeViewer = data.viewerMode === 'three'
+  const usePannellumViewer = data.viewerMode === 'pannellum'
 
   const handleSceneChange = useCallback((sceneSlug: string) => {
     setCurrentSceneSlug(sceneSlug)
@@ -44,22 +49,24 @@ export default function TourViewer({ data }: { data: SceneData }) {
   return (
     <TransitionProvider>
       <div className="flex items-center justify-center h-dvh w-dvw relative font-sans">
-        {useThreeViewer ? (
-          <ThreePanoramaViewer
-            scenes={data.floorScenes}
-            initialSceneSlug={data.currentScene.slug}
-            tourSlug={data.tourSlug}
-            floorSlug={data.floorSlug}
-            isDraft={data.isDraft}
-            onSceneChange={handleSceneChange}
-          />
-        ) : (
+        {usePannellumViewer ? (
           <PannellumViewer
             scenes={data.floorScenes}
             initialSceneSlug={data.currentScene.slug}
             tourSlug={data.tourSlug}
             floorSlug={data.floorSlug}
             isDraft={data.isDraft}
+            debugHotspots={Boolean(data.debugHotspots)}
+            onSceneChange={handleSceneChange}
+          />
+        ) : (
+          <ThreePanoramaViewer
+            scenes={data.floorScenes}
+            initialSceneSlug={data.currentScene.slug}
+            tourSlug={data.tourSlug}
+            floorSlug={data.floorSlug}
+            isDraft={data.isDraft}
+            debugHotspots={Boolean(data.debugHotspots)}
             onSceneChange={handleSceneChange}
           />
         )}
@@ -73,7 +80,20 @@ export default function TourViewer({ data }: { data: SceneData }) {
           floorSlug={data.floorSlug}
           isDraft={data.isDraft}
           viewerMode={data.viewerMode}
+          debugHotspots={Boolean(data.debugHotspots)}
         />
+        {data.debugHotspots && (
+          <HotspotDebugPanel
+            activeSceneSlug={currentSceneSlug}
+            currentScene={data.currentScene}
+            floorScenes={data.floorScenes}
+            isDraft={data.isDraft}
+            routeFloorSlug={data.routeFloorSlug || data.floorSlug}
+            routeSceneSlug={data.routeSceneSlug || data.currentScene.slug}
+            routeTourSlug={data.routeTourSlug || data.tourSlug}
+            viewerMode={data.viewerMode || 'three'}
+          />
+        )}
         {showWelcome && data.tour.welcomeTitle && (
           <WelcomeModal
             title={data.tour.welcomeTitle}
@@ -86,7 +106,7 @@ export default function TourViewer({ data }: { data: SceneData }) {
         <button
           onClick={() => setShowTransitionSettings(!showTransitionSettings)}
           className="fixed bottom-4 right-4 z-50 p-3 bg-ochre text-white rounded-full shadow-lg hover:bg-ochre/90 transition-all"
-          title="过渡效果设置"
+          title="Transition Animation Settings"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 

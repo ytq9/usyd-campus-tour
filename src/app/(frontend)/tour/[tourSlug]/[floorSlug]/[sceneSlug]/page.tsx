@@ -7,13 +7,14 @@ import TourViewer from '@/components/tour/TourViewer'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string; floorSlug: string; sceneSlug: string }>
-type SearchParams = Promise<{ draft?: string; viewer?: string }>
+type SearchParams = Promise<{ draft?: string; viewer?: string; debugHotspots?: string }>
 
 export default async function SceneViewerPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug, floorSlug, sceneSlug } = await params
-  const { draft: draftParam, viewer: viewerParam } = await searchParams
+  const { draft: draftParam, viewer: viewerParam, debugHotspots: debugHotspotsParam } = await searchParams
   const isDraft = draftParam === 'true'
-  const viewerMode: 'three' | 'pannellum' = viewerParam === 'three' ? 'three' : 'pannellum'
+  const debugHotspots = debugHotspotsParam === 'true'
+  const viewerMode: 'three' | 'pannellum' = viewerParam === 'pannellum' ? 'pannellum' : 'three'
   const payload = await getPayload({ config })
 
   // Fetch tour
@@ -163,8 +164,12 @@ export default async function SceneViewerPage({ params, searchParams }: { params
     })),
     tourSlug,
     floorSlug,
+    routeTourSlug: tourSlug,
+    routeFloorSlug: floorSlug,
+    routeSceneSlug: sceneSlug,
     isDraft,
     viewerMode,
+    debugHotspots,
   }
 
   return <TourViewer data={sceneData} />

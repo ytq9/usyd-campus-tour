@@ -102,11 +102,11 @@ export function TransitionSelector() {
   return (
     <>
       <div className="transition-selector p-4 bg-white rounded-lg shadow-lg max-w-xs">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">过渡动画设置</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">Transition Animation Settings</h3>
         
         {/* 启用/禁用开关 */}
         <div className="flex items-center justify-between mb-4">
-          <span className="text-gray-700">启用过渡动画</span>
+          <span className="text-gray-700">Enable transition animation</span>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -127,7 +127,7 @@ export function TransitionSelector() {
             {/* 同楼层过渡预设 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                同楼层切换效果
+                Same-floor transition effect
               </label>
               <div className="flex gap-2">
                 <select
@@ -148,7 +148,7 @@ export function TransitionSelector() {
                   onClick={() => handlePreview(settings.sameFloorPreset)}
                   className="px-3 py-2 bg-ochre text-white rounded-md text-sm hover:bg-ochre/90"
                 >
-                  预览
+                  Preview
                 </button>
               </div>
             </div>
@@ -156,7 +156,7 @@ export function TransitionSelector() {
             {/* 跨楼层过渡预设 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                跨楼层切换效果
+                Cross-floor transition effect
               </label>
               <div className="flex gap-2">
                 <select
@@ -177,14 +177,14 @@ export function TransitionSelector() {
                   onClick={() => handlePreview(settings.crossFloorPreset)}
                   className="px-3 py-2 bg-ochre text-white rounded-md text-sm hover:bg-ochre/90"
                 >
-                  预览
+                  Preview
                 </button>
               </div>
             </div>
 
             {/* 快速预览所有效果 */}
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm font-medium text-gray-700 mb-2">快速预览所有效果：</p>
+              <p className="text-sm font-medium text-gray-700 mb-2">Quick preview all effects:</p>
               <div className="grid grid-cols-2 gap-2">
                 {['portal', 'fade', 'zoomIn', 'zoomRotate', 'blur', 'flash', 'wipeLeft'].map(preset => (
                   <button
@@ -381,16 +381,16 @@ function PreviewOverlay({ type, presets }: { type: string; presets: typeof TRANS
 // 预设名称映射
 function getPresetLabel(preset: string): string {
   const labels: Record<string, string> = {
-    default: '默认淡入淡出',
-    quickFade: '快速淡入淡出',
-    portal: '传送门效果 ✨',
-    zoomIn: '缩放进入',
-    zoomRotate: '缩放旋转',
-    blur: '模糊过渡',
-    flash: '闪白过渡',
-    slideLeft: '向左滑动',
-    slideRight: '向右滑动',
-    wipeLeft: '擦除效果'
+    default: 'Default fade',
+    quickFade: 'Quick fade',
+    portal: 'Portal effect ✨',
+    zoomIn: 'Zoom in',
+    zoomRotate: 'Zoom and rotate',
+    blur: 'Blur transition',
+    flash: 'White flash transition',
+    slideLeft: 'Slide left',
+    slideRight: 'Slide right',
+    wipeLeft: 'Wipe transition'
   }
   return labels[preset] || preset
 }

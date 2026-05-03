@@ -1,22 +1,51 @@
 'use client'
 
 import React, { useRef } from 'react'
+import type { InfoHotspotFocusHandler } from './three/types'
+import { getInfoContentTextBlocks } from './infoContentText'
 
 type Props = {
   hotspot: any
+  onFocus?: InfoHotspotFocusHandler
 }
 
-export default function InfoHotspot({ hotspot }: Props) {
+export default function InfoHotspot({ hotspot, onFocus }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null)
+  const contentBlocks = getInfoContentTextBlocks(hotspot.infoContent)
 
   const modalId = `info_modal_${(hotspot.text || '').replace(/[^a-zA-Z0-9]/g, '_')}`
+  const openModal = () => {
+    if (modalRef.current && !modalRef.current.open) {
+      modalRef.current.showModal()
+    }
+  }
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (onFocus) {
+      onFocus(hotspot, openModal)
+      return
+    }
+
+    openModal()
+  }
+
+  const stopViewerGesture = (event: React.SyntheticEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    ;(event.nativeEvent as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.()
+  }
 
   return (
     <>
       <button
+        data-tour-hotspot-interactive="true"
         className="pointer-events-auto cursor-pointer"
         type="button"
-        onClick={() => modalRef.current?.showModal()}
+        onClick={handleClick}
+        onPointerDown={stopViewerGesture}
+        onTouchStart={stopViewerGesture}
       >
         <span className="absolute inline-flex size-10 animate-ping rounded-full bg-ochre opacity-75" />
         <svg className="relative inline-flex size-10 transition duration-300 hover:scale-110 bg-white rounded-full" viewBox="0 0 24 24" fill="black">
@@ -33,8 +62,12 @@ export default function InfoHotspot({ hotspot }: Props) {
             </form>
           </div>
           <div className="py-4 prose text-gray-700">
-            {hotspot.infoContent ? (
-              <div>{typeof hotspot.infoContent === 'string' ? hotspot.infoContent : 'Information available'}</div>
+            {contentBlocks.length > 0 ? (
+              <div>
+                {contentBlocks.map((block, index) => (
+                  <p key={index}>{block}</p>
+                ))}
+              </div>
             ) : (
               <p>{hotspot.text}</p>
             )}

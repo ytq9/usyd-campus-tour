@@ -18,6 +18,7 @@ type Args = {
   initialPitch: number
   initialYaw: number
   initialHfov: number
+  resetKey?: string
 }
 
 const DRAG_DEGREES_PER_SCREEN = 1
@@ -29,11 +30,17 @@ export function useThreePanoramaControls({
   initialPitch,
   initialYaw,
   initialHfov,
+  resetKey,
 }: Args) {
   const cameraStateRef = useRef<CameraState>({
     pitch: clampInteractionPitch(initialPitch),
     yaw: normaliseYaw(initialYaw),
     hfov: clampHfov(initialHfov),
+  })
+  const resetCameraStateRef = useRef({
+    pitch: initialPitch,
+    yaw: initialYaw,
+    hfov: initialHfov,
   })
 
   const applyCameraState = useCallback(() => {
@@ -67,12 +74,16 @@ export function useThreePanoramaControls({
   }, [setCameraState])
 
   useEffect(() => {
-    setCameraState({
+    resetCameraStateRef.current = {
       pitch: initialPitch,
       yaw: initialYaw,
       hfov: initialHfov,
-    })
-  }, [initialPitch, initialYaw, initialHfov, setCameraState])
+    }
+  }, [initialPitch, initialYaw, initialHfov])
+
+  useEffect(() => {
+    setCameraState(resetCameraStateRef.current)
+  }, [resetKey, setCameraState])
 
   useEffect(() => {
     const container = containerRef.current
@@ -90,6 +101,7 @@ export function useThreePanoramaControls({
 
     const handlePointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return
+      if (isViewerControlTarget(event.target)) return
 
       isDragging = true
       activePointerId = event.pointerId
@@ -124,6 +136,8 @@ export function useThreePanoramaControls({
     }
 
     const handleWheel = (event: WheelEvent) => {
+      if (isViewerControlTarget(event.target)) return
+
       setCameraState({
         hfov: cameraStateRef.current.hfov + event.deltaY * WHEEL_HFOV_SENSITIVITY,
       })
@@ -151,4 +165,8 @@ export function useThreePanoramaControls({
     lookAt,
     setCameraState,
   }
+}
+
+function isViewerControlTarget(target: EventTarget | null): boolean {
+  return target instanceof Element && Boolean(target.closest('[data-tour-hotspot-interactive="true"]'))
 }

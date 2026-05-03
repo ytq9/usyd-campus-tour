@@ -14,10 +14,12 @@ type Props = {
   floorSlug: string
   isDraft: boolean
   viewerMode?: 'pannellum' | 'three'
+  debugHotspots?: boolean
 }
 
-export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, viewerMode }: Props) {
+export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, viewerMode, debugHotspots }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
+  const homeHref = buildTourHomeHref(tourSlug, isDraft, viewerMode, Boolean(debugHotspots))
 
   return (
     <div className="h-dvh w-dvw absolute pointer-events-none flex flex-col justify-between z-10">
@@ -53,6 +55,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
           floorSlug={floorSlug}
           isDraft={isDraft}
           viewerMode={viewerMode}
+          debugHotspots={debugHotspots}
         />
       </div>
 
@@ -64,7 +67,7 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
         <div className="bg-black/60 p-6 pl-4 rounded-r-xl mb-10 pointer-events-auto flex flex-row space-x-2">
           {/* Home button */}
           <a
-            href={`/tour/${tourSlug}`}
+            href={homeHref}
             className="bg-ochre hover:bg-orange-700 p-2 size-14 rounded-full cursor-pointer flex items-center justify-center"
             title="Back to tour"
           >
@@ -81,9 +84,25 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             tourSlug={tourSlug}
             isDraft={isDraft}
             viewerMode={viewerMode}
+            debugHotspots={debugHotspots}
           />
         </div>
       </div>
     </div>
   )
+}
+
+function buildTourHomeHref(
+  tourSlug: string,
+  isDraft: boolean,
+  viewerMode: 'pannellum' | 'three' | undefined,
+  debugHotspots: boolean,
+) {
+  const query = new URLSearchParams()
+  if (viewerMode === 'pannellum') query.set('viewer', 'pannellum')
+  if (debugHotspots) query.set('debugHotspots', 'true')
+  const queryString = query.toString() ? `?${query.toString()}` : ''
+  return isDraft
+    ? `/tour/${tourSlug}/preview${queryString}`
+    : `/tour/${tourSlug}${queryString}`
 }

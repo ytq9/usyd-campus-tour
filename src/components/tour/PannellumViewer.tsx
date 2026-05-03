@@ -22,10 +22,11 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  debugHotspots?: boolean
   onSceneChange: (sceneSlug: string) => void
 }
 
-export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, isDraft, onSceneChange }: Props) {
+export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, floorSlug, isDraft, debugHotspots, onSceneChange }: Props) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumRef = useRef<any>(null)
   const { state: transitionState, startTransition, isTransitioning } = useSceneTransition()
@@ -38,7 +39,16 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
     clickPosition?: { x: number; y: number }
   ) => {
     const isSameFloor = !targetFloorSlug || targetFloorSlug === floorSlug
-    const draftQuery = isDraft ? '?draft=true' : ''
+    const query = new URLSearchParams()
+    if (isDraft) query.set('draft', 'true')
+    if (debugHotspots) query.set('debugHotspots', 'true')
+    if (typeof window !== 'undefined') {
+      const currentParams = new URLSearchParams(window.location.search)
+      if (currentParams.get('viewer') === 'pannellum') {
+        query.set('viewer', 'pannellum')
+      }
+    }
+    const queryString = query.toString() ? `?${query.toString()}` : ''
 
     // 从全局设置获取过渡效果配置
     const transitionConfig = getConfig(isSameFloor)
@@ -58,11 +68,11 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
           }
         } else {
           // 跨楼层 - 页面跳转
-          window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${draftQuery}`)
+          window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${queryString}`)
         }
       }
     })
-  }, [floorSlug, isDraft, tourSlug, onSceneChange, startTransition, getConfig])
+  }, [debugHotspots, floorSlug, isDraft, tourSlug, onSceneChange, startTransition, getConfig])
 
   const createTooltip = useCallback(
     (hotSpotDiv: HTMLDivElement, args: any) => {
@@ -128,6 +138,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         },
         scenes: pannellumScenes,
       } as any)
+      window.pannellumViewer = pannellumRef.current
 
       // Listen for scene changes
       pannellumRef.current.on('scenechange', (sceneId: string) => {
@@ -139,6 +150,9 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
 
     return () => {
       if (pannellumRef.current) {
+        if (window.pannellumViewer === pannellumRef.current) {
+          window.pannellumViewer = null
+        }
         pannellumRef.current.destroy()
         pannellumRef.current = null
       }

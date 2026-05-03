@@ -2,11 +2,17 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { SceneTransition, useSceneTransition, useTransitionSettings } from '../transition'
+import { useTransitionSettings } from '../transition'
 import ThreeHotspotLayer from './ThreeHotspotLayer'
+import {
+  animateCameraExit,
+  animateCameraFocus,
+  animateCameraTransition,
+} from './threeCameraTransition'
+import { getRawPannellumPitchYaw, toThreeDisplayPitchYaw } from './threePanoramaMath'
 import { useThreePanoramaControls } from './useThreePanoramaControls'
 import { useThreeSceneTexture } from './useThreeSceneTexture'
-import type { ThreePanoramaViewerProps, ThreeSceneData } from './types'
+import type { CameraState, HotspotData, ThreePanoramaViewerProps, ThreeSceneData, ThreeViewerApi } from './types'
 
 export default function ThreePanoramaViewer({
   scenes,
@@ -14,6 +20,7 @@ export default function ThreePanoramaViewer({
   tourSlug,
   floorSlug,
   isDraft,
+  debugHotspots,
   onSceneChange,
 }: ThreePanoramaViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -23,9 +30,10 @@ export default function ThreePanoramaViewer({
   const sphereRef = useRef<THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | null>(null)
   const frameRef = useRef<number | null>(null)
   const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  const animationAbortRef = useRef<AbortController | null>(null)
   const [cameraForHotspots, setCameraForHotspots] = useState<THREE.PerspectiveCamera | null>(null)
   const [activeSceneSlug, setActiveSceneSlug] = useState(initialSceneSlug)
-  const { state: transitionState, startTransition, isTransitioning } = useSceneTransition()
+  const [isCameraTransitioning, setIsCameraTransitioning] = useState(false)
   const { getConfig } = useTransitionSettings()
 
   const activeScene = useMemo<ThreeSceneData>(() => (
@@ -33,64 +41,227 @@ export default function ThreePanoramaViewer({
     scenes.find((scene) => scene.slug === initialSceneSlug) ||
     scenes[0]
   ), [activeSceneSlug, initialSceneSlug, scenes])
+  const activeSceneCameraState = useMemo(() => (
+    activeScene ? getSceneCameraState(activeScene) : { pitch: 0, yaw: 0, hfov: 120 }
+  ), [activeScene])
 
-  const { applyCameraState, setCameraState } = useThreePanoramaControls({
+  const { applyCameraState, getCameraState, setCameraState } = useThreePanoramaControls({
     cameraRef,
     containerRef,
-    initialPitch: activeScene?.initialPitch ?? 0,
-    initialYaw: activeScene?.initialYaw ?? 0,
-    initialHfov: activeScene?.initialHfov ?? 120,
+    initialPitch: activeSceneCameraState.pitch,
+    initialYaw: activeSceneCameraState.yaw,
+    initialHfov: activeSceneCameraState.hfov,
+    resetKey: initialSceneSlug,
   })
 
   const { texture, isLoading, error } = useThreeSceneTexture(activeScene?.panoramaUrl)
 
-  const switchToScene = useCallback((sceneSlug: string) => {
+  const beginCameraAnimation = useCallback(() => {
+    animationAbortRef.current?.abort()
+    const controller = new AbortController()
+    animationAbortRef.current = controller
+    setIsCameraTransitioning(true)
+    return controller
+  }, [])
+
+  const finishCameraAnimation = useCallback((controller: AbortController) => {
+    if (animationAbortRef.current !== controller) return
+    animationAbortRef.current = null
+    setIsCameraTransitioning(false)
+  }, [])
+
+  const switchToScene = useCallback((sceneSlug: string, resetCamera = true) => {
     const nextScene = scenes.find((scene) => scene.slug === sceneSlug)
-    if (!nextScene) return
+    if (!nextScene) return false
 
     setActiveSceneSlug(sceneSlug)
-    setCameraState({
-      pitch: nextScene.initialPitch,
-      yaw: nextScene.initialYaw,
-      hfov: nextScene.initialHfov,
-    })
+    if (resetCamera) {
+      setCameraState(getSceneCameraState(nextScene))
+    }
     onSceneChange(sceneSlug)
+    return true
   }, [onSceneChange, scenes, setCameraState])
 
-  const handleSceneNavigation = useCallback(async (
+  const runSameFloorTransition = useCallback(async (
+    targetScene: ThreeSceneData,
+    hotspot?: HotspotData | null,
+  ) => {
+    const controller = beginCameraAnimation()
+    const transitionConfig = getConfig(true)
+
+    try {
+      await animateCameraTransition({
+        duration: transitionConfig.duration,
+        getCameraState,
+        onMidpoint: () => {
+          switchToScene(targetScene.slug, false)
+        },
+        outgoingDirection: getHotspotDirection(hotspot, targetScene),
+        setCameraState,
+        signal: controller.signal,
+        targetState: getSceneCameraState(targetScene),
+      })
+    } finally {
+      finishCameraAnimation(controller)
+    }
+  }, [activeScene, beginCameraAnimation, finishCameraAnimation, getCameraState, getConfig, setCameraState, switchToScene])
+
+  const runCrossFloorTransition = useCallback(async (
+    targetSlug: string,
+    targetFloorSlug: string,
+    hotspot?: HotspotData | null,
+  ) => {
+    const controller = beginCameraAnimation()
+    const transitionConfig = getConfig(false)
+    const targetUrl = buildSceneUrl(tourSlug, targetFloorSlug, targetSlug, isDraft, Boolean(debugHotspots))
+
+    try {
+      await animateCameraExit({
+        duration: Math.max(450, transitionConfig.duration * 0.65),
+        getCameraState,
+        onComplete: () => {
+          window.location.assign(targetUrl)
+        },
+        outgoingDirection: getHotspotDirection(hotspot),
+        setCameraState,
+        signal: controller.signal,
+      })
+    } finally {
+      finishCameraAnimation(controller)
+    }
+  }, [activeScene, beginCameraAnimation, debugHotspots, finishCameraAnimation, getCameraState, getConfig, isDraft, setCameraState, tourSlug])
+
+  const navigateToHotspot = useCallback((hotspot: HotspotData) => {
+    const targetSlug = hotspot.targetScene?.slug
+    if (!targetSlug) {
+      warnInDevelopment('Scene hotspot ignored because targetScene.slug is missing.', hotspot)
+      return
+    }
+
+    const targetFloorSlug = hotspot.targetFloor?.slug
+    const isSameFloor = !targetFloorSlug || targetFloorSlug === floorSlug
+
+    if (isSameFloor) {
+      const targetScene = scenes.find((scene) => scene.slug === targetSlug)
+      if (!targetScene) {
+        const reason = targetFloorSlug
+          ? `Target scene "${targetSlug}" was not found in the current floor scene list.`
+          : `Target scene "${targetSlug}" was not found in the current floor scene list. The hotspot may be missing targetFloor for a cross-floor portal.`
+        warnInDevelopment(reason, hotspot)
+        return
+      }
+
+      void runSameFloorTransition(targetScene, hotspot)
+      return
+    }
+
+    void runCrossFloorTransition(targetSlug, targetFloorSlug, hotspot)
+  }, [floorSlug, runCrossFloorTransition, runSameFloorTransition, scenes])
+
+  const focusCameraAt = useCallback(async (pitch: number, yaw: number, hfov?: number) => {
+    const controller = beginCameraAnimation()
+
+    try {
+      return await animateCameraFocus({
+        getCameraState,
+        setCameraState,
+        signal: controller.signal,
+        targetHfov: hfov,
+        targetPitch: pitch,
+        targetYaw: yaw,
+      })
+    } finally {
+      finishCameraAnimation(controller)
+    }
+  }, [beginCameraAnimation, finishCameraAnimation, getCameraState, setCameraState])
+
+  const focusScenePitchYaw = useCallback((pitch: number, yaw: number, hfov?: number) => {
+    // HotspotPicker stores raw Pannellum pitch/yaw, and PannellumViewer focuses
+    // those raw coordinates. Ignore scene.rotation for hotspot focus parity.
+    const displayPosition = getRawPannellumPitchYaw(pitch, yaw)
+    return focusCameraAt(displayPosition.pitch, displayPosition.yaw, hfov)
+  }, [focusCameraAt])
+
+  const focusInfoHotspot = useCallback(async (hotspot: HotspotData) => {
+    if (!Number.isFinite(Number(hotspot.pitch)) || !Number.isFinite(Number(hotspot.yaw))) {
+      warnInDevelopment('Info hotspot focus skipped because pitch or yaw is missing.', hotspot)
+      return true
+    }
+
+    return focusScenePitchYaw(Number(hotspot.pitch), Number(hotspot.yaw), 72)
+  }, [focusScenePitchYaw])
+
+  const handleInfoFocus = useCallback((hotspot: HotspotData, openInfo: () => void) => {
+    void (async () => {
+      const didFocus = await focusInfoHotspot(hotspot)
+      if (didFocus) openInfo()
+    })()
+  }, [focusInfoHotspot])
+
+  const handleSceneNavigation = useCallback((
     targetSlug: string,
     targetFloorSlug?: string,
-    clickEvent?: MouseEvent,
+    _clickEvent?: MouseEvent,
+    hotspot?: HotspotData,
   ) => {
-    const isSameFloor = !targetFloorSlug || targetFloorSlug === floorSlug
-    const query = new URLSearchParams()
-    if (isDraft) query.set('draft', 'true')
-    query.set('viewer', 'three')
-    const queryString = query.toString() ? `?${query.toString()}` : ''
-    const clickPosition = clickEvent
-      ? { x: clickEvent.clientX, y: clickEvent.clientY }
-      : undefined
-    const transitionConfig = getConfig(isSameFloor)
-
-    await startTransition({
-      targetSceneSlug: targetSlug,
-      targetFloorSlug,
-      isSameFloor,
-      originPosition: clickPosition,
-      customConfig: transitionConfig,
-      onMidpoint: async () => {
-        if (isSameFloor) {
-          switchToScene(targetSlug)
-        } else {
-          window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${targetSlug}${queryString}`)
-        }
-      },
+    navigateToHotspot(hotspot || {
+      targetFloor: targetFloorSlug ? { slug: targetFloorSlug } : null,
+      targetScene: { slug: targetSlug },
+      type: 'scene',
     })
-  }, [floorSlug, getConfig, isDraft, startTransition, switchToScene, tourSlug])
+  }, [navigateToHotspot])
 
   useEffect(() => {
     setActiveSceneSlug(initialSceneSlug)
-  }, [initialSceneSlug])
+    const nextScene = scenes.find((scene) => scene.slug === initialSceneSlug)
+    if (nextScene) {
+      setCameraState(getSceneCameraState(nextScene))
+      onSceneChange(initialSceneSlug)
+    }
+  }, [initialSceneSlug, onSceneChange, scenes, setCameraState])
+
+  useEffect(() => {
+    return () => {
+      animationAbortRef.current?.abort()
+      animationAbortRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const api: ThreeViewerApi = {
+      camera: cameraRef.current,
+      focusInfoHotspot,
+      getCameraState,
+      loadScene: (sceneSlug: string) => {
+        const targetScene = scenes.find((scene) => scene.slug === sceneSlug)
+        if (!targetScene) {
+          warnInDevelopment(`Scene "${sceneSlug}" was not found in the current floor scene list.`)
+          return
+        }
+        void runSameFloorTransition(targetScene, null)
+      },
+      lookAt: (pitch: number, yaw: number, hfov?: number) => {
+        void focusScenePitchYaw(pitch, yaw, hfov)
+      },
+      navigateToHotspot,
+    }
+
+    window.threePanoramaViewer = api
+
+    return () => {
+      if (window.threePanoramaViewer === api) {
+        delete window.threePanoramaViewer
+      }
+    }
+  }, [
+    cameraForHotspots,
+    focusScenePitchYaw,
+    focusInfoHotspot,
+    getCameraState,
+    navigateToHotspot,
+    runSameFloorTransition,
+    scenes,
+  ])
 
   useEffect(() => {
     const container = containerRef.current
@@ -194,7 +365,7 @@ export default function ThreePanoramaViewer({
         className="h-dvh w-dvw inset-0 absolute overflow-hidden bg-black"
         id="three-panorama"
         style={{
-          filter: isTransitioning ? 'brightness(0.95)' : 'none',
+          filter: isCameraTransitioning ? 'brightness(0.95)' : 'none',
           touchAction: 'none',
           transition: 'filter 0.3s ease',
         }}
@@ -214,11 +385,69 @@ export default function ThreePanoramaViewer({
           containerRef={containerRef}
           floorSlug={floorSlug}
           hotspots={activeScene.hotspots || []}
+          onInfoFocus={handleInfoFocus}
           onNavigate={handleSceneNavigation}
           tourSlug={tourSlug}
         />
       </div>
-      <SceneTransition state={transitionState} />
     </>
   )
+}
+
+function getSceneCameraState(scene: ThreeSceneData): CameraState {
+  const displayPosition = toThreeDisplayPitchYaw(
+    scene.initialPitch,
+    scene.initialYaw,
+    scene.rotation,
+  )
+
+  return {
+    pitch: displayPosition.pitch,
+    yaw: displayPosition.yaw,
+    hfov: scene.initialHfov,
+  }
+}
+
+function getHotspotDirection(
+  hotspot?: HotspotData | null,
+  targetScene?: ThreeSceneData,
+) {
+  if (Number.isFinite(Number(hotspot?.pitch)) && Number.isFinite(Number(hotspot?.yaw))) {
+    // Portal hotspots use the same raw Pannellum coordinates rendered by the
+    // admin picker and PannellumViewer. scene.rotation is intentionally ignored
+    // until hotspot rotation behavior is validated separately.
+    return getRawPannellumPitchYaw(
+      Number(hotspot?.pitch),
+      Number(hotspot?.yaw),
+    )
+  }
+
+  if (targetScene) {
+    return getSceneCameraState(targetScene)
+  }
+
+  return null
+}
+
+function buildSceneUrl(
+  tourSlug: string,
+  floorSlug: string,
+  sceneSlug: string,
+  isDraft: boolean,
+  debugHotspots: boolean,
+) {
+  const query = new URLSearchParams()
+  if (isDraft) query.set('draft', 'true')
+  if (debugHotspots) query.set('debugHotspots', 'true')
+  const queryString = query.toString() ? `?${query.toString()}` : ''
+  return `/tour/${tourSlug}/${floorSlug}/${sceneSlug}${queryString}`
+}
+
+function warnInDevelopment(message: string, context?: unknown) {
+  if (process.env.NODE_ENV !== 'development') return
+  if (context === undefined) {
+    console.warn(`[ThreePanoramaViewer] ${message}`)
+    return
+  }
+  console.warn(`[ThreePanoramaViewer] ${message}`, context)
 }

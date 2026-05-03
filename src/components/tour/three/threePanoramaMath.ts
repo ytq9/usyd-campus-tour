@@ -19,10 +19,16 @@ const RAD_TO_DEG = 180 / Math.PI
  * - yaw 0 looks along Three.js negative Z, matching the default camera forward vector.
  * - positive yaw rotates toward positive X.
  *
- * Pannellum's equirectangular yaw origin depends on the source image's center.
- * The existing app does not apply the Scene `rotation` field in PannellumViewer,
- * so this prototype intentionally applies no extra yaw offset. If visual parity
- * shows a constant horizontal offset, add it in this module rather than in CMS data.
+ * Stored CMS values stay in the original Pannellum-style coordinate space.
+ * Some camera paths may apply the scene `rotation` field as an image yaw offset
+ * with:
+ *
+ *   displayYaw = storedYaw + scene.rotation
+ *
+ * Hotspots are different for now: HotspotPicker saves raw Pannellum-compatible
+ * coordinates, and PannellumViewer renders those raw coordinates. The Three.js
+ * public viewer should also render, focus, and transition toward hotspots using
+ * the stored raw coordinates until a proper rotation strategy is confirmed.
  */
 export function pitchYawToVector3(pitch: number, yaw: number): THREE.Vector3 {
   const clampedPitch = clampPitch(pitch)
@@ -43,6 +49,29 @@ export function vector3ToPitchYaw(vector: THREE.Vector3): PitchYaw {
   const pitch = Math.asin(THREE.MathUtils.clamp(normalized.y, -1, 1)) * RAD_TO_DEG
   const yaw = Math.atan2(normalized.x, -normalized.z) * RAD_TO_DEG
 
+  return {
+    pitch: clampPitch(pitch),
+    yaw: normaliseYaw(yaw),
+  }
+}
+
+export function applySceneRotationToYaw(yaw: number, sceneRotation: number | null | undefined): number {
+  const safeRotation = Number.isFinite(Number(sceneRotation)) ? Number(sceneRotation) : 0
+  return normaliseYaw(yaw + safeRotation)
+}
+
+export function toThreeDisplayPitchYaw(
+  pitch: number,
+  yaw: number,
+  sceneRotation: number | null | undefined,
+): PitchYaw {
+  return {
+    pitch: clampPitch(pitch),
+    yaw: applySceneRotationToYaw(yaw, sceneRotation),
+  }
+}
+
+export function getRawPannellumPitchYaw(pitch: number, yaw: number): PitchYaw {
   return {
     pitch: clampPitch(pitch),
     yaw: normaliseYaw(yaw),

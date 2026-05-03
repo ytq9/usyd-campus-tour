@@ -53,6 +53,7 @@ export type ThreePanoramaViewerProps = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  debugHotspots?: boolean
   onSceneChange: (sceneSlug: string) => void
 }
 
@@ -60,11 +61,19 @@ export type HotspotNavigationHandler = (
   targetSlug: string,
   targetFloorSlug?: string,
   clickEvent?: MouseEvent,
+  hotspot?: HotspotData,
+) => void
+
+export type InfoHotspotFocusHandler = (
+  hotspot: HotspotData,
+  openInfo: () => void,
 ) => void
 
 export type ThreeViewerApi = {
   camera: PerspectiveCamera | null
+  focusInfoHotspot: (hotspot: HotspotData) => Promise<boolean>
   getCameraState: () => CameraState
   loadScene: (sceneSlug: string) => void
   lookAt: (pitch: number, yaw: number, hfov?: number) => void
+  navigateToHotspot: (hotspot: HotspotData) => void
 }

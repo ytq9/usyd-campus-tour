@@ -2,15 +2,17 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import InfoHotspot from './InfoHotspot'
+import type { InfoHotspotFocusHandler } from './three/types'
 
 type Props = {
   hotspot: any
   tourSlug: string
   floorSlug: string
-  onNavigate: (targetSlug: string, targetFloorSlug?: string, clickEvent?: MouseEvent) => void
+  onNavigate: (targetSlug: string, targetFloorSlug?: string, clickEvent?: MouseEvent, hotspot?: any) => void
+  onInfoFocus?: InfoHotspotFocusHandler
 }
 
-export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate }: Props) {
+export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate, onInfoFocus }: Props) {
   const btnRef = useRef<HTMLButtonElement>(null)
   const [isPressed, setIsPressed] = useState(false)
 
@@ -23,7 +25,7 @@ export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate
   }, [])
 
   if (hotspot.type === 'info') {
-    return <InfoHotspot hotspot={hotspot} />
+    return <InfoHotspot hotspot={hotspot} onFocus={onInfoFocus} />
   }
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -35,8 +37,13 @@ export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate
     
     if (targetSlug) {
       const nativeEvent = e.nativeEvent as MouseEvent
-      onNavigate(targetSlug, targetFloorSlug, nativeEvent)
+      onNavigate(targetSlug, targetFloorSlug, nativeEvent, hotspot)
     }
+  }
+
+  const stopViewerGesture = (e: React.SyntheticEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
+    ;(e.nativeEvent as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.()
   }
 
   const handleMouseDown = () => setIsPressed(true)
@@ -46,7 +53,10 @@ export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate
   return (
     <button
       ref={btnRef}
+      data-tour-hotspot-interactive="true"
       onClick={handleClick}
+      onPointerDown={stopViewerGesture}
+      onTouchStart={stopViewerGesture}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}

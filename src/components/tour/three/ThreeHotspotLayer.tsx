@@ -3,14 +3,15 @@
 import React, { RefObject, useEffect, useState } from 'react'
 import type { PerspectiveCamera } from 'three'
 import HotspotButton from '../HotspotButton'
-import { projectPitchYawToScreen } from './threePanoramaMath'
-import type { HotspotData, HotspotNavigationHandler, ProjectedHotspot } from './types'
+import { getRawPannellumPitchYaw, projectPitchYawToScreen } from './threePanoramaMath'
+import type { HotspotData, HotspotNavigationHandler, InfoHotspotFocusHandler, ProjectedHotspot } from './types'
 
 type Props = {
   camera: PerspectiveCamera | null
   containerRef: RefObject<HTMLElement | null>
   floorSlug: string
   hotspots: HotspotData[]
+  onInfoFocus: InfoHotspotFocusHandler
   onNavigate: HotspotNavigationHandler
   tourSlug: string
 }
@@ -22,6 +23,7 @@ export default function ThreeHotspotLayer({
   containerRef,
   floorSlug,
   hotspots,
+  onInfoFocus,
   onNavigate,
   tourSlug,
 }: Props) {
@@ -43,9 +45,16 @@ export default function ThreeHotspotLayer({
       const nextHotspots = hotspots
         .filter((hotspot) => hotspot.pitch !== undefined && hotspot.yaw !== undefined)
         .map((hotspot) => {
-          const projected = projectPitchYawToScreen(
+          // HotspotPicker saves Pannellum-compatible raw coordinates, and
+          // PannellumViewer renders them without scene.rotation. Ignore
+          // scene.rotation here so Three.js hotspot placement matches both.
+          const displayPosition = getRawPannellumPitchYaw(
             Number(hotspot.pitch),
             Number(hotspot.yaw),
+          )
+          const projected = projectPitchYawToScreen(
+            displayPosition.pitch,
+            displayPosition.yaw,
             camera,
             container,
           )
@@ -76,6 +85,7 @@ export default function ThreeHotspotLayer({
 
   const stopViewerGesture = (event: React.SyntheticEvent) => {
     event.stopPropagation()
+    ;(event.nativeEvent as Event & { stopImmediatePropagation?: () => void }).stopImmediatePropagation?.()
   }
 
   return (
@@ -86,11 +96,14 @@ export default function ThreeHotspotLayer({
         return (
           <div
             key={`${hotspot.text || hotspot.type}-${index}`}
+            data-tour-hotspot-interactive="true"
             className="absolute pointer-events-auto"
             onClick={stopViewerGesture}
             onDoubleClick={stopViewerGesture}
             onPointerDown={stopViewerGesture}
+            onPointerDownCapture={stopViewerGesture}
             onTouchStart={stopViewerGesture}
+            onTouchStartCapture={stopViewerGesture}
             style={{
               left: x,
               top: y,
@@ -101,6 +114,7 @@ export default function ThreeHotspotLayer({
               hotspot={{ ...hotspot, floorSlug }}
               tourSlug={tourSlug}
               floorSlug={floorSlug}
+              onInfoFocus={onInfoFocus}
               onNavigate={onNavigate}
             />
           </div>
