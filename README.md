@@ -166,6 +166,27 @@ Uploaded files are stored in the `media` Docker volume and persist between conta
 
 ---
 
+## Viewer Debugging and Migration Docs
+
+Primary viewer troubleshooting:
+
+- [Viewer troubleshooting guide](docs/viewer-troubleshooting-guide.md)
+- [Three.js CMS picker experiment](docs/threejs-cms-picker-experiment.md)
+- [Pannellum to Three.js migration plan](docs/pannellum-to-threejs-migration-plan.md)
+
+Important public viewer URLs:
+
+| Purpose | URL |
+|---------|-----|
+| Default Three.js viewer | `/tour/<tourSlug>/<floorSlug>/<sceneSlug>` |
+| Debug hotspot mode | `/tour/<tourSlug>/<floorSlug>/<sceneSlug>?debugHotspots=true` |
+| Draft debug mode | `/tour/<tourSlug>/<floorSlug>/<sceneSlug>?draft=true&debugHotspots=true` |
+| Pannellum fallback | `/tour/<tourSlug>/<floorSlug>/<sceneSlug>?viewer=pannellum&debugHotspots=true` |
+
+Use the draft debug URL after editing a scene in admin. Use the Pannellum fallback URL only when comparing renderer behavior.
+
+---
+
 ## Stopping and Restarting
 
 **Stop** (keeps data):
@@ -204,5 +225,5 @@ docker compose up --build
 - **Frontend / Backend**: [Next.js 15](https://nextjs.org) (App Router)
 - **CMS**: [Payload CMS 3](https://payloadcms.com)
 - **Database**: PostgreSQL 16
-- **360° Viewer**: [Pannellum](https://pannellum.org)
+- **360° Viewer**: Three.js by default, with [Pannellum](https://pannellum.org) as a fallback
 - **Deployment**: Docker + Docker Compose

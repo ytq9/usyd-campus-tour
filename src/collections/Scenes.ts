@@ -46,7 +46,8 @@ export const Scenes: CollectionConfig = {
       required: true,
       admin: {
         components: {
-          afterInput: ['/components/admin/PanoramaValidationPreview'],
+          // Pannellum fallback: '/components/admin/PanoramaValidationPreview'
+          afterInput: ['/components/admin/three/ThreeInitialViewPicker'],
         },
       },
     },
@@ -107,7 +108,8 @@ export const Scenes: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              Field: '@/components/HotspotPicker',
+              // Pannellum fallback: '@/components/HotspotPicker'
+              Field: '@/components/admin/three/ThreeHotspotPicker',
             },
           },
         },
