@@ -15,7 +15,6 @@ type Props = {
   routeFloorSlug: string
   routeSceneSlug: string
   routeTourSlug: string
-  viewerMode: 'pannellum' | 'three'
 }
 
 export default function HotspotDebugPanel({
@@ -26,7 +25,6 @@ export default function HotspotDebugPanel({
   routeFloorSlug,
   routeSceneSlug,
   routeTourSlug,
-  viewerMode,
 }: Props) {
   const warnings = useMemo(() => {
     const nextWarnings: string[] = []
@@ -95,8 +93,6 @@ export default function HotspotDebugPanel({
         <dd>{String(isDraft)}</dd>
         <dt className="text-white/60">data mode</dt>
         <dd>{isDraft ? 'draft data' : 'published data'}</dd>
-        <dt className="text-white/60">viewer mode</dt>
-        <dd>{viewerMode}</dd>
         <dt className="text-white/60">route tourSlug</dt>
         <dd className="break-all">{routeTourSlug}</dd>
         <dt className="text-white/60">route floorSlug</dt>

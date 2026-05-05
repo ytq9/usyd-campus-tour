@@ -7,12 +7,11 @@ import config from '@payload-config'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string }>
-type SearchParams = Promise<{ viewer?: string; debugHotspots?: string }>
+type SearchParams = Promise<{ debugHotspots?: string }>
 
 export default async function TourLandingPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug } = await params
-  const { viewer, debugHotspots } = await searchParams
-  const shouldPreservePannellumFallback = viewer === 'pannellum'
+  const { debugHotspots } = await searchParams
   const shouldPreserveHotspotDebug = debugHotspots === 'true'
   const payload = await getPayload({ config })
 
@@ -44,11 +43,10 @@ export default async function TourLandingPage({ params, searchParams }: { params
     }
   }
 
-  const appendViewerQuery = (href: string) => {
+  const appendDebugQuery = (href: string) => {
     if (href === '#') return href
 
     const query = new URLSearchParams()
-    if (shouldPreservePannellumFallback) query.set('viewer', 'pannellum')
     if (shouldPreserveHotspotDebug) query.set('debugHotspots', 'true')
     const queryString = query.toString()
 
@@ -74,7 +72,7 @@ export default async function TourLandingPage({ params, searchParams }: { params
           <div className="text-center px-4">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
               <Link
-                href={appendViewerQuery(startHref)}
+                href={appendDebugQuery(startHref)}
                 className="d-btn d-btn-lg bg-ochre border-ochre text-white hover:bg-orange-700 text-lg px-8"
               >
               Start Tour
@@ -106,7 +104,7 @@ export default async function TourLandingPage({ params, searchParams }: { params
                 const f = typeof floor === 'object' ? floor : null
                 if (!f) return null
                 const scene = f.initialScene && typeof f.initialScene === 'object' ? f.initialScene : null
-                const href = scene ? appendViewerQuery(`/tour/${tourSlug}/${f.slug}/${scene.slug}`) : '#'
+                const href = scene ? appendDebugQuery(`/tour/${tourSlug}/${f.slug}/${scene.slug}`) : '#'
                 return (
                   <Link
                     key={f.id}

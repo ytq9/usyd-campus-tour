@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import InfoHotspot from './InfoHotspot'
 import type { InfoHotspotFocusHandler } from './three/types'
 
@@ -13,16 +13,7 @@ type Props = {
 }
 
 export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate, onInfoFocus }: Props) {
-  const btnRef = useRef<HTMLButtonElement>(null)
   const [isPressed, setIsPressed] = useState(false)
-
-  useEffect(() => {
-    // Disable pannellum touch handling on this element
-    const el = btnRef.current?.closest('.pnlm-hotspot')
-    if (el) {
-      (el as HTMLElement).ontouchend = null
-    }
-  }, [])
 
   if (hotspot.type === 'info') {
     return <InfoHotspot hotspot={hotspot} onFocus={onInfoFocus} />
@@ -52,7 +43,6 @@ export default function HotspotButton({ hotspot, tourSlug, floorSlug, onNavigate
 
   return (
     <button
-      ref={btnRef}
       data-tour-hotspot-interactive="true"
       onClick={handleClick}
       onPointerDown={stopViewerGesture}

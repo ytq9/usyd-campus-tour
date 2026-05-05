@@ -27,7 +27,7 @@ src/components/tour/TourOverlay.tsx
 src/components/tour/FloorMapModal.tsx
 ```
 
-`TourViewer` passes `tourFloors`, `currentFloor`, the active scene slug, route slugs, draft mode, viewer mode, and debug mode into `TourOverlay`. `TourOverlay` renders the existing `FloorMapModal` button in the bottom control cluster.
+`TourViewer` passes `tourFloors`, `currentFloor`, the active scene slug, route slugs, draft mode, and debug mode into `TourOverlay`. `TourOverlay` renders the existing `FloorMapModal` button in the bottom control cluster.
 
 ## Map Point Navigation
 
@@ -43,9 +43,6 @@ The modal preserves active query parameters:
 
 - `draft=true`
 - `debugHotspots=true`
-- `viewer=pannellum`
-
-It does not add `viewer=three`, because Three.js is the default.
 
 ## Manual Check
 
@@ -55,4 +52,3 @@ It does not add `viewer=three`, because Three.js is the default.
 4. Click a map point.
 5. Confirm the destination route still includes `debugHotspots=true`.
 6. Repeat in draft mode with `?draft=true&debugHotspots=true`.
-7. Repeat in fallback mode with `?viewer=pannellum&debugHotspots=true`.

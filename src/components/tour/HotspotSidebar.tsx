@@ -8,11 +8,10 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
-  viewerMode?: 'pannellum' | 'three'
   debugHotspots?: boolean
 }
 
-export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft, viewerMode, debugHotspots }: Props) {
+export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft, debugHotspots }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedInfoHotspot, setSelectedInfoHotspot] = useState<any | null>(null)
   const infoModalRef = useRef<HTMLDialogElement>(null)
@@ -20,7 +19,7 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
 
   const handleNavigate = async (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
-      if (viewerMode !== 'pannellum' && window.threePanoramaViewer?.navigateToHotspot) {
+      if (window.threePanoramaViewer?.navigateToHotspot) {
         window.threePanoramaViewer.navigateToHotspot(hs)
         return
       }
@@ -28,24 +27,15 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
       const targetFloorSlug = hs.targetFloor?.slug || floorSlug
       const query = new URLSearchParams()
       if (isDraft) query.set('draft', 'true')
-      if (viewerMode === 'pannellum') query.set('viewer', 'pannellum')
       if (debugHotspots) query.set('debugHotspots', 'true')
       const queryString = query.toString() ? `?${query.toString()}` : ''
-      if (targetFloorSlug !== floorSlug) {
-        window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${queryString}`)
-      } else if (window.pannellumViewer) {
-        window.pannellumViewer.loadScene(hs.targetScene.slug)
-      } else {
-        window.location.assign(`/tour/${tourSlug}/${floorSlug}/${hs.targetScene.slug}${queryString}`)
-      }
+      window.location.assign(`/tour/${tourSlug}/${targetFloorSlug}/${hs.targetScene.slug}${queryString}`)
     } else if (hs.type === 'info') {
       setSelectedInfoHotspot(hs)
       let shouldOpenInfo = true
 
-      if (viewerMode !== 'pannellum' && window.threePanoramaViewer?.focusInfoHotspot) {
+      if (window.threePanoramaViewer?.focusInfoHotspot) {
         shouldOpenInfo = await window.threePanoramaViewer.focusInfoHotspot(hs)
-      } else if (window.pannellumViewer) {
-        window.pannellumViewer.lookAt(hs.pitch, hs.yaw, hs.initialHfov || 120, 2000)
       }
 
       if (!shouldOpenInfo) return

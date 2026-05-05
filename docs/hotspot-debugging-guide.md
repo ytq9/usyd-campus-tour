@@ -2,7 +2,7 @@
 
 ## How Admin Hotspot Coordinates Are Saved
 
-`src/components/HotspotPicker.tsx` lets an admin choose hotspot coordinates in the Payload form. The picker uses Pannellum-compatible pitch/yaw coordinates and writes those values into the current Payload form row with `setPitch` and `setYaw`.
+`src/components/admin/three/ThreeHotspotPicker.tsx` lets an admin choose hotspot coordinates in the Payload form. The picker uses the same pitch/yaw coordinate fields rendered by the public Three.js viewer and writes those values into the current Payload form row with `setPitch` and `setYaw`.
 
 Those form updates are not the same thing as publishing public data. After moving a hotspot, the scene document still needs to be saved. If the project is using drafts, public visitors will keep seeing the published values until the draft is published.
 
@@ -34,19 +34,9 @@ To inspect draft data:
 /tour/<tourSlug>/<floorSlug>/<sceneSlug>?draft=true&debugHotspots=true
 ```
 
-The debug panel shows the viewer mode, route slugs, draft state, current scene slug, active scene slug, all `floorScenes`, and each hotspot's raw `pitch`, `yaw`, `type`, `text`, `targetScene`, and `targetFloor`.
+The debug panel shows route slugs, draft state, current scene slug, active scene slug, all `floorScenes`, and each hotspot's raw `pitch`, `yaw`, `type`, `text`, `targetScene`, and `targetFloor`.
 
 Use it to compare the public data received by the viewer against the exact Payload admin field values.
-
-## Comparing Pannellum and Three.js
-
-The default public viewer is Three.js. The Pannellum fallback can be opened with:
-
-```text
-/tour/<tourSlug>/<floorSlug>/<sceneSlug>?viewer=pannellum&debugHotspots=true
-```
-
-If Three.js and Pannellum both show the same wrong hotspot position, check the debug panel first. Matching wrong values usually point to old or unexpected CMS data. Matching correct values with wrong visual placement points back to viewer projection or panorama image differences.
 
 ## Confirming Data vs Projection
 
@@ -67,5 +57,3 @@ Viewer navigation preserves active debug parameters:
 
 - `draft=true` remains active in draft preview flows.
 - `debugHotspots=true` remains active across floor map and hotspot navigation.
-- `viewer=pannellum` is preserved only when using the Pannellum fallback.
-- `viewer=three` is not added because Three.js is the default viewer.

@@ -3,8 +3,8 @@
 import * as THREE from 'three'
 import type { PitchYaw } from './types'
 
-export const PANNELLUM_MIN_HFOV = 50
-export const PANNELLUM_MAX_HFOV = 120
+export const MIN_HFOV = 50
+export const MAX_HFOV = 120
 export const CONTROL_MIN_PITCH = -89.9
 export const CONTROL_MAX_PITCH = 89.9
 
@@ -12,23 +12,22 @@ const DEG_TO_RAD = Math.PI / 180
 const RAD_TO_DEG = 180 / Math.PI
 
 /**
- * Coordinate convention used for compatibility with existing Pannellum CMS data:
+ * Coordinate convention used by stored CMS panorama data:
  *
  * - pitch is vertical angle in degrees: +90 is up, -90 is down.
  * - yaw is horizontal direction in degrees.
  * - yaw 0 looks along Three.js negative Z, matching the default camera forward vector.
  * - positive yaw rotates toward positive X.
  *
- * Stored CMS values stay in the original Pannellum-style coordinate space.
+ * Stored CMS values stay in their original pitch/yaw coordinate space.
  * Some camera paths may apply the scene `rotation` field as an image yaw offset
  * with:
  *
  *   displayYaw = storedYaw + scene.rotation
  *
- * Hotspots are different for now: HotspotPicker saves raw Pannellum-compatible
- * coordinates, and PannellumViewer renders those raw coordinates. The Three.js
- * public viewer should also render, focus, and transition toward hotspots using
- * the stored raw coordinates until a proper rotation strategy is confirmed.
+ * Hotspots use stored raw coordinates. The public viewer renders, focuses, and
+ * transitions toward hotspots using those values until a broader rotation
+ * strategy is confirmed.
  */
 export function pitchYawToVector3(pitch: number, yaw: number): THREE.Vector3 {
   const clampedPitch = clampPitch(pitch)
@@ -71,7 +70,7 @@ export function toThreeDisplayPitchYaw(
   }
 }
 
-export function getRawPannellumPitchYaw(pitch: number, yaw: number): PitchYaw {
+export function getStoredPitchYaw(pitch: number, yaw: number): PitchYaw {
   return {
     pitch: clampPitch(pitch),
     yaw: normaliseYaw(yaw),
@@ -110,7 +109,7 @@ export function projectPitchYawToScreen(
 }
 
 /**
- * Converts a normalized screen point to Pannellum-style pitch/yaw.
+ * Converts a normalized screen point to stored pitch/yaw coordinates.
  *
  * x and y are normalized device coordinates, not pixels:
  * - x: -1 left, +1 right
@@ -152,8 +151,8 @@ export function clampInteractionPitch(pitch: number): number {
 }
 
 export function clampHfov(hfov: number): number {
-  if (!Number.isFinite(hfov)) return PANNELLUM_MAX_HFOV
-  return THREE.MathUtils.clamp(hfov, PANNELLUM_MIN_HFOV, PANNELLUM_MAX_HFOV)
+  if (!Number.isFinite(hfov)) return MAX_HFOV
+  return THREE.MathUtils.clamp(hfov, MIN_HFOV, MAX_HFOV)
 }
 
 export function horizontalFovToVerticalFov(hfov: number, aspect: number): number {

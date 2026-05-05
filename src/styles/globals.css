@@ -10,35 +10,6 @@
   --color-ochre: #e64626;
 }
 
-/* ============================================
-   Pannellum 基础样式覆盖
-   ============================================ */
-.pnlm-sprite {
-  background-image: none !important;
-}
-
-/* 确保热点容器不阻挡子元素的点击 */
-.pnlm-hotspot {
-  pointer-events: none !important;
-  background-color: transparent !important;
-}
-
-.pnlm-hotspot:hover {
-  background-color: transparent !important;
-}
-
-/* 热点内的按钮需要能够接收点击 */
-.pnlm-hotspot .hotspot-portal-button,
-.pnlm-hotspot button,
-.pnlm-hotspot .pointer-events-auto {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-.pnlm-controls-container {
-  display: none;
-}
-
 .d-modal-action {
   margin: 0 !important;
 }
@@ -144,22 +115,9 @@
   }
 }
 
-/* 应用于 Pannellum 容器的过渡效果 */
-#panorama {
-  transition: filter 0.3s ease-out;
-}
-
-#panorama.transitioning {
-  filter: brightness(0.9) saturate(1.1);
-}
-
 /* 过渡期间的全局效果 */
 body.scene-transitioning {
   overflow: hidden;
-}
-
-body.scene-transitioning #panorama {
-  pointer-events: none;
 }
 
 /* 平滑过渡的通用 easing 函数 */
@@ -189,8 +147,7 @@ body.scene-transitioning #panorama {
 /* 减少动画偏好的用户 */
 @media (prefers-reduced-motion: reduce) {
   .scene-transition-overlay,
-  .hotspot-portal-button,
-  #panorama {
+  .hotspot-portal-button {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

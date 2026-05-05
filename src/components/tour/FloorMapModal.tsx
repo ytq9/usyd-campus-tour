@@ -8,11 +8,10 @@ type Props = {
   currentSceneSlug: string
   tourSlug: string
   isDraft: boolean
-  viewerMode?: 'pannellum' | 'three'
   debugHotspots?: boolean
 }
 
-export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug, isDraft, viewerMode, debugHotspots }: Props) {
+export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug, isDraft, debugHotspots }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null)
   const initialActiveFloorIdx = tourFloors.findIndex((f: any) => (
     f.id === currentFloor.id || f.slug === currentFloor.slug
@@ -24,7 +23,6 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
   const handleMapPointClick = (floorSlug: string, sceneSlug: string) => {
     const query = new URLSearchParams()
     if (isDraft) query.set('draft', 'true')
-    if (viewerMode === 'pannellum') query.set('viewer', 'pannellum')
     if (debugHotspots) query.set('debugHotspots', 'true')
     const queryString = query.toString() ? `?${query.toString()}` : ''
     window.location.assign(`/tour/${tourSlug}/${floorSlug}/${sceneSlug}${queryString}`)

@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic'
 import React, { useState, useCallback } from 'react'
-import PannellumViewer from './PannellumViewer'
 import TourOverlay from './TourOverlay'
 import WelcomeModal from './WelcomeModal'
 import HotspotDebugPanel from './HotspotDebugPanel'
@@ -28,7 +27,6 @@ type SceneData = {
   routeFloorSlug?: string
   routeSceneSlug?: string
   isDraft: boolean
-  viewerMode?: 'pannellum' | 'three'
   debugHotspots?: boolean
 }
 
@@ -38,7 +36,6 @@ export default function TourViewer({ data }: { data: SceneData }) {
 
   const currentScene = data.floorScenes.find((s: any) => s.slug === currentSceneSlug) || data.currentScene
   const hotspots = currentScene.hotspots || []
-  const usePannellumViewer = data.viewerMode === 'pannellum'
 
   const handleSceneChange = useCallback((sceneSlug: string) => {
     setCurrentSceneSlug(sceneSlug)
@@ -46,27 +43,15 @@ export default function TourViewer({ data }: { data: SceneData }) {
 
   return (
     <div className="flex items-center justify-center h-dvh w-dvw relative font-sans">
-      {usePannellumViewer ? (
-        <PannellumViewer
-          scenes={data.floorScenes}
-          initialSceneSlug={data.currentScene.slug}
-          tourSlug={data.tourSlug}
-          floorSlug={data.floorSlug}
-          isDraft={data.isDraft}
-          debugHotspots={Boolean(data.debugHotspots)}
-          onSceneChange={handleSceneChange}
-        />
-      ) : (
-        <ThreePanoramaViewer
-          scenes={data.floorScenes}
-          initialSceneSlug={data.currentScene.slug}
-          tourSlug={data.tourSlug}
-          floorSlug={data.floorSlug}
-          isDraft={data.isDraft}
-          debugHotspots={Boolean(data.debugHotspots)}
-          onSceneChange={handleSceneChange}
-        />
-      )}
+      <ThreePanoramaViewer
+        scenes={data.floorScenes}
+        initialSceneSlug={data.currentScene.slug}
+        tourSlug={data.tourSlug}
+        floorSlug={data.floorSlug}
+        isDraft={data.isDraft}
+        debugHotspots={Boolean(data.debugHotspots)}
+        onSceneChange={handleSceneChange}
+      />
       <TourOverlay
         tour={data.tour}
         currentScene={currentScene}
@@ -76,7 +61,6 @@ export default function TourViewer({ data }: { data: SceneData }) {
         tourSlug={data.tourSlug}
         floorSlug={data.floorSlug}
         isDraft={data.isDraft}
-        viewerMode={data.viewerMode}
         debugHotspots={Boolean(data.debugHotspots)}
       />
       {data.debugHotspots && (
@@ -88,7 +72,6 @@ export default function TourViewer({ data }: { data: SceneData }) {
           routeFloorSlug={data.routeFloorSlug || data.floorSlug}
           routeSceneSlug={data.routeSceneSlug || data.currentScene.slug}
           routeTourSlug={data.routeTourSlug || data.tourSlug}
-          viewerMode={data.viewerMode || 'three'}
         />
       )}
       {showWelcome && data.tour.welcomeTitle && (

@@ -3,7 +3,7 @@
 import React, { RefObject, useEffect, useState } from 'react'
 import type { PerspectiveCamera } from 'three'
 import HotspotButton from '../HotspotButton'
-import { getRawPannellumPitchYaw, projectPitchYawToScreen } from './threePanoramaMath'
+import { getStoredPitchYaw, projectPitchYawToScreen } from './threePanoramaMath'
 import type { HotspotData, HotspotNavigationHandler, InfoHotspotFocusHandler, ProjectedHotspot } from './types'
 
 type Props = {
@@ -45,10 +45,9 @@ export default function ThreeHotspotLayer({
       const nextHotspots = hotspots
         .filter((hotspot) => hotspot.pitch !== undefined && hotspot.yaw !== undefined)
         .map((hotspot) => {
-          // HotspotPicker saves Pannellum-compatible raw coordinates, and
-          // PannellumViewer renders them without scene.rotation. Ignore
-          // scene.rotation here so Three.js hotspot placement matches both.
-          const displayPosition = getRawPannellumPitchYaw(
+          // Hotspots use stored raw coordinates. Ignore scene.rotation here so
+          // hotspot placement matches the authored CMS values.
+          const displayPosition = getStoredPitchYaw(
             Number(hotspot.pitch),
             Number(hotspot.yaw),
           )

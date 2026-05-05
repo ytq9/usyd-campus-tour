@@ -9,7 +9,7 @@ import {
   animateCameraFocus,
   animateCameraTransition,
 } from './threeCameraTransition'
-import { getRawPannellumPitchYaw, toThreeDisplayPitchYaw } from './threePanoramaMath'
+import { getStoredPitchYaw, toThreeDisplayPitchYaw } from './threePanoramaMath'
 import { useThreePanoramaControls } from './useThreePanoramaControls'
 import { useThreeSceneTexture } from './useThreeSceneTexture'
 import type { CameraState, HotspotData, ThreePanoramaViewerProps, ThreeSceneData, ThreeViewerApi } from './types'
@@ -175,9 +175,9 @@ export default function ThreePanoramaViewer({
   }, [beginCameraAnimation, finishCameraAnimation, getCameraState, setCameraState])
 
   const focusScenePitchYaw = useCallback((pitch: number, yaw: number, hfov?: number) => {
-    // HotspotPicker stores raw Pannellum pitch/yaw, and PannellumViewer focuses
-    // those raw coordinates. Ignore scene.rotation for hotspot focus parity.
-    const displayPosition = getRawPannellumPitchYaw(pitch, yaw)
+    // Hotspots use stored raw coordinates. Ignore scene.rotation for hotspot
+    // focus until the rotation strategy is finalized.
+    const displayPosition = getStoredPitchYaw(pitch, yaw)
     return focusCameraAt(displayPosition.pitch, displayPosition.yaw, hfov)
   }, [focusCameraAt])
 
@@ -412,10 +412,10 @@ function getHotspotDirection(
   targetScene?: ThreeSceneData,
 ) {
   if (Number.isFinite(Number(hotspot?.pitch)) && Number.isFinite(Number(hotspot?.yaw))) {
-    // Portal hotspots use the same raw Pannellum coordinates rendered by the
-    // admin picker and PannellumViewer. scene.rotation is intentionally ignored
-    // until hotspot rotation behavior is validated separately.
-    return getRawPannellumPitchYaw(
+    // Portal hotspots use stored raw coordinates. scene.rotation is
+    // intentionally ignored until hotspot rotation behavior is validated
+    // separately.
+    return getStoredPitchYaw(
       Number(hotspot?.pitch),
       Number(hotspot?.yaw),
     )

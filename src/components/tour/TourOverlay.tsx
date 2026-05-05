@@ -13,13 +13,12 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
-  viewerMode?: 'pannellum' | 'three'
   debugHotspots?: boolean
 }
 
-export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, viewerMode, debugHotspots }: Props) {
+export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, debugHotspots }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
-  const homeHref = buildTourHomeHref(tourSlug, isDraft, viewerMode, Boolean(debugHotspots))
+  const homeHref = buildTourHomeHref(tourSlug, isDraft, Boolean(debugHotspots))
 
   return (
     <div className="h-dvh w-dvw absolute pointer-events-none flex flex-col justify-between z-10">
@@ -54,7 +53,6 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
           tourSlug={tourSlug}
           floorSlug={floorSlug}
           isDraft={isDraft}
-          viewerMode={viewerMode}
           debugHotspots={debugHotspots}
         />
       </div>
@@ -83,7 +81,6 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             currentSceneSlug={currentScene.slug}
             tourSlug={tourSlug}
             isDraft={isDraft}
-            viewerMode={viewerMode}
             debugHotspots={debugHotspots}
           />
         </div>
@@ -95,11 +92,9 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
 function buildTourHomeHref(
   tourSlug: string,
   isDraft: boolean,
-  viewerMode: 'pannellum' | 'three' | undefined,
   debugHotspots: boolean,
 ) {
   const query = new URLSearchParams()
-  if (viewerMode === 'pannellum') query.set('viewer', 'pannellum')
   if (debugHotspots) query.set('debugHotspots', 'true')
   const queryString = query.toString() ? `?${query.toString()}` : ''
   return isDraft

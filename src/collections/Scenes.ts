@@ -42,14 +42,13 @@ export const Scenes: CollectionConfig = {
     {
       name: 'panorama',
       type: 'upload',
-      relationTo: 'media',
-      required: true,
-      admin: {
-        components: {
-          // Pannellum fallback: '/components/admin/PanoramaValidationPreview'
-          afterInput: ['/components/admin/three/ThreeInitialViewPicker'],
+        relationTo: 'media',
+        required: true,
+        admin: {
+          components: {
+            afterInput: ['/components/admin/three/ThreeInitialViewPicker'],
+          },
         },
-      },
     },
     {
       name: 'initialYaw',
@@ -108,7 +107,6 @@ export const Scenes: CollectionConfig = {
           type: 'ui',
           admin: {
             components: {
-              // Pannellum fallback: '@/components/HotspotPicker'
               Field: '@/components/admin/three/ThreeHotspotPicker',
             },
           },

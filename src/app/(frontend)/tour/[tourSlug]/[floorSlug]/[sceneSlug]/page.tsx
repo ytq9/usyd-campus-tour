@@ -7,14 +7,13 @@ import TourViewer from '@/components/tour/TourViewer'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string; floorSlug: string; sceneSlug: string }>
-type SearchParams = Promise<{ draft?: string; viewer?: string; debugHotspots?: string }>
+type SearchParams = Promise<{ draft?: string; debugHotspots?: string }>
 
 export default async function SceneViewerPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug, floorSlug, sceneSlug } = await params
-  const { draft: draftParam, viewer: viewerParam, debugHotspots: debugHotspotsParam } = await searchParams
+  const { draft: draftParam, debugHotspots: debugHotspotsParam } = await searchParams
   const isDraft = draftParam === 'true'
   const debugHotspots = debugHotspotsParam === 'true'
-  const viewerMode: 'three' | 'pannellum' = viewerParam === 'pannellum' ? 'pannellum' : 'three'
   const payload = await getPayload({ config })
 
   // Fetch tour
@@ -49,7 +48,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const scene = scenes.docs[0]
   if (!scene) notFound()
 
-  // Fetch all scenes on this floor for Pannellum multi-scene config
+  // Fetch all scenes on this floor for in-viewer navigation.
   const floorScenes = await payload.find({
     collection: 'scenes',
     where: { floor: { equals: floor.id } },
@@ -168,7 +167,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
     routeFloorSlug: floorSlug,
     routeSceneSlug: sceneSlug,
     isDraft,
-    viewerMode,
     debugHotspots,
   }
 

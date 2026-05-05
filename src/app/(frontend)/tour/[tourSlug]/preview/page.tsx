@@ -6,11 +6,11 @@ import config from '@payload-config'
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string }>
-type SearchParams = Promise<{ viewer?: string; debugHotspots?: string }>
+type SearchParams = Promise<{ debugHotspots?: string }>
 
 export default async function PreviewPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug } = await params
-  const { viewer, debugHotspots } = await searchParams
+  const { debugHotspots } = await searchParams
   const payload = await getPayload({ config })
 
   // Fetch tour as draft
@@ -36,7 +36,6 @@ export default async function PreviewPage({ params, searchParams }: { params: Pa
       : null
     if (initialScene) {
       const query = new URLSearchParams({ draft: 'true' })
-      if (viewer === 'pannellum') query.set('viewer', 'pannellum')
       if (debugHotspots === 'true') query.set('debugHotspots', 'true')
       redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}?${query.toString()}`)
     }
