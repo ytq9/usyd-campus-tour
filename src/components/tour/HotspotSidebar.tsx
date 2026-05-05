@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
+import { getInfoContentPreview, getInfoContentTextBlocks } from './infoContentText'
 
 type Props = {
   hotspots: any[]
@@ -15,6 +16,7 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
   const [isOpen, setIsOpen] = useState(false)
   const [selectedInfoHotspot, setSelectedInfoHotspot] = useState<any | null>(null)
   const infoModalRef = useRef<HTMLDialogElement>(null)
+  const selectedInfoContentBlocks = getInfoContentTextBlocks(selectedInfoHotspot?.infoContent)
 
   const handleNavigate = async (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
@@ -71,24 +73,33 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
       {/* Sidebar content */}
       <div className={`${isOpen ? 'block' : 'hidden'} lg:block pointer-events-auto mt-2 mr-2`}>
         <div className="space-y-2 w-64 lg:w-80 bg-black/50 p-4 rounded-md border-2 border-white/20 max-h-[70vh] overflow-y-auto">
-          {hotspots.map((hs, i) => (
-            <button
-              key={i}
-              onClick={() => handleNavigate(hs)}
-              className={`p-3 w-full text-left cursor-pointer text-sm ${
-                hs.type === 'info'
-                  ? 'border-2 bg-white text-black hover:bg-gray-100'
-                  : 'bg-ochre text-white hover:bg-orange-700'
-              } transition-colors`}
-            >
-              {hs.type === 'info' && (
-                <svg className="size-5 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                </svg>
-              )}
-              {hs.text}
-            </button>
-          ))}
+          {hotspots.map((hs, i) => {
+            const infoPreview = hs.type === 'info' ? getInfoContentPreview(hs.infoContent) : ''
+
+            return (
+              <button
+                key={i}
+                onClick={() => handleNavigate(hs)}
+                className={`p-3 w-full text-left cursor-pointer text-sm ${
+                  hs.type === 'info'
+                    ? 'border-2 bg-white text-black hover:bg-gray-100'
+                    : 'bg-ochre text-white hover:bg-orange-700'
+                } transition-colors`}
+              >
+                {hs.type === 'info' && (
+                  <svg className="size-5 inline mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                  </svg>
+                )}
+                {hs.text}
+                {infoPreview && (
+                  <span className="mt-1 block pl-7 text-xs text-black/65 line-clamp-2">
+                    {infoPreview}
+                  </span>
+                )}
+              </button>
+            )
+          })}
           {hotspots.length === 0 && (
             <p className="text-white/50 text-sm text-center py-2">No hotspots in this scene</p>
           )}
@@ -104,11 +115,11 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
             </form>
           </div>
           <div className="py-4 prose text-gray-700">
-            {selectedInfoHotspot?.infoContent ? (
+            {selectedInfoContentBlocks.length > 0 ? (
               <div>
-                {typeof selectedInfoHotspot.infoContent === 'string'
-                  ? selectedInfoHotspot.infoContent
-                  : 'Information available'}
+                {selectedInfoContentBlocks.map((block, index) => (
+                  <p key={index}>{block}</p>
+                ))}
               </div>
             ) : (
               <p>{selectedInfoHotspot?.text}</p>
