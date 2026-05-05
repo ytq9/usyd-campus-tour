@@ -159,6 +159,10 @@ export function getRecommendedTransition(
   return TRANSITION_PRESETS.zoomIn
 }
 
+export function getDefaultTransitionConfig(isSameFloor: boolean): TransitionConfig {
+  return isSameFloor ? TRANSITION_PRESETS.portal : TRANSITION_PRESETS.zoomIn
+}
+
 // 获取CSS easing值
 export function getCSSEasing(easing: EasingType): string {
   return EASING_FUNCTIONS[easing] || 'ease-in-out'

@@ -16,11 +16,6 @@
 
 // 核心组件
 export { default as SceneTransition } from './SceneTransition'
-export { 
-  TransitionProvider, 
-  useTransitionSettings,
-  TransitionSelector 
-} from './TransitionProvider'
 
 // Hooks
 export { 
@@ -39,6 +34,7 @@ export {
   TRANSITION_PRESETS,
   EASING_FUNCTIONS,
   getRecommendedTransition,
+  getDefaultTransitionConfig,
   getCSSEasing
 } from './transitionConfig'
 

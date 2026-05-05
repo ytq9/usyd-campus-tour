@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import { useTransitionSettings } from '../transition'
+import { getDefaultTransitionConfig } from '../transition'
 import ThreeHotspotLayer from './ThreeHotspotLayer'
 import {
   animateCameraExit,
@@ -34,7 +34,6 @@ export default function ThreePanoramaViewer({
   const [cameraForHotspots, setCameraForHotspots] = useState<THREE.PerspectiveCamera | null>(null)
   const [activeSceneSlug, setActiveSceneSlug] = useState(initialSceneSlug)
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false)
-  const { getConfig } = useTransitionSettings()
 
   const activeScene = useMemo<ThreeSceneData>(() => (
     scenes.find((scene) => scene.slug === activeSceneSlug) ||
@@ -87,7 +86,7 @@ export default function ThreePanoramaViewer({
     hotspot?: HotspotData | null,
   ) => {
     const controller = beginCameraAnimation()
-    const transitionConfig = getConfig(true)
+    const transitionConfig = getDefaultTransitionConfig(true)
 
     try {
       await animateCameraTransition({
@@ -104,7 +103,7 @@ export default function ThreePanoramaViewer({
     } finally {
       finishCameraAnimation(controller)
     }
-  }, [activeScene, beginCameraAnimation, finishCameraAnimation, getCameraState, getConfig, setCameraState, switchToScene])
+  }, [activeScene, beginCameraAnimation, finishCameraAnimation, getCameraState, setCameraState, switchToScene])
 
   const runCrossFloorTransition = useCallback(async (
     targetSlug: string,
@@ -112,7 +111,7 @@ export default function ThreePanoramaViewer({
     hotspot?: HotspotData | null,
   ) => {
     const controller = beginCameraAnimation()
-    const transitionConfig = getConfig(false)
+    const transitionConfig = getDefaultTransitionConfig(false)
     const targetUrl = buildSceneUrl(tourSlug, targetFloorSlug, targetSlug, isDraft, Boolean(debugHotspots))
 
     try {
@@ -129,7 +128,7 @@ export default function ThreePanoramaViewer({
     } finally {
       finishCameraAnimation(controller)
     }
-  }, [activeScene, beginCameraAnimation, debugHotspots, finishCameraAnimation, getCameraState, getConfig, isDraft, setCameraState, tourSlug])
+  }, [activeScene, beginCameraAnimation, debugHotspots, finishCameraAnimation, getCameraState, isDraft, setCameraState, tourSlug])
 
   const navigateToHotspot = useCallback((hotspot: HotspotData) => {
     const targetSlug = hotspot.targetScene?.slug

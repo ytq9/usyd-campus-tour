@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import HotspotButton from './HotspotButton'
-import { SceneTransition, useSceneTransition, useTransitionSettings } from './transition'
+import { getDefaultTransitionConfig, SceneTransition, useSceneTransition } from './transition'
 
 type Scene = {
   slug: string
@@ -30,7 +30,6 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
   const viewerRef = useRef<HTMLDivElement>(null)
   const pannellumRef = useRef<any>(null)
   const { state: transitionState, startTransition, isTransitioning } = useSceneTransition()
-  const { getConfig } = useTransitionSettings()
 
   // 处理场景导航（带过渡动画）
   const handleSceneNavigation = useCallback(async (
@@ -50,8 +49,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
     }
     const queryString = query.toString() ? `?${query.toString()}` : ''
 
-    // 从全局设置获取过渡效果配置
-    const transitionConfig = getConfig(isSameFloor)
+    const transitionConfig = getDefaultTransitionConfig(isSameFloor)
 
     await startTransition({
       targetSceneSlug: targetSlug,
@@ -72,7 +70,7 @@ export default function PannellumViewer({ scenes, initialSceneSlug, tourSlug, fl
         }
       }
     })
-  }, [debugHotspots, floorSlug, isDraft, tourSlug, onSceneChange, startTransition, getConfig])
+  }, [debugHotspots, floorSlug, isDraft, tourSlug, onSceneChange, startTransition])
 
   const createTooltip = useCallback(
     (hotSpotDiv: HTMLDivElement, args: any) => {
