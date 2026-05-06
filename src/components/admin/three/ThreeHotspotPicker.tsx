@@ -15,10 +15,25 @@ type Props = {
   [key: string]: unknown
 }
 
+type SceneSummary = {
+  id: number | string
+  title: string
+  slug?: string
+  panoramaUrl: string | null
+}
+
+const idOf = (v: unknown): string | null => {
+  if (v == null) return null
+  if (typeof v === 'object') return (v as { id?: number | string }).id != null ? String((v as { id: number | string }).id) : null
+  return String(v)
+}
+
 export default function ThreeHotspotPicker({ path }: Props) {
   const basePath = path.replace(/\.visualPicker$/, '')
   const { value: pitch, setValue: setPitch } = useField<number | string | null>({ path: `${basePath}.pitch` })
   const { value: yaw, setValue: setYaw } = useField<number | string | null>({ path: `${basePath}.yaw` })
+  const { value: hotspotType } = useField<string>({ path: `${basePath}.type` })
+  const { value: targetScene, setValue: setTargetScene } = useField<number | string | { id: number | string } | null>({ path: `${basePath}.targetScene` })
   const panoramaFieldValue = useFormFields(([fields]) => fields.panorama?.value as any)
   const panorama = useAdminPanoramaMedia(panoramaFieldValue)
   const [isOpen, setIsOpen] = useState(false)
@@ -26,6 +41,9 @@ export default function ThreeHotspotPicker({ path }: Props) {
   const [draftPick, setDraftPick] = useState<PitchYaw | null>(null)
   const [lastWritten, setLastWritten] = useState<PitchYaw | null>(null)
   const [camera, setCamera] = useState<CameraState>({ pitch: 0, yaw: 0, hfov: 120 })
+  const [scenes, setScenes] = useState<SceneSummary[]>([])
+  const [scenesError, setScenesError] = useState<string | null>(null)
+  const [sceneSearch, setSceneSearch] = useState('')
 
   const fieldPoint = useMemo(() => {
     const fieldPitch = Number(pitch)
@@ -81,6 +99,56 @@ export default function ThreeHotspotPicker({ path }: Props) {
 
   const markerPoint = draftPick || fieldPoint
 
+  const isPortal = hotspotType === 'scene'
+
+  useEffect(() => {
+    if (!isOpen || !isPortal || scenes.length > 0) return
+
+    let cancelled = false
+    fetch('/api/scenes?limit=200&depth=1')
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return
+        const docs = Array.isArray(data?.docs) ? data.docs : []
+        setScenes(docs.map((s: any) => ({
+          id: s.id,
+          title: s.title || s.slug || `Scene ${s.id}`,
+          slug: s.slug,
+          panoramaUrl: s.panorama?.url || null,
+        })))
+        setScenesError(null)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        setScenesError(err instanceof Error ? err.message : 'Failed to load scenes')
+      })
+
+    return () => { cancelled = true }
+  }, [isOpen, isPortal, scenes.length])
+
+  const targetSceneId = idOf(targetScene)
+  const selectedScene = useMemo(
+    () => (targetSceneId ? scenes.find((s) => String(s.id) === targetSceneId) ?? null : null),
+    [targetSceneId, scenes],
+  )
+
+  const filteredScenes = useMemo(() => {
+    const q = sceneSearch.trim().toLowerCase()
+    if (!q) return scenes
+    return scenes.filter((s) =>
+      s.title.toLowerCase().includes(q) || (s.slug || '').toLowerCase().includes(q),
+    )
+  }, [scenes, sceneSearch])
+
+  const handlePickScene = useCallback((sceneId: number | string) => {
+    const num = Number(sceneId)
+    setTargetScene(Number.isNaN(num) ? sceneId : num)
+  }, [setTargetScene])
+
+  const handleClearScene = useCallback(() => {
+    setTargetScene(null)
+  }, [setTargetScene])
+
   return (
     <div style={styles.panel}>
       <div style={styles.toolbar}>
@@ -127,6 +195,113 @@ export default function ThreeHotspotPicker({ path }: Props) {
             onMarkerDrag={handleMarkerDrag}
             onMarkerDragEnd={(coords) => commitPick(coords)}
           />
+
+          {isPortal && (
+            <div style={styles.targetSection}>
+              <div style={styles.targetHeader}>
+                <span style={styles.targetTitle}>Target scene</span>
+                <span style={styles.targetCount}>
+                  {scenes.length} scene{scenes.length === 1 ? '' : 's'}
+                </span>
+              </div>
+
+              {scenesError ? (
+                <p style={styles.errorText}>Could not load scenes: {scenesError}</p>
+              ) : null}
+
+              <div
+                style={{
+                  ...styles.selectedCard,
+                  borderColor: selectedScene ? '#1a6ef5' : '#d0d5dd',
+                  background: selectedScene ? '#eff4ff' : '#f9fafb',
+                }}
+              >
+                {selectedScene ? (
+                  <>
+                    {selectedScene.panoramaUrl ? (
+                      <img
+                        src={selectedScene.panoramaUrl}
+                        alt={selectedScene.title}
+                        style={styles.selectedPreview}
+                      />
+                    ) : (
+                      <div style={styles.selectedPreviewEmpty}>No preview</div>
+                    )}
+                    <div style={styles.selectedMeta}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={styles.selectedLabel}>Selected</div>
+                        <div style={styles.selectedTitle}>{selectedScene.title}</div>
+                      </div>
+                      <button type="button" onClick={handleClearScene} style={styles.clearButton}>
+                        Clear
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div style={styles.selectedEmpty}>
+                    {targetSceneId
+                      ? `Selected scene #${targetSceneId} not in list`
+                      : 'No scene selected — pick one below'}
+                  </div>
+                )}
+              </div>
+
+              <input
+                type="text"
+                value={sceneSearch}
+                onChange={(e) => setSceneSearch(e.target.value)}
+                placeholder={`Search ${scenes.length} scene${scenes.length === 1 ? '' : 's'}...`}
+                style={styles.searchInput}
+              />
+
+              <div style={styles.thumbGrid}>
+                {filteredScenes.length === 0 ? (
+                  <div style={styles.thumbEmpty}>
+                    {scenes.length === 0 ? 'Loading scenes...' : `No scenes match "${sceneSearch}"`}
+                  </div>
+                ) : filteredScenes.map((s) => {
+                  const isSelected = String(s.id) === targetSceneId
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => handlePickScene(s.id)}
+                      title={s.title}
+                      style={{
+                        ...styles.thumbButton,
+                        borderColor: isSelected ? '#1a6ef5' : '#e4e7ec',
+                        boxShadow: isSelected ? '0 0 0 2px rgba(26,110,245,0.25)' : 'none',
+                      }}
+                    >
+                      <div style={styles.thumbImageWrap}>
+                        {s.panoramaUrl ? (
+                          <img src={s.panoramaUrl} alt={s.title} style={styles.thumbImage} />
+                        ) : (
+                          <div style={styles.thumbImageEmpty}>No image</div>
+                        )}
+                        {isSelected && <div style={styles.thumbCheck}>OK</div>}
+                      </div>
+                      <div
+                        style={{
+                          ...styles.thumbCaption,
+                          color: isSelected ? '#1d2939' : '#475467',
+                          fontWeight: isSelected ? 600 : 400,
+                        }}
+                      >
+                        {s.title}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {!isPortal && hotspotType === 'info' && (
+            <p style={styles.infoNote}>
+              Info hotspots: edit the rich text body in the Info Content field below.
+            </p>
+          )}
 
           <div style={styles.debugGrid}>
             <DebugValue label="panorama URL" value={panorama.panoramaUrl || '(none)'} />
@@ -233,6 +408,176 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 6,
     color: '#9a3412',
     fontSize: 13,
+    margin: '10px 0 0',
+    padding: '8px 10px',
+  },
+  targetSection: {
+    border: '1px solid #e4e7ec',
+    borderRadius: 6,
+    marginTop: 10,
+    padding: 10,
+    background: '#ffffff',
+  },
+  targetHeader: {
+    alignItems: 'baseline',
+    display: 'flex',
+    gap: 8,
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  targetTitle: {
+    color: '#1d2939',
+    fontSize: 13,
+    fontWeight: 600,
+  },
+  targetCount: {
+    color: '#667085',
+    fontSize: 11,
+  },
+  selectedCard: {
+    border: '1px solid #d0d5dd',
+    borderRadius: 4,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  selectedPreview: {
+    background: '#000',
+    display: 'block',
+    height: 90,
+    objectFit: 'cover',
+    width: '100%',
+  },
+  selectedPreviewEmpty: {
+    alignItems: 'center',
+    color: '#98a2b3',
+    display: 'flex',
+    fontSize: 12,
+    height: 90,
+    justifyContent: 'center',
+  },
+  selectedMeta: {
+    alignItems: 'center',
+    display: 'flex',
+    gap: 8,
+    justifyContent: 'space-between',
+    padding: '6px 10px',
+  },
+  selectedLabel: {
+    color: '#1a6ef5',
+    fontSize: 10,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  selectedTitle: {
+    color: '#1d2939',
+    fontSize: 13,
+    fontWeight: 600,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  selectedEmpty: {
+    color: '#667085',
+    fontSize: 12,
+    padding: '14px 10px',
+    textAlign: 'center',
+  },
+  clearButton: {
+    background: '#ffffff',
+    border: '1px solid #d0d5dd',
+    borderRadius: 4,
+    color: '#475467',
+    cursor: 'pointer',
+    flexShrink: 0,
+    fontSize: 11,
+    padding: '4px 8px',
+  },
+  searchInput: {
+    border: '1px solid #d0d5dd',
+    borderRadius: 4,
+    boxSizing: 'border-box',
+    color: '#1d2939',
+    fontSize: 12,
+    marginBottom: 8,
+    padding: '6px 8px',
+    width: '100%',
+  },
+  thumbGrid: {
+    background: '#f9fafb',
+    border: '1px solid #e4e7ec',
+    borderRadius: 4,
+    display: 'grid',
+    gap: 6,
+    gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+    maxHeight: 240,
+    overflowY: 'auto',
+    padding: 6,
+  },
+  thumbEmpty: {
+    color: '#98a2b3',
+    fontSize: 12,
+    gridColumn: '1 / -1',
+    padding: '20px 8px',
+    textAlign: 'center',
+  },
+  thumbButton: {
+    background: '#ffffff',
+    border: '1px solid #e4e7ec',
+    borderRadius: 4,
+    cursor: 'pointer',
+    overflow: 'hidden',
+    padding: 0,
+    textAlign: 'left',
+  },
+  thumbImageWrap: {
+    background: '#000',
+    height: 60,
+    position: 'relative',
+    width: '100%',
+  },
+  thumbImage: {
+    display: 'block',
+    height: '100%',
+    objectFit: 'cover',
+    width: '100%',
+  },
+  thumbImageEmpty: {
+    alignItems: 'center',
+    color: '#475467',
+    display: 'flex',
+    fontSize: 10,
+    height: '100%',
+    justifyContent: 'center',
+  },
+  thumbCheck: {
+    alignItems: 'center',
+    background: '#1a6ef5',
+    borderRadius: '50%',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+    color: '#ffffff',
+    display: 'flex',
+    fontSize: 9,
+    fontWeight: 700,
+    height: 18,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    width: 18,
+  },
+  thumbCaption: {
+    fontSize: 11,
+    overflow: 'hidden',
+    padding: '4px 6px',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  infoNote: {
+    background: '#eef4ff',
+    border: '1px solid #b6d4fe',
+    borderRadius: 6,
+    color: '#1f4ea1',
+    fontSize: 12,
     margin: '10px 0 0',
     padding: '8px 10px',
   },
