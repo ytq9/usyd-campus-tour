@@ -82,82 +82,68 @@ export const Scenes: CollectionConfig = {
       name: 'hotspots',
       type: 'array',
       admin: {
-        description: 'Hotspots are managed visually above. This list mirrors the same data for advanced editing (rich text info content lives here).',
-        initCollapsed: true,
+        description: 'Each row mirrors a marker from the visual editor above. Use this list for advanced editing (rich text info content lives here).',
       },
       fields: [
         {
           name: 'type',
           type: 'select',
           required: true,
+          defaultValue: 'info',
           options: [
             { label: 'Portal (Scene Navigation)', value: 'scene' },
             { label: 'Info Item', value: 'info' },
           ],
         },
         {
+          name: 'text',
+          type: 'text',
+          required: true,
+          defaultValue: 'New Hotspot',
+        },
+        {
           name: 'pitch',
           type: 'number',
           required: true,
-          admin: { description: 'Vertical position (-90 to 90)' },
+          defaultValue: 0,
         },
         {
           name: 'yaw',
           type: 'number',
           required: true,
-          admin: { description: 'Horizontal position (-180 to 180)' },
-        },
-        {
-          name: 'text',
-          type: 'text',
-          required: true,
-          admin: { description: 'Hotspot label' },
+          defaultValue: 0,
         },
         {
           name: 'targetScene',
           type: 'relationship',
           relationTo: 'scenes',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'scene',
-            description: 'Target scene for portal navigation',
-          },
         },
         {
           name: 'targetFloor',
           type: 'relationship',
           relationTo: 'floors',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'scene',
-            description: 'Target floor (for cross-floor portals)',
-          },
         },
         {
           name: 'infoContent',
           type: 'richText',
-          admin: {
-            condition: (data, siblingData) => siblingData?.type === 'info',
-            description: 'Content shown in info modal',
-          },
-        },
-        {
-          name: 'cssClass',
-          type: 'text',
-          admin: { description: 'Optional CSS class for styling' },
         },
         {
           name: 'iconColor',
           type: 'text',
-          admin: { description: 'Optional icon color (hex)' },
         },
         {
           name: 'iconSize',
           type: 'select',
+          defaultValue: 'md',
           options: [
             { label: 'Small', value: 'sm' },
             { label: 'Medium', value: 'md' },
             { label: 'Large', value: 'lg' },
           ],
-          defaultValue: 'md',
+        },
+        {
+          name: 'cssClass',
+          type: 'text',
         },
       ],
     },
