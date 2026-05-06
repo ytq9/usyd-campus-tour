@@ -79,6 +79,7 @@ export const Scenes: CollectionConfig = {
       type: 'array',
       admin: {
         description: 'Floating items: portals (scene navigation) and info items (content modals)',
+        initCollapsed: true,
       },
       fields: [
         {
