@@ -32,7 +32,10 @@ export default function ThreeHotspotPicker({ path }: Props) {
   const basePath = path.replace(/\.visualPicker$/, '')
   const { value: pitch, setValue: setPitch } = useField<number | string | null>({ path: `${basePath}.pitch` })
   const { value: yaw, setValue: setYaw } = useField<number | string | null>({ path: `${basePath}.yaw` })
-  const { value: hotspotType } = useField<string>({ path: `${basePath}.type` })
+  const { value: hotspotType, setValue: setHotspotType } = useField<string>({ path: `${basePath}.type` })
+  const { value: hotspotText, setValue: setHotspotText } = useField<string>({ path: `${basePath}.text` })
+  const { value: iconColor, setValue: setIconColor } = useField<string | null>({ path: `${basePath}.iconColor` })
+  const { value: iconSize, setValue: setIconSize } = useField<string>({ path: `${basePath}.iconSize` })
   const { value: targetScene, setValue: setTargetScene } = useField<number | string | { id: number | string } | null>({ path: `${basePath}.targetScene` })
   const panoramaFieldValue = useFormFields(([fields]) => fields.panorama?.value as any)
   const panorama = useAdminPanoramaMedia(panoramaFieldValue)
@@ -195,6 +198,59 @@ export default function ThreeHotspotPicker({ path }: Props) {
             onMarkerDrag={handleMarkerDrag}
             onMarkerDragEnd={(coords) => commitPick(coords)}
           />
+
+          <div style={styles.metaSection}>
+            <div style={styles.metaRow}>
+              <label style={styles.metaCell}>
+                <span style={styles.metaLabel}>Type</span>
+                <select
+                  value={hotspotType || 'info'}
+                  onChange={(e) => setHotspotType(e.target.value)}
+                  style={styles.metaInput}
+                >
+                  <option value="info">Info Item</option>
+                  <option value="scene">Portal (Scene Navigation)</option>
+                </select>
+              </label>
+
+              <label style={{ ...styles.metaCell, flex: 2 }}>
+                <span style={styles.metaLabel}>Label</span>
+                <input
+                  type="text"
+                  value={hotspotText || ''}
+                  onChange={(e) => setHotspotText(e.target.value)}
+                  placeholder="Hotspot label"
+                  style={styles.metaInput}
+                />
+              </label>
+            </div>
+
+            <div style={styles.metaRow}>
+              <label style={styles.metaCell}>
+                <span style={styles.metaLabel}>Icon color</span>
+                <input
+                  type="text"
+                  value={iconColor || ''}
+                  onChange={(e) => setIconColor(e.target.value || null)}
+                  placeholder="#cc0000"
+                  style={styles.metaInput}
+                />
+              </label>
+
+              <label style={styles.metaCell}>
+                <span style={styles.metaLabel}>Icon size</span>
+                <select
+                  value={iconSize || 'md'}
+                  onChange={(e) => setIconSize(e.target.value)}
+                  style={styles.metaInput}
+                >
+                  <option value="sm">Small</option>
+                  <option value="md">Medium</option>
+                  <option value="lg">Large</option>
+                </select>
+              </label>
+            </div>
+          </div>
 
           {isPortal && (
             <div style={styles.targetSection}>
@@ -410,6 +466,44 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
     margin: '10px 0 0',
     padding: '8px 10px',
+  },
+  metaSection: {
+    background: '#ffffff',
+    border: '1px solid #e4e7ec',
+    borderRadius: 6,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    marginTop: 10,
+    padding: 10,
+  },
+  metaRow: {
+    display: 'flex',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  metaCell: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    gap: 4,
+    minWidth: 120,
+  },
+  metaLabel: {
+    color: '#475467',
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  metaInput: {
+    border: '1px solid #d0d5dd',
+    borderRadius: 4,
+    boxSizing: 'border-box',
+    color: '#1d2939',
+    fontSize: 13,
+    padding: '6px 8px',
+    width: '100%',
   },
   targetSection: {
     border: '1px solid #e4e7ec',
