@@ -42,31 +42,26 @@ export const Scenes: CollectionConfig = {
     {
       name: 'panorama',
       type: 'upload',
-        relationTo: 'media',
-        required: true,
-        admin: {
-          components: {
-            afterInput: ['/components/admin/three/ThreeInitialViewPicker'],
-          },
-        },
+      relationTo: 'media',
+      required: true,
     },
     {
       name: 'initialYaw',
       type: 'number',
       defaultValue: 0,
-      admin: { description: 'Initial horizontal camera angle', hidden: true },
+      admin: { hidden: true },
     },
     {
       name: 'initialPitch',
       type: 'number',
       defaultValue: 0,
-      admin: { description: 'Initial vertical camera angle', hidden: true },
+      admin: { hidden: true },
     },
     {
       name: 'initialHfov',
       type: 'number',
       defaultValue: 120,
-      admin: { description: 'Initial horizontal field of view', hidden: true },
+      admin: { hidden: true },
     },
     {
       name: 'rotation',
@@ -75,10 +70,19 @@ export const Scenes: CollectionConfig = {
       admin: { description: 'Image rotation offset in degrees' },
     },
     {
+      name: 'hotspotEditor',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '@/components/admin/three/ThreeSceneHotspotEditor',
+        },
+      },
+    },
+    {
       name: 'hotspots',
       type: 'array',
       admin: {
-        description: 'Floating items: portals (scene navigation) and info items (content modals)',
+        description: 'Hotspots are managed visually above. This list mirrors the same data for advanced editing (rich text info content lives here).',
         initCollapsed: true,
       },
       fields: [
@@ -102,15 +106,6 @@ export const Scenes: CollectionConfig = {
           type: 'number',
           required: true,
           admin: { description: 'Horizontal position (-180 to 180)' },
-        },
-        {
-          name: 'visualPicker',
-          type: 'ui',
-          admin: {
-            components: {
-              Field: '@/components/admin/three/ThreeHotspotPicker',
-            },
-          },
         },
         {
           name: 'text',

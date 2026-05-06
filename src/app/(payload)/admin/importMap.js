@@ -23,8 +23,7 @@ import { UnderlineFeatureClient as UnderlineFeatureClient_e70f5e05f09f93e00b997e
 import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { MapPointsEditor as MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c } from '@/components/payload/MapPointsEditor'
-import { default as default_89d5b14b2a8b78b35c7fb6450d2c5303 } from '../../../components/admin/three/ThreeInitialViewPicker'
-import { default as default_2ecc841a2fb807641b62df99336799b1 } from '@/components/admin/three/ThreeHotspotPicker'
+import { default as default_894a722305973334be91b6aae8e52c63 } from '@/components/admin/three/ThreeSceneHotspotEditor'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -53,7 +52,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#BoldFeatureClient": BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/payload/MapPointsEditor#MapPointsEditor": MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c,
-  "/components/admin/three/ThreeInitialViewPicker#default": default_89d5b14b2a8b78b35c7fb6450d2c5303,
-  "@/components/admin/three/ThreeHotspotPicker#default": default_2ecc841a2fb807641b62df99336799b1,
+  "@/components/admin/three/ThreeSceneHotspotEditor#default": default_894a722305973334be91b6aae8e52c63,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
