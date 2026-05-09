@@ -258,7 +258,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
   const { addFieldRow, dispatchFields, removeFieldRow } = useForm()
   const floorplanField = useFormFields(([fields]) => fields.floorplan as FieldState<number | string | MediaValue | null> | undefined)
 
-  // Read live row data directly from form state so markers appear immediately after addFieldRow/dispatchFields
+  // Read live form rows so newly added map markers appear before the document is saved.
   const points = useFormFields(([fields]) => {
     const rows = (fields[path]?.rows ?? []) as unknown[]
     return rows.map((_, i) => ({
@@ -751,7 +751,6 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
                 )
               })}
 
-              {/* Preview circle while choosing scene for a new marker */}
               {pendingAdd && (
                 <circle
                   cx={pendingAdd.cx}

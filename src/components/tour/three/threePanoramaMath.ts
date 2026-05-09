@@ -8,9 +8,6 @@ export const MAX_HFOV = 120
 export const CONTROL_MIN_PITCH = -89.9
 export const CONTROL_MAX_PITCH = 89.9
 
-const DEG_TO_RAD = Math.PI / 180
-const RAD_TO_DEG = 180 / Math.PI
-
 /**
  * Coordinate convention used by stored CMS panorama data:
  *
@@ -32,21 +29,19 @@ const RAD_TO_DEG = 180 / Math.PI
 export function pitchYawToVector3(pitch: number, yaw: number): THREE.Vector3 {
   const clampedPitch = clampPitch(pitch)
   const normalizedYaw = normaliseYaw(yaw)
-  const pitchRad = clampedPitch * DEG_TO_RAD
-  const yawRad = normalizedYaw * DEG_TO_RAD
-  const cosPitch = Math.cos(pitchRad)
+  const spherical = new THREE.Spherical(
+    1,
+    THREE.MathUtils.degToRad(90 - clampedPitch),
+    Math.PI - THREE.MathUtils.degToRad(normalizedYaw),
+  )
 
-  return new THREE.Vector3(
-    Math.sin(yawRad) * cosPitch,
-    Math.sin(pitchRad),
-    -Math.cos(yawRad) * cosPitch,
-  ).normalize()
+  return new THREE.Vector3().setFromSpherical(spherical).normalize()
 }
 
 export function vector3ToPitchYaw(vector: THREE.Vector3): PitchYaw {
-  const normalized = vector.clone().normalize()
-  const pitch = Math.asin(THREE.MathUtils.clamp(normalized.y, -1, 1)) * RAD_TO_DEG
-  const yaw = Math.atan2(normalized.x, -normalized.z) * RAD_TO_DEG
+  const spherical = new THREE.Spherical().setFromVector3(vector.clone().normalize())
+  const pitch = 90 - THREE.MathUtils.radToDeg(spherical.phi)
+  const yaw = THREE.MathUtils.radToDeg(Math.PI - spherical.theta)
 
   return {
     pitch: clampPitch(pitch),
@@ -157,6 +152,6 @@ export function clampHfov(hfov: number): number {
 
 export function horizontalFovToVerticalFov(hfov: number, aspect: number): number {
   const safeAspect = aspect > 0 ? aspect : 1
-  const hRadians = clampHfov(hfov) * DEG_TO_RAD
-  return 2 * Math.atan(Math.tan(hRadians * 0.5) / safeAspect) * RAD_TO_DEG
+  const hRadians = THREE.MathUtils.degToRad(clampHfov(hfov))
+  return THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hRadians * 0.5) / safeAspect))
 }

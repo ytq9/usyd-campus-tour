@@ -13,7 +13,6 @@ export const Media: CollectionConfig = {
     ],
     adminThumbnail: 'thumbnail',
   },
-  //  Register a custom component at the top of the Media list page
   admin: {
     components: {
       beforeList: ['@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList'],
@@ -28,7 +27,6 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
-    //  If alt is empty, automatically fill it with the filename.
     beforeOperation: [
       ({ args, operation }) => {
         if ((operation === 'create' || operation === 'update') && args.req?.file) {

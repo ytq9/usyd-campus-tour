@@ -50,8 +50,7 @@ export const Tours: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ data, req, operation }) => {
-        // Auto-generate slug from title if not set
+      async ({ data }) => {
         if (data?.title && !data?.slug) {
           data.slug = data.title
             .toLowerCase()
@@ -61,24 +60,21 @@ export const Tours: CollectionConfig = {
         return data
       },
       async ({ data, req }) => {
-        // Publish workflow validation — only runs when publishing
         if (data._status !== 'published') return data
 
         const { payload } = req
         const errors: string[] = []
 
-        // Check 1: Tour must have floors
+        // Keep incomplete drafts flexible, but block publishing until the viewer can load a complete tour.
         const floorRefs = data.floors as (string | number | { id: string | number })[] | undefined
         if (!floorRefs || floorRefs.length === 0) {
           errors.push('Tour has no floors linked. Add at least one floor before publishing.')
         }
 
-        // Check 2: Tour must have a defaultFloor
         if (!data.defaultFloor) {
           errors.push('Tour has no default floor set. Set a default floor before publishing.')
         }
 
-        // Checks 3–7: Per-floor and per-scene validation
         const floorIds = (floorRefs || []).map((f) => (typeof f === 'object' ? f.id : f))
 
         for (const floorId of floorIds) {
@@ -97,12 +93,11 @@ export const Tours: CollectionConfig = {
 
           const floorLabel = `Floor "${floor.name}"`
 
-          // Check 3: Each floor must have an initialScene
           if (!floor.initialScene) {
             errors.push(`${floorLabel} has no initial scene set.`)
           }
 
-          // Fetch all scenes on this floor (including drafts)
+          // Draft scenes are included so validation can explain what still needs publishing.
           const scenesResult = await payload.find({
             collection: 'scenes',
             where: { floor: { equals: floorId } },
@@ -114,7 +109,6 @@ export const Tours: CollectionConfig = {
 
           const allScenes: any[] = scenesResult.docs
 
-          // Check 4: Each floor must have at least one published scene
           const publishedScenes = allScenes.filter((s) => s._status === 'published')
           if (allScenes.length === 0) {
             errors.push(`${floorLabel} has no scenes.`)
@@ -122,7 +116,6 @@ export const Tours: CollectionConfig = {
             errors.push(`${floorLabel} has no published scenes. Publish at least one scene first.`)
           }
 
-          // Check 5: initialScene must be published
           if (floor.initialScene) {
             const initialSceneId =
               typeof floor.initialScene === 'object' ? floor.initialScene.id : floor.initialScene
@@ -134,16 +127,13 @@ export const Tours: CollectionConfig = {
             }
           }
 
-          // Checks 6 & 7: Per-scene checks (panorama and portal hotspot targets)
           for (const scene of publishedScenes) {
             const sceneLabel = `Scene "${scene.title}" (${floorLabel})`
 
-            // Check 6: Published scene must have a panorama
             if (!scene.panorama) {
               errors.push(`${sceneLabel} is missing a panorama image.`)
             }
 
-            // Check 7: Portal hotspots must point to published scenes
             for (const hotspot of scene.hotspots || []) {
               if (hotspot.type !== 'scene') continue
               if (!hotspot.targetScene) continue

@@ -16,7 +16,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const debugHotspots = debugHotspotsParam === 'true'
   const payload = await getPayload({ config })
 
-  // Fetch tour
   const tours = await payload.find({
     collection: 'tours',
     where: { slug: { equals: tourSlug } },
@@ -27,7 +26,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const tour = tours.docs[0]
   if (!tour) notFound()
 
-  // Fetch current floor
   const floors = await payload.find({
     collection: 'floors',
     where: { slug: { equals: floorSlug } },
@@ -37,7 +35,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const floor = floors.docs[0]
   if (!floor) notFound()
 
-  // Fetch current scene
   const scenes = await payload.find({
     collection: 'scenes',
     where: { slug: { equals: sceneSlug } },
@@ -48,7 +45,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
   const scene = scenes.docs[0]
   if (!scene) notFound()
 
-  // Fetch all scenes on this floor for in-viewer navigation.
   const floorScenes = await payload.find({
     collection: 'scenes',
     where: { floor: { equals: floor.id } },
@@ -57,7 +53,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
     draft: isDraft,
   })
 
-  // Fetch all floors for the tour (for floor map)
   const tourFloors = tour.floors
     ? await Promise.all(
         tour.floors.map(async (f: any) => {
@@ -72,7 +67,6 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       )
     : []
 
-  // Build scene data for client
   const sceneData = {
     tour: {
       id: tour.id,

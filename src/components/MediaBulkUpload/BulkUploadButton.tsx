@@ -112,7 +112,7 @@ export const BulkUploadButton: React.FC = () => {
       setIsUploading(true)
       setFailedFiles([])
 
-      // Check duplicates first
+      // Keep existing uploads safe by asking before duplicate filenames are sent.
       const duplicates: string[] = []
       const uniqueFilesList: File[] = []
       for (const file of imageFiles) {
@@ -125,13 +125,11 @@ export const BulkUploadButton: React.FC = () => {
       }
 
       if (duplicates.length > 0) {
-        // Show modal for user to choose
         setDuplicateFiles(duplicates)
         setOriginalFiles(imageFiles)
         setUniqueFiles(uniqueFilesList)
         setShowDuplicateModal(true)
       } else {
-        // No duplicates, upload all
         setProgress({ current: 0, total: imageFiles.length })
 
         const results: UploadResult[] = []
@@ -213,7 +211,6 @@ export const BulkUploadButton: React.FC = () => {
 
   return (
     <div style={{ marginBottom: '16px' }}>
-      {/* Drop zone */}
       <div
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
         onDragLeave={() => setIsDragging(false)}
@@ -267,7 +264,6 @@ export const BulkUploadButton: React.FC = () => {
         </span>
       </div>
 
-      {/* Progress bar */}
       {isUploading && progress && (
         <div style={{ marginTop: '10px' }}>
           <div
@@ -294,7 +290,6 @@ export const BulkUploadButton: React.FC = () => {
         </div>
       )}
 
-      {/* Failed files list */}
       {failedFiles.length > 0 && !isUploading && (
         <div
           style={{
@@ -345,7 +340,6 @@ export const BulkUploadButton: React.FC = () => {
         </div>
       )}
 
-      {/* Duplicate files modal */}
       {showDuplicateModal && (
         <div style={{
           position: 'fixed',

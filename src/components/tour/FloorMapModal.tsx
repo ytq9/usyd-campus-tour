@@ -42,7 +42,6 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
 
       <dialog ref={modalRef} className="d-modal">
         <div className="d-modal-box relative w-full max-w-5xl bg-white/90">
-          {/* Floor tabs */}
           <div className="d-tabs d-tabs-lift mb-4">
             {tourFloors.map((floor: any, idx: number) => (
               <button
@@ -55,7 +54,6 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
             ))}
           </div>
 
-          {/* Floor map content */}
           {tourFloors[activeFloorIdx] && (
             <div className="p-4 bg-white rounded-lg">
               {tourFloors[activeFloorIdx].floorplan ? (
@@ -65,7 +63,6 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
                     alt={`${tourFloors[activeFloorIdx].name} floorplan`}
                     className="w-full h-auto"
                   />
-                  {/* Map points overlay */}
                   <svg className="absolute inset-0 w-full h-full" viewBox="0 0 5000 2000" preserveAspectRatio="xMidYMid meet">
                     {(tourFloors[activeFloorIdx].mapPoints || []).map((mp: any, i: number) => {
                       const isCurrentScene = mp.scene?.slug === currentSceneSlug

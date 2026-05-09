@@ -27,7 +27,7 @@ type HotspotRef = {
   sceneDbId: number
 }
 
-// ID maps use string keys to simplify cross-referencing
+// Reference JSON uses local string IDs, while Payload records may use numeric IDs.
 type IdMap = Record<string, number>
 
 type RichTextValue = {
@@ -85,7 +85,6 @@ async function seed() {
 
   const payload = await getPayload({ config })
 
-  // Create admin user if none exists
   const existingUsers = await payload.find({ collection: 'users', limit: 1 })
   if (existingUsers.totalDocs === 0) {
     await payload.create({
@@ -98,7 +97,6 @@ async function seed() {
     console.log('Created admin user: admin@usyd.edu.au / admin123')
   }
 
-  // Check for seed data
   const tourConfigPath = path.resolve(__dirname, 'data/tour.json')
   if (!fs.existsSync(tourConfigPath)) {
     console.log('No seed data found at src/seed/data/tour.json')
@@ -109,29 +107,24 @@ async function seed() {
     console.log('  4. Copy reference public/tour/ to public/tour/')
     console.log('  5. Re-run this script')
 
-    // Create a sample tour anyway
     console.log('\nCreating sample tour data...')
     await createSampleTour(payload)
     process.exit(0)
   }
 
-  // Load tour config
   const tourConfig = JSON.parse(fs.readFileSync(tourConfigPath, 'utf-8'))
 
-  // Maps for tracking created records
-  const mediaMap: IdMap = {} // filePath -> mediaId
-  const floorMap: IdMap = {} // floorSlug -> floorId
-  const sceneMap: IdMap = {} // "floorSlug/sceneLocalId" -> sceneDbId
-  const hotspotRefs: HotspotRef[] = [] // deferred hotspot creation
+  const mediaMap: IdMap = {}
+  const floorMap: IdMap = {}
+  const sceneMap: IdMap = {}
+  const hotspotRefs: HotspotRef[] = []
 
-  // 1. Upload panorama images and floorplan SVGs
   console.log('Uploading media files...')
   const publicDir = path.resolve(__dirname, '../../public')
 
   for (const floorplan of tourConfig.floorplans) {
     const floorSlug = floorplan.config.replace('.json', '')
 
-    // Upload floorplan SVG
     const svgPath = path.join(publicDir, floorplan.floorplan)
     if (fs.existsSync(svgPath)) {
       const svgFilename = path.basename(svgPath)
@@ -153,7 +146,6 @@ async function seed() {
       }
     }
 
-    // Upload panorama images for this floor
     const floorConfigPath = path.resolve(__dirname, `data/floorplans/${floorplan.config}`)
     if (fs.existsSync(floorConfigPath)) {
       const floorConfig = JSON.parse(fs.readFileSync(floorConfigPath, 'utf-8'))
@@ -186,7 +178,6 @@ async function seed() {
     }
   }
 
-  // 2. Create Tour
   console.log('Creating tour...')
   const tour = await payload.create({
     collection: 'tours',
@@ -202,7 +193,6 @@ async function seed() {
   })
   console.log(`  Created tour: ${tour.title}`)
 
-  // 3. Create Floors (without initialScene - will update later)
   console.log('Creating floors...')
   for (let i = 0; i < tourConfig.floorplans.length; i++) {
     const fp = tourConfig.floorplans[i]
@@ -227,7 +217,6 @@ async function seed() {
     console.log(`  Created floor: ${fp.floorName}`)
   }
 
-  // 4. Create Scenes (without hotspots - will update later)
   console.log('Creating scenes...')
   for (const fp of tourConfig.floorplans) {
     const floorSlug = fp.config.replace('.json', '')
@@ -267,7 +256,6 @@ async function seed() {
 
       sceneMap[`${floorSlug}/${sceneLocalId}`] = scene.id
 
-      // Store hotspot references for later
       if (sceneData.hotSpots) {
         for (const hs of sceneData.hotSpots) {
           hotspotRefs.push({
@@ -283,7 +271,6 @@ async function seed() {
     }
   }
 
-  // 5. Update Scenes with hotspots (now that all scenes exist for cross-references)
   console.log('Adding hotspots to scenes...')
   const sceneHotspots: Record<string, any[]> = {}
 
@@ -302,10 +289,8 @@ async function seed() {
     }
 
     if (hs.type === 'scene' || hs.type !== 'info') {
-      // Resolve target scene
       const isNewFloor = hs.navType === 'newFloorScene'
       if (isNewFloor && hs.sceneId) {
-        // sceneId format: "floorSlug/sceneId" for cross-floor
         const parts = hs.sceneId.split('/')
         if (parts.length === 2) {
           const targetFloorSlug = parts[0]
@@ -317,7 +302,6 @@ async function seed() {
           }
         }
       } else if (hs.sceneId) {
-        // Same floor
         const targetSceneDbId = sceneMap[`${ref.floorLocalId}/${hs.sceneId}`]
         if (targetSceneDbId) {
           hotspotData.targetScene = targetSceneDbId
@@ -341,16 +325,13 @@ async function seed() {
   }
   console.log(`  Updated ${Object.keys(sceneHotspots).length} scenes with hotspots`)
 
-  // 6. Update Floors with initialScene and mapPoints
   console.log('Updating floors with initial scenes and map points...')
   for (const fp of tourConfig.floorplans) {
     const floorSlug = fp.config.replace('.json', '')
     const floorDbId = floorMap[floorSlug]
 
-    // Resolve initial scene
     const initialSceneDbId = sceneMap[`${floorSlug}/${fp.initialSceneId}`]
 
-    // Resolve map points
     const mapPoints = (fp.hotSpotPoints || [])
       .map((pt: any) => {
         const sceneDbId = sceneMap[`${floorSlug}/${pt.sceneId}`]
@@ -375,7 +356,6 @@ async function seed() {
     console.log(`  Updated floor: ${fp.floorName}`)
   }
 
-  // 7. Update Tour with floors and defaultFloor
   console.log('Updating tour with floors...')
   const floorIds = tourConfig.floorplans.map((fp: any) => {
     const floorSlug = fp.config.replace('.json', '')
@@ -399,7 +379,7 @@ async function seed() {
 }
 
 async function createSampleTour(payload: any) {
-  // Create a minimal sample tour for testing
+  // Keep local setup usable even when the reference data bundle is not present.
   const tour = await payload.create({
     collection: 'tours',
     draft: false,

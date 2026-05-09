@@ -50,7 +50,6 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
 
   return (
     <div className="w-1/3 flex flex-col items-end">
-      {/* Mobile toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden pointer-events-auto p-2 bg-black/70 rounded-l-md mt-4"
@@ -60,7 +59,6 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
         </svg>
       </button>
 
-      {/* Sidebar content */}
       <div className={`${isOpen ? 'block' : 'hidden'} lg:block pointer-events-auto mt-2 mr-2`}>
         <div className="space-y-2 w-64 lg:w-80 bg-black/50 p-4 rounded-md border-2 border-white/20 max-h-[70vh] overflow-y-auto">
           {hotspots.map((hs, i) => {

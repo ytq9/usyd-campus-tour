@@ -14,6 +14,7 @@
     "@payloadcms/db-postgres": "^3.32.0",
     "@payloadcms/next": "^3.32.0",
     "@payloadcms/richtext-lexical": "^3.32.0",
+    "@react-three/fiber": "^9.6.1",
     "@theatre/core": "^0.5.1",
     "@theatre/studio": "^0.5.1",
     "cross-env": "^7.0.0",

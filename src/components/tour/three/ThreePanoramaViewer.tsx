@@ -1,5 +1,6 @@
 'use client'
 
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { getDefaultTransitionConfig } from '../transition'
@@ -9,10 +10,13 @@ import {
   animateCameraFocus,
   animateCameraTransition,
 } from './threeCameraTransition'
-import { getStoredPitchYaw, toThreeDisplayPitchYaw } from './threePanoramaMath'
+import { getStoredPitchYaw, projectPitchYawToScreen, toThreeDisplayPitchYaw } from './threePanoramaMath'
 import { useThreePanoramaControls } from './useThreePanoramaControls'
 import { useThreeSceneTexture } from './useThreeSceneTexture'
-import type { CameraState, HotspotData, ThreePanoramaViewerProps, ThreeSceneData, ThreeViewerApi } from './types'
+import type { CameraState, HotspotData, ProjectedHotspot, ThreePanoramaViewerProps, ThreeSceneData, ThreeViewerApi } from './types'
+
+const HOTSPOT_EDGE_PADDING = 48
+const EMPTY_HOTSPOTS: HotspotData[] = []
 
 export default function ThreePanoramaViewer({
   scenes,
@@ -25,15 +29,11 @@ export default function ThreePanoramaViewer({
 }: ThreePanoramaViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
-  const sceneRef = useRef<THREE.Scene | null>(null)
-  const sphereRef = useRef<THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | null>(null)
-  const frameRef = useRef<number | null>(null)
-  const resizeObserverRef = useRef<ResizeObserver | null>(null)
   const animationAbortRef = useRef<AbortController | null>(null)
-  const [cameraForHotspots, setCameraForHotspots] = useState<THREE.PerspectiveCamera | null>(null)
+  const [cameraForApi, setCameraForApi] = useState<THREE.PerspectiveCamera | null>(null)
   const [activeSceneSlug, setActiveSceneSlug] = useState(initialSceneSlug)
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false)
+  const [projectedHotspots, setProjectedHotspots] = useState<ProjectedHotspot[]>([])
 
   const activeScene = useMemo<ThreeSceneData>(() => (
     scenes.find((scene) => scene.slug === activeSceneSlug) ||
@@ -43,6 +43,7 @@ export default function ThreePanoramaViewer({
   const activeSceneCameraState = useMemo(() => (
     activeScene ? getSceneCameraState(activeScene) : { pitch: 0, yaw: 0, hfov: 120 }
   ), [activeScene])
+  const activeSceneHotspots = activeScene?.hotspots ?? EMPTY_HOTSPOTS
 
   const { applyCameraState, getCameraState, setCameraState } = useThreePanoramaControls({
     cameraRef,
@@ -253,7 +254,7 @@ export default function ThreePanoramaViewer({
       }
     }
   }, [
-    cameraForHotspots,
+    cameraForApi,
     focusScenePitchYaw,
     focusInfoHotspot,
     getCameraState,
@@ -261,93 +262,6 @@ export default function ThreePanoramaViewer({
     runSameFloorTransition,
     scenes,
   ])
-
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container || cameraRef.current) return
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1100)
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: false,
-      powerPreference: 'high-performance',
-    })
-    const geometry = new THREE.SphereGeometry(500, 64, 40)
-    geometry.scale(-1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-    const sphere = new THREE.Mesh(geometry, material)
-
-    scene.add(sphere)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setSize(Math.max(container.clientWidth, 1), Math.max(container.clientHeight, 1))
-    renderer.domElement.style.display = 'block'
-    renderer.domElement.style.height = '100%'
-    renderer.domElement.style.touchAction = 'none'
-    renderer.domElement.style.width = '100%'
-    container.appendChild(renderer.domElement)
-
-    sceneRef.current = scene
-    cameraRef.current = camera
-    rendererRef.current = renderer
-    sphereRef.current = sphere
-    setCameraForHotspots(camera)
-    applyCameraState()
-
-    const resize = () => {
-      const width = Math.max(container.clientWidth, 1)
-      const height = Math.max(container.clientHeight, 1)
-      renderer.setSize(width, height, false)
-      applyCameraState()
-    }
-
-    resizeObserverRef.current = new ResizeObserver(resize)
-    resizeObserverRef.current.observe(container)
-    window.addEventListener('resize', resize)
-    resize()
-
-    const render = () => {
-      renderer.render(scene, camera)
-      frameRef.current = requestAnimationFrame(render)
-    }
-    frameRef.current = requestAnimationFrame(render)
-
-    return () => {
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current)
-        frameRef.current = null
-      }
-
-      resizeObserverRef.current?.disconnect()
-      resizeObserverRef.current = null
-      window.removeEventListener('resize', resize)
-
-      scene.remove(sphere)
-      material.map = null
-      material.dispose()
-      geometry.dispose()
-      renderer.dispose()
-      renderer.forceContextLoss()
-
-      if (renderer.domElement.parentElement === container) {
-        container.removeChild(renderer.domElement)
-      }
-
-      sphereRef.current = null
-      rendererRef.current = null
-      sceneRef.current = null
-      cameraRef.current = null
-      setCameraForHotspots(null)
-    }
-  }, [applyCameraState])
-
-  useEffect(() => {
-    const sphere = sphereRef.current
-    if (!sphere) return
-
-    sphere.material.map = texture
-    sphere.material.needsUpdate = true
-  }, [texture])
 
   if (!activeScene) {
     return (
@@ -369,6 +283,33 @@ export default function ThreePanoramaViewer({
           transition: 'filter 0.3s ease',
         }}
       >
+        <Canvas
+          camera={{ fov: 75, near: 0.1, far: 1100, position: [0, 0, 0] }}
+          dpr={[1, 2]}
+          gl={{
+            alpha: false,
+            antialias: true,
+            powerPreference: 'high-performance',
+          }}
+          style={{
+            display: 'block',
+            height: '100%',
+            touchAction: 'none',
+            width: '100%',
+          }}
+        >
+          <PanoramaCameraBridge
+            applyCameraState={applyCameraState}
+            cameraRef={cameraRef}
+            onCameraChange={setCameraForApi}
+          />
+          <HotspotProjectionBridge
+            containerRef={containerRef}
+            hotspots={activeSceneHotspots}
+            onChange={setProjectedHotspots}
+          />
+          <PanoramaSphere texture={texture} />
+        </Canvas>
         {isLoading && !texture && (
           <div className="absolute inset-0 flex items-center justify-center text-white/70 text-sm">
             Loading scene...
@@ -380,17 +321,164 @@ export default function ThreePanoramaViewer({
           </div>
         )}
         <ThreeHotspotLayer
-          camera={cameraForHotspots}
-          containerRef={containerRef}
           floorSlug={floorSlug}
-          hotspots={activeScene.hotspots || []}
           onInfoFocus={handleInfoFocus}
           onNavigate={handleSceneNavigation}
+          projectedHotspots={projectedHotspots}
           tourSlug={tourSlug}
         />
       </div>
     </>
   )
+}
+
+function HotspotProjectionBridge({
+  containerRef,
+  hotspots,
+  onChange,
+}: {
+  containerRef: React.RefObject<HTMLElement | null>
+  hotspots: HotspotData[]
+  onChange: React.Dispatch<React.SetStateAction<ProjectedHotspot[]>>
+}) {
+  const previousRef = useRef<ProjectedHotspot[]>([])
+
+  useFrame(({ camera }) => {
+    const container = containerRef.current
+    if (!(camera instanceof THREE.PerspectiveCamera) || !container) {
+      if (previousRef.current.length > 0) {
+        previousRef.current = []
+        onChange([])
+      }
+      return
+    }
+
+    const width = container.clientWidth
+    const height = container.clientHeight
+    const nextHotspots = hotspots
+      .filter((hotspot) => hotspot.pitch !== undefined && hotspot.yaw !== undefined)
+      .map((hotspot) => {
+        // Hotspots use stored raw coordinates. Ignore scene.rotation here so
+        // hotspot placement matches the authored CMS values.
+        const displayPosition = getStoredPitchYaw(
+          Number(hotspot.pitch),
+          Number(hotspot.yaw),
+        )
+        const projected = projectPitchYawToScreen(
+          displayPosition.pitch,
+          displayPosition.yaw,
+          camera,
+          container,
+        )
+        const insideViewport =
+          projected.x >= -HOTSPOT_EDGE_PADDING &&
+          projected.x <= width + HOTSPOT_EDGE_PADDING &&
+          projected.y >= -HOTSPOT_EDGE_PADDING &&
+          projected.y <= height + HOTSPOT_EDGE_PADDING
+
+        return {
+          hotspot,
+          x: projected.x,
+          y: projected.y,
+          visible: projected.visible && insideViewport,
+        }
+      })
+
+    if (areProjectedHotspotsEqual(previousRef.current, nextHotspots)) return
+
+    previousRef.current = nextHotspots
+    onChange(nextHotspots)
+  })
+
+  useEffect(() => {
+    previousRef.current = []
+    onChange((current) => (current.length ? [] : current))
+  }, [hotspots, onChange])
+
+  return null
+}
+
+function PanoramaCameraBridge({
+  applyCameraState,
+  cameraRef,
+  onCameraChange,
+}: {
+  applyCameraState: () => void
+  cameraRef: React.RefObject<THREE.PerspectiveCamera | null>
+  onCameraChange: (camera: THREE.PerspectiveCamera | null) => void
+}) {
+  const { camera, size } = useThree()
+
+  useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) {
+      onCameraChange(null)
+      return
+    }
+
+    cameraRef.current = camera
+    onCameraChange(camera)
+    applyCameraState()
+
+    return () => {
+      if (cameraRef.current === camera) {
+        cameraRef.current = null
+      }
+      onCameraChange(null)
+    }
+  }, [applyCameraState, camera, cameraRef, onCameraChange])
+
+  useEffect(() => {
+    applyCameraState()
+  }, [applyCameraState, size.height, size.width])
+
+  return null
+}
+
+function PanoramaSphere({ texture }: { texture: THREE.Texture | null }) {
+  const materialRef = useRef<THREE.MeshBasicMaterial | null>(null)
+  const geometry = useMemo(() => {
+    const sphereGeometry = new THREE.SphereGeometry(500, 64, 40)
+    sphereGeometry.scale(-1, 1, 1)
+    return sphereGeometry
+  }, [])
+
+  useEffect(() => {
+    const material = materialRef.current
+    if (!material) return
+
+    if (texture) texture.needsUpdate = true
+    material.map = texture
+    material.needsUpdate = true
+  }, [texture])
+
+  return (
+    <mesh geometry={geometry}>
+      <meshBasicMaterial
+        ref={materialRef}
+        color={0xffffff}
+        map={texture}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
+    </mesh>
+  )
+}
+
+function areProjectedHotspotsEqual(
+  current: ProjectedHotspot[],
+  next: ProjectedHotspot[],
+) {
+  if (current.length !== next.length) return false
+
+  return next.every((projected, index) => {
+    const previous = current[index]
+    return (
+      previous?.hotspot === projected.hotspot &&
+      previous.visible === projected.visible &&
+      Math.abs(previous.x - projected.x) <= 0.5 &&
+      Math.abs(previous.y - projected.y) <= 0.5
+    )
+  })
 }
 
 function getSceneCameraState(scene: ThreeSceneData): CameraState {

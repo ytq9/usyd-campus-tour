@@ -1,5 +1,6 @@
 'use client'
 
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { useForm, useFormFields } from '@payloadcms/ui'
@@ -12,6 +13,7 @@ import {
   projectPitchYawToScreen,
   screenPointToPitchYaw,
 } from '@/components/tour/three/threePanoramaMath'
+import { useThreeSceneTexture } from '@/components/tour/three/useThreeSceneTexture'
 import { useAdminPanoramaMedia } from './useAdminPanoramaMedia'
 
 type Props = {
@@ -54,19 +56,18 @@ const idOf = (v: unknown): string | null => {
 export default function ThreeSceneHotspotEditor(_props: Props) {
   const { dispatchFields } = useForm()
 
-  // ─── Read panorama URL via existing admin media hook ────────────────
   const panoramaFieldValue = useFormFields(([fields]) => fields['panorama']?.value as any)
   const panorama = useAdminPanoramaMedia(panoramaFieldValue)
   const panoramaUrl = panorama.panoramaUrl
+  const { texture, isLoading, error } = useThreeSceneTexture(panoramaUrl)
 
-  // Initial camera state read from form (the hidden initialPitch/Yaw/Hfov fields)
+  // Hidden scene camera fields seed the admin preview.
   const initialFromForm = useFormFields(([fields]) => ({
     pitch: Number(fields['initialPitch']?.value ?? 0) || 0,
     yaw: Number(fields['initialYaw']?.value ?? 0) || 0,
     hfov: Number(fields['initialHfov']?.value ?? SEED_HFOV) || SEED_HFOV,
   })) as { pitch: number; yaw: number; hfov: number }
 
-  // ─── Read hotspots array from form state ────────────────────────────
   const hotspotsState: HotspotRow[] = useFormFields(([fields]) => {
     const arr = (fields as any)['hotspots']
     const rows = arr?.rows
@@ -87,7 +88,7 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
     return list
   }) as HotspotRow[]
 
-  // ─── Scenes list (for Target Scene picker) ──────────────────────────
+  // Payload form rows only store target IDs, so the side panel fetches scene summaries for the picker.
   const [scenes, setScenes] = useState<SceneSummary[]>([])
   useEffect(() => {
     fetch('/api/scenes?limit=200&depth=1')
@@ -104,7 +105,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
       .catch(() => {})
   }, [])
 
-  // ─── Local state ────────────────────────────────────────────────────
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [isAdding, setIsAdding] = useState(false)
   const [markerPositions, setMarkerPositions] = useState<Map<number, ScreenPos>>(new Map())
@@ -122,86 +122,46 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
   const hotspotsRef = useRef<HotspotRow[]>(hotspotsState)
   useEffect(() => { hotspotsRef.current = hotspotsState }, [hotspotsState])
 
-  // ─── Init Three.js (panorama only — sphere + camera + drag/wheel) ───
+  const initialFromFormRef = useRef(initialFromForm)
+  useEffect(() => { initialFromFormRef.current = initialFromForm }, [initialFromForm])
+
+  const applyCameraState = useCallback(() => {
+    const camera = cameraRef.current
+    const container = viewerRef.current
+    if (!camera || !container) return
+
+    const state = cameraStateRef.current
+    const width = Math.max(container.clientWidth, 1)
+    const height = Math.max(container.clientHeight, 1)
+    camera.aspect = width / height
+    camera.fov = horizontalFovToVerticalFov(state.hfov, camera.aspect)
+    camera.position.set(0, 0, 0)
+    camera.lookAt(pitchYawToVector3(state.pitch, state.yaw))
+    camera.updateProjectionMatrix()
+  }, [])
+
+  const handleSphereReady = useCallback((
+    sphere: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | null,
+  ) => {
+    sphereRef.current = sphere
+  }, [])
+
+  useEffect(() => {
+    if (!panoramaUrl) return
+
+    const initial = initialFromFormRef.current
+    cameraStateRef.current = {
+      pitch: initial.pitch,
+      yaw: initial.yaw,
+      hfov: clampHfov(initial.hfov),
+    }
+    applyCameraState()
+  }, [applyCameraState, panoramaUrl])
+
   useEffect(() => {
     const container = viewerRef.current
     if (!container || !panoramaUrl) return
 
-    let cancelled = false
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1100)
-    const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: false,
-      powerPreference: 'high-performance',
-    })
-    const geometry = new THREE.SphereGeometry(500, 64, 40)
-    geometry.scale(-1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff })
-    const sphere = new THREE.Mesh(geometry, material)
-    scene.add(sphere)
-
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setSize(Math.max(container.clientWidth, 1), Math.max(container.clientHeight, 1))
-    renderer.domElement.style.display = 'block'
-    renderer.domElement.style.width = '100%'
-    renderer.domElement.style.height = '100%'
-    renderer.domElement.style.touchAction = 'none'
-    container.appendChild(renderer.domElement)
-
-    cameraRef.current = camera
-    sphereRef.current = sphere
-
-    // Reset camera state to form initial values whenever the panorama changes
-    cameraStateRef.current = {
-      pitch: initialFromForm.pitch,
-      yaw: initialFromForm.yaw,
-      hfov: clampHfov(initialFromForm.hfov),
-    }
-
-    const applyCameraState = () => {
-      const state = cameraStateRef.current
-      const w = Math.max(container.clientWidth, 1)
-      const h = Math.max(container.clientHeight, 1)
-      camera.aspect = w / h
-      camera.fov = horizontalFovToVerticalFov(state.hfov, camera.aspect)
-      camera.position.set(0, 0, 0)
-      camera.lookAt(pitchYawToVector3(state.pitch, state.yaw))
-      camera.updateProjectionMatrix()
-    }
-    applyCameraState()
-
-    const resize = () => {
-      const w = Math.max(container.clientWidth, 1)
-      const h = Math.max(container.clientHeight, 1)
-      renderer.setSize(w, h, false)
-      applyCameraState()
-    }
-    const ro = new ResizeObserver(resize)
-    ro.observe(container)
-    window.addEventListener('resize', resize)
-
-    // Load texture
-    const loader = new THREE.TextureLoader()
-    loader.setCrossOrigin('anonymous')
-    loader.load(panoramaUrl, (texture) => {
-      if (cancelled) {
-        texture.dispose()
-        return
-      }
-      texture.colorSpace = THREE.SRGBColorSpace
-      texture.minFilter = THREE.LinearFilter
-      texture.magFilter = THREE.LinearFilter
-      const mat = sphereRef.current?.material
-      if (mat) {
-        mat.map = texture
-        mat.needsUpdate = true
-      }
-    })
-
-    // Panorama drag — pointer events on the viewer container.
-    // Skip when the pointer started on a marker (data attribute).
     let isPanning = false
     let panPointerId: number | null = null
     let lastX = 0
@@ -255,77 +215,15 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
     container.addEventListener('pointercancel', endPan)
     container.addEventListener('wheel', onWheel, { passive: false })
 
-    // RAF: project all hotspots each frame + render
-    let raf = 0
-    const tick = () => {
-      const cam = cameraRef.current
-      if (cam) {
-        const list = hotspotsRef.current
-        setMarkerPositions((prev) => {
-          const next = new Map<number, ScreenPos>()
-          let changed = prev.size !== list.length
-          for (let i = 0; i < list.length; i++) {
-            const hs = list[i]
-            // While dragging this marker, keep prev (mousemove writes into it)
-            if (draggingIndexRef.current === i) {
-              const p = prev.get(i)
-              if (p) next.set(i, p)
-              continue
-            }
-            if (hs.pitch == null || hs.yaw == null) continue
-            const p = projectPitchYawToScreen(Number(hs.pitch), Number(hs.yaw), cam, container)
-            next.set(i, p)
-            if (!changed) {
-              const old = prev.get(i)
-              if (
-                !old ||
-                old.visible !== p.visible ||
-                Math.abs(old.x - p.x) > 0.5 ||
-                Math.abs(old.y - p.y) > 0.5
-              ) {
-                changed = true
-              }
-            }
-          }
-          return changed ? next : prev
-        })
-      }
-      renderer.render(scene, camera)
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-
     return () => {
-      cancelled = true
-      cancelAnimationFrame(raf)
-      ro.disconnect()
-      window.removeEventListener('resize', resize)
       container.removeEventListener('pointerdown', onPointerDown)
       container.removeEventListener('pointermove', onPointerMove)
       container.removeEventListener('pointerup', endPan)
       container.removeEventListener('pointercancel', endPan)
       container.removeEventListener('wheel', onWheel)
-
-      scene.remove(sphere)
-      const oldMap = material.map
-      material.map = null
-      oldMap?.dispose?.()
-      material.dispose()
-      geometry.dispose()
-      renderer.dispose()
-      try { renderer.forceContextLoss() } catch {}
-      if (renderer.domElement.parentElement === container) {
-        container.removeChild(renderer.domElement)
-      }
-      cameraRef.current = null
-      sphereRef.current = null
     }
-    // We intentionally only re-run when panoramaUrl changes — initial camera
-    // values seed cameraStateRef on init and shouldn't tear down the renderer.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panoramaUrl])
+  }, [applyCameraState, panoramaUrl])
 
-  // ─── Click panorama to add new hotspot ──────────────────────────────
   useEffect(() => {
     if (!isAdding) return
     const container = viewerRef.current
@@ -377,7 +275,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
     return () => { container.removeEventListener('click', onClick) }
   }, [isAdding, dispatchFields])
 
-  // ─── Drag a marker ──────────────────────────────────────────────────
   const onMarkerMouseDown = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
@@ -453,7 +350,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
     document.addEventListener('mouseup', onUp)
   }, [dispatchFields])
 
-  // ─── Field updates from side panel ──────────────────────────────────
   const updateField = useCallback((index: number, field: string, value: any) => {
     try {
       dispatchFields({ type: 'UPDATE', path: `hotspots.${index}.${field}`, value } as any)
@@ -469,7 +365,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
 
   const selected = selectedIndex !== null ? hotspotsState[selectedIndex] : null
 
-  // ─── Render ─────────────────────────────────────────────────────────
   if (!panoramaUrl) {
     return (
       <div style={{ margin: '16px 0' }}>
@@ -489,7 +384,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
 
   return (
     <div style={{ margin: '16px 0' }}>
-      {/* Toolbar */}
       <div style={{
         display: 'flex', gap: 10, marginBottom: 8,
         flexWrap: 'wrap', alignItems: 'center',
@@ -521,13 +415,65 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
       </div>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        {/* Panorama viewer + overlay markers */}
         <div style={{
           flex: 1, position: 'relative',
           border: '1px solid #333', borderRadius: 6, overflow: 'hidden',
           minWidth: 0,
         }}>
-          <div ref={viewerRef} style={{ width: '100%', height: 480, background: '#000', touchAction: 'none' }} />
+          <div ref={viewerRef} style={{ width: '100%', height: 480, background: '#000', touchAction: 'none' }}>
+            <Canvas
+              camera={{ fov: 75, near: 0.1, far: 1100, position: [0, 0, 0] }}
+              dpr={[1, 2]}
+              gl={{
+                alpha: false,
+                antialias: true,
+                powerPreference: 'high-performance',
+              }}
+              style={{
+                display: 'block',
+                height: '100%',
+                touchAction: 'none',
+                width: '100%',
+              }}
+            >
+              <AdminCameraBridge
+                applyCameraState={applyCameraState}
+                cameraRef={cameraRef}
+              />
+              <AdminHotspotProjectionBridge
+                containerRef={viewerRef}
+                draggingIndexRef={draggingIndexRef}
+                hotspots={hotspotsState}
+                onChange={setMarkerPositions}
+              />
+              <AdminPanoramaSphere
+                onSphereReady={handleSphereReady}
+                texture={texture}
+              />
+            </Canvas>
+          </div>
+
+          {isLoading && !texture && (
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              color: 'rgba(255,255,255,0.72)', fontSize: 13,
+              pointerEvents: 'none',
+            }}>
+              Loading panorama...
+            </div>
+          )}
+
+          {error && (
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              color: 'rgba(255,255,255,0.84)', fontSize: 13,
+              background: 'rgba(0,0,0,0.36)', pointerEvents: 'none',
+            }}>
+              Unable to load panorama.
+            </div>
+          )}
 
           {hotspotsState.map((hs, i) => {
             const pos = markerPositions.get(i)
@@ -583,7 +529,6 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
           )}
         </div>
 
-        {/* Side panel */}
         <div style={{
           width: 320, flexShrink: 0,
           border: '1px solid #333', borderRadius: 6,
@@ -615,7 +560,132 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
   )
 }
 
-// ─── Side panel editor ──────────────────────────────────────────────
+function AdminCameraBridge({
+  applyCameraState,
+  cameraRef,
+}: {
+  applyCameraState: () => void
+  cameraRef: React.RefObject<THREE.PerspectiveCamera | null>
+}) {
+  const { camera, size } = useThree()
+
+  useEffect(() => {
+    if (!(camera instanceof THREE.PerspectiveCamera)) return
+
+    cameraRef.current = camera
+    applyCameraState()
+
+    return () => {
+      if (cameraRef.current === camera) {
+        cameraRef.current = null
+      }
+    }
+  }, [applyCameraState, camera, cameraRef])
+
+  useEffect(() => {
+    applyCameraState()
+  }, [applyCameraState, size.height, size.width])
+
+      return null
+    }
+
+function AdminHotspotProjectionBridge({
+  containerRef,
+  draggingIndexRef,
+  hotspots,
+  onChange,
+}: {
+  containerRef: React.RefObject<HTMLElement | null>
+  draggingIndexRef: React.RefObject<number | null>
+  hotspots: HotspotRow[]
+  onChange: React.Dispatch<React.SetStateAction<Map<number, ScreenPos>>>
+}) {
+  useFrame(({ camera }) => {
+    const container = containerRef.current
+    if (!(camera instanceof THREE.PerspectiveCamera) || !container) {
+      onChange((prev) => (prev.size ? new Map() : prev))
+      return
+    }
+
+    onChange((prev) => {
+      const next = new Map<number, ScreenPos>()
+      let changed = prev.size !== hotspots.length
+
+      for (let i = 0; i < hotspots.length; i++) {
+        const hs = hotspots[i]
+        // Mousemove owns the live marker position while a drag is active.
+        if (draggingIndexRef.current === i) {
+          const p = prev.get(i)
+          if (p) next.set(i, p)
+          continue
+        }
+        if (hs.pitch == null || hs.yaw == null) continue
+
+        const p = projectPitchYawToScreen(Number(hs.pitch), Number(hs.yaw), camera, container)
+        next.set(i, p)
+
+        if (!changed) {
+          const old = prev.get(i)
+          if (
+            !old ||
+            old.visible !== p.visible ||
+            Math.abs(old.x - p.x) > 0.5 ||
+            Math.abs(old.y - p.y) > 0.5
+          ) {
+            changed = true
+          }
+        }
+      }
+
+      return changed ? next : prev
+    })
+  })
+
+  return null
+}
+
+function AdminPanoramaSphere({
+  onSphereReady,
+  texture,
+}: {
+  onSphereReady: (sphere: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | null) => void
+  texture: THREE.Texture | null
+}) {
+  const sphereRef = useRef<THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial> | null>(null)
+  const materialRef = useRef<THREE.MeshBasicMaterial | null>(null)
+  const geometry = useMemo(() => {
+    const sphereGeometry = new THREE.SphereGeometry(500, 64, 40)
+    sphereGeometry.scale(-1, 1, 1)
+    return sphereGeometry
+  }, [])
+
+  useEffect(() => {
+    const material = materialRef.current
+    if (!material) return
+
+    if (texture) texture.needsUpdate = true
+    material.map = texture
+    material.needsUpdate = true
+  }, [texture])
+
+  useEffect(() => {
+    onSphereReady(sphereRef.current)
+    return () => onSphereReady(null)
+  }, [onSphereReady])
+
+  return (
+    <mesh ref={sphereRef} geometry={geometry}>
+      <meshBasicMaterial
+        ref={materialRef}
+        color={0xffffff}
+        map={texture}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
+    </mesh>
+  )
+}
+
 function SidePanel({
   index, hotspot, scenes, onChange, onDelete,
 }: {
@@ -720,7 +790,6 @@ function SidePanel({
         <div style={fieldRow}>
           <label style={labelStyle}>Target Scene</label>
 
-          {/* Currently selected — prominent confirmation card */}
           <div style={{
             marginBottom: 8,
             border: targetScene ? '1px solid #1a6ef5' : '1px dashed #444',
@@ -788,7 +857,6 @@ function SidePanel({
             )}
           </div>
 
-          {/* Search */}
           <input
             type="text"
             value={sceneSearch}
@@ -797,7 +865,6 @@ function SidePanel({
             style={{ ...inputStyle, marginBottom: 8 }}
           />
 
-          {/* Thumbnail grid picker — visual selection */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',

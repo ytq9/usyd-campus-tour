@@ -14,12 +14,7 @@
   margin: 0 !important;
 }
 
-/* ============================================
-   场景过渡动画样式
-   Theatre.js 风格的平滑过渡效果
-   ============================================ */
-
-/* 过渡动画层基础样式 */
+/* Shared polish for scene transitions and portal hotspots. */
 .scene-transition-overlay {
   will-change: transform, opacity, filter;
   backface-visibility: hidden;
@@ -27,7 +22,6 @@
   transform-style: preserve-3d;
 }
 
-/* Portal 热点按钮增强样式 */
 .hotspot-portal-button {
   position: relative;
   transform-origin: center center;
@@ -44,7 +38,6 @@
   border-radius: 50%;
 }
 
-/* 加载指示器旋转动画 */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -58,7 +51,6 @@
   animation: spin 1s linear infinite;
 }
 
-/* 脉冲动画优化 */
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 0.75;
@@ -70,7 +62,6 @@
   }
 }
 
-/* 传送门效果的特殊动画 */
 @keyframes portal-ripple {
   0% {
     transform: translate(-50%, -50%) scale(0);
@@ -91,7 +82,6 @@
   }
 }
 
-/* 场景淡入动画 */
 @keyframes scene-fade-in {
   from {
     opacity: 0;
@@ -103,7 +93,6 @@
   }
 }
 
-/* 场景缩放进入动画 */
 @keyframes scene-zoom-in {
   from {
     transform: scale(1.2);
@@ -115,36 +104,31 @@
   }
 }
 
-/* 过渡期间的全局效果 */
 body.scene-transitioning {
   overflow: hidden;
 }
 
-/* 平滑过渡的通用 easing 函数 */
 :root {
   --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-in-expo: cubic-bezier(0.95, 0.05, 0.795, 0.035);
   --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
   --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
-  
-  /* 过渡动画主题色 */
+
   --transition-primary: #E64626;
   --transition-glow: rgba(230, 70, 38, 0.5);
 }
 
-/* 移动端触摸优化 */
 @media (hover: none) and (pointer: coarse) {
   .hotspot-portal-button {
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   .hotspot-portal-button:active {
     transform: scale(0.95);
   }
 }
 
-/* 减少动画偏好的用户 */
 @media (prefers-reduced-motion: reduce) {
   .scene-transition-overlay,
   .hotspot-portal-button {
@@ -153,12 +137,11 @@ body.scene-transitioning {
   }
 }
 
-/* 高对比度模式支持 */
 @media (prefers-contrast: high) {
   .scene-transition-overlay {
     background-color: black !important;
   }
-  
+
   .hotspot-portal-button svg {
     filter: drop-shadow(0 0 2px white);
   }

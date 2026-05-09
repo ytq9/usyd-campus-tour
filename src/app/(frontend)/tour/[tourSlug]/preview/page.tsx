@@ -13,7 +13,6 @@ export default async function PreviewPage({ params, searchParams }: { params: Pa
   const { debugHotspots } = await searchParams
   const payload = await getPayload({ config })
 
-  // Fetch tour as draft
   const tours = await payload.find({
     collection: 'tours',
     where: { slug: { equals: tourSlug } },
@@ -25,7 +24,6 @@ export default async function PreviewPage({ params, searchParams }: { params: Pa
   const tour = tours.docs[0]
   if (!tour) notFound()
 
-  // Find default floor and redirect to scene viewer
   const defaultFloor = tour.defaultFloor && typeof tour.defaultFloor === 'object'
     ? tour.defaultFloor
     : null

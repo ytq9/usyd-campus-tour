@@ -28,7 +28,6 @@ export default async function TourLandingPage({ params, searchParams }: { params
   const tour = tours.docs[0]
   if (!tour) notFound()
 
-  // Find default floor and its initial scene
   const defaultFloor = tour.defaultFloor && typeof tour.defaultFloor === 'object'
     ? tour.defaultFloor
     : null
@@ -56,7 +55,6 @@ export default async function TourLandingPage({ params, searchParams }: { params
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      {/* Hero Section */}
       <div className="relative h-[60vh] overflow-hidden">
         {tour.coverImage && typeof tour.coverImage === 'object' ? (
           <img
@@ -71,31 +69,29 @@ export default async function TourLandingPage({ params, searchParams }: { params
         <div className="relative h-full flex items-center justify-center">
           <div className="text-center px-4">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">{tour.title}</h1>
-              <Link
-                href={appendDebugQuery(startHref)}
-                className="d-btn d-btn-lg bg-ochre border-ochre text-white hover:bg-orange-700 text-lg px-8"
-              >
+            <Link
+              href={appendDebugQuery(startHref)}
+              className="d-btn d-btn-lg bg-ochre border-ochre text-white hover:bg-orange-700 text-lg px-8"
+            >
               Start Tour
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Tour Info */}
       <div className="max-w-4xl mx-auto px-4 py-12">
         {tour.welcomeTitle && (
           <h2 className="text-2xl font-bold mb-4">{tour.welcomeTitle}</h2>
         )}
         {tour.welcomeText && (
           <div className="prose prose-invert prose-lg max-w-none">
-            {/* Rich text would need a renderer - for now show as text */}
+            {/* Payload rich text is stored as Lexical JSON; keep this fallback until a renderer is added. */}
             <p className="text-gray-300">
               {typeof tour.welcomeText === 'string' ? tour.welcomeText : 'Welcome to the tour!'}
             </p>
           </div>
         )}
 
-        {/* Floor List */}
         {tour.floors && tour.floors.length > 0 && (
           <div className="mt-12">
             <h3 className="text-xl font-semibold mb-4">Floors</h3>
@@ -119,7 +115,6 @@ export default async function TourLandingPage({ params, searchParams }: { params
           </div>
         )}
 
-        {/* Back to tours */}
         <div className="mt-12">
           <Link href="/" className="text-ochre hover:underline">
             ← Back to all tours
