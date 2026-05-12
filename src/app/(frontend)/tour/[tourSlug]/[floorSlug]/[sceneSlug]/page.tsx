@@ -123,6 +123,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
         cssClass: hs.cssClass || '',
         iconColor: hs.iconColor || '',
         iconSize: hs.iconSize || 'md',
+        iconStyle: hs.iconStyle || 'default',
       })),
     },
     floorScenes: floorScenes.docs.map((s: any) => ({
@@ -149,6 +150,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
         cssClass: hs.cssClass || '',
         iconColor: hs.iconColor || '',
         iconSize: hs.iconSize || 'md',
+        iconStyle: hs.iconStyle || 'default',
       })),
     })),
     tourFloors: tourFloors.map((f: any) => ({
