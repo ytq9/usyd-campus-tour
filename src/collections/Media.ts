@@ -13,7 +13,6 @@ export const Media: CollectionConfig = {
     ],
     adminThumbnail: 'thumbnail',
   },
-  //  Register a custom component at the top of the Media list page
   admin: {
     components: {
       beforeList: ['@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList'],
@@ -28,7 +27,6 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
-    //  If alt is empty, automatically fill it with the filename.
     beforeOperation: [
       ({ args, operation }) => {
         if ((operation === 'create' || operation === 'update') && args.req?.file) {
@@ -50,6 +48,9 @@ export const Media: CollectionConfig = {
           where: { panorama: { equals: id } },
           limit: 1,
           depth: 0,
+          draft: true,
+          overrideAccess: true,
+          req,
         })
         if (scenesUsingMedia.totalDocs > 0) {
           throw new Error(
@@ -61,6 +62,9 @@ export const Media: CollectionConfig = {
           where: { coverImage: { equals: id } },
           limit: 1,
           depth: 0,
+          draft: true,
+          overrideAccess: true,
+          req,
         })
         if (toursUsingMedia.totalDocs > 0) {
           throw new Error(
@@ -72,6 +76,9 @@ export const Media: CollectionConfig = {
           where: { floorplan: { equals: id } },
           limit: 1,
           depth: 0,
+          draft: true,
+          overrideAccess: true,
+          req,
         })
         if (floorsUsingMedia.totalDocs > 0) {
           throw new Error(

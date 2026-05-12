@@ -26,7 +26,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
     limit: 50,
   })
 
-  // Get all unique tags for filter
   const allTours = await payload.find({
     collection: 'tours',
     where: { _status: { equals: 'published' } },
@@ -49,7 +48,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Search and Filter */}
         <form className="mb-8 flex flex-col sm:flex-row gap-4" action="/" method="GET">
           <input
             type="text"
@@ -69,7 +67,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
           </button>
         </form>
 
-        {/* Tour Grid */}
         {tours.docs.length === 0 ? (
           <div className="text-center py-16">
             <h2 className="text-xl text-gray-500">No tours found</h2>
@@ -91,7 +88,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Search
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   {tour.coverImage && typeof tour.coverImage === 'object' ? (
                     <img
-                      src={tour.coverImage.sizes?.preview?.url || tour.coverImage.url}
+                      src={tour.coverImage.sizes?.preview?.url ?? tour.coverImage.url ?? ''}
                       alt={tour.coverImage.alt || tour.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

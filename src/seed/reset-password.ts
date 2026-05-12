@@ -12,7 +12,6 @@ async function resetPassword() {
   const email = 'admin@usyd.edu.au'
   const password = 'admin123'
 
-  // Check if user exists
   const existing = await payload.find({
     collection: 'users',
     where: { email: { equals: email } },
@@ -20,7 +19,6 @@ async function resetPassword() {
   })
 
   if (existing.totalDocs > 0) {
-    // Reset password
     await payload.update({
       collection: 'users',
       id: existing.docs[0].id,
@@ -28,7 +26,6 @@ async function resetPassword() {
     })
     console.log(`Password reset for: ${email}`)
   } else {
-    // Create new admin
     await payload.create({
       collection: 'users',
       data: { email, password },

@@ -1,16 +1,9 @@
 'use client'
 
-/**
- * Scene Transition Component
- * 场景过渡动画组件
- * 
- * 使用 Theatre.js 设计理念实现平滑的镜头切换过渡效果
- * 支持多种过渡动画类型：淡入淡出、缩放、旋转、模糊、传送门效果等
- */
-
 import React, { useMemo } from 'react'
-import { TransitionState, TransitionPhase } from './useSceneTransition'
-import { TransitionType, getCSSEasing } from './transitionConfig'
+import type { TransitionPhase, TransitionState } from './useSceneTransition'
+import type { TransitionConfig, TransitionType } from './transitionConfig'
+import { getCSSEasing } from './transitionConfig'
 
 interface SceneTransitionProps {
   state: TransitionState
@@ -20,7 +13,6 @@ interface SceneTransitionProps {
 export default function SceneTransition({ state, children }: SceneTransitionProps) {
   const { phase, config, progress, originPosition } = state
 
-  // 计算过渡样式
   const overlayStyle = useMemo(() => {
     if (phase === 'idle') return {}
 
@@ -31,7 +23,6 @@ export default function SceneTransition({ state, children }: SceneTransitionProp
     return getTransitionStyle(config.type, currentProgress, config, originPosition, easing)
   }, [phase, config, progress, originPosition])
 
-  // 不在过渡中时不渲染
   if (phase === 'idle') {
     return <>{children}</>
   }
@@ -39,37 +30,33 @@ export default function SceneTransition({ state, children }: SceneTransitionProp
   return (
     <>
       {children}
-      
-      {/* 主过渡层 */}
-      <div 
+
+      <div
         className="scene-transition-overlay"
         style={{
           position: 'fixed',
           inset: 0,
           zIndex: 1000,
           pointerEvents: 'all',
-          ...overlayStyle
+          ...overlayStyle,
         }}
       >
-        {/* 传送门效果的额外元素 */}
         {config.type === 'portal' && (
-          <PortalEffect 
-            progress={progress} 
+          <PortalEffect
+            progress={progress}
             phase={phase}
             originPosition={originPosition}
           />
         )}
 
-        {/* 闪光效果 */}
         {config.type === 'flash' && (
-          <FlashEffect 
+          <FlashEffect
             progress={progress}
             phase={phase}
             color={config.flashColor || 'rgba(255, 255, 255, 0.9)'}
           />
         )}
 
-        {/* 擦除效果 */}
         {config.type === 'wipe' && (
           <WipeEffect
             progress={progress}
@@ -79,7 +66,6 @@ export default function SceneTransition({ state, children }: SceneTransitionProp
         )}
       </div>
 
-      {/* 加载指示器 */}
       {(phase === 'switching' || phase === 'entering') && (
         <LoadingIndicator />
       )}
@@ -87,16 +73,15 @@ export default function SceneTransition({ state, children }: SceneTransitionProp
   )
 }
 
-// 获取过渡样式
 function getTransitionStyle(
   type: TransitionType,
   progress: number,
-  config: any,
+  config: TransitionConfig,
   originPosition: { x: number; y: number } | null,
-  easing: string
+  easing: string,
 ): React.CSSProperties {
   const baseStyle: React.CSSProperties = {
-    transition: `all ${config.duration / 2}ms ${easing}`
+    transition: `all ${config.duration / 2}ms ${easing}`,
   }
 
   switch (type) {
@@ -104,10 +89,10 @@ function getTransitionStyle(
       return {
         ...baseStyle,
         backgroundColor: 'rgba(0, 0, 0, 1)',
-        opacity: progress
+        opacity: progress,
       }
 
-    case 'zoom':
+    case 'zoom': {
       const zoomScale = config.zoomScale || 2.5
       const scale = 1 + (zoomScale - 1) * progress
       return {
@@ -115,12 +100,13 @@ function getTransitionStyle(
         backgroundColor: 'rgba(0, 0, 0, 1)',
         opacity: progress,
         transform: `scale(${scale})`,
-        transformOrigin: originPosition 
+        transformOrigin: originPosition
           ? `${originPosition.x}px ${originPosition.y}px`
-          : 'center center'
+          : 'center center',
       }
+    }
 
-    case 'zoomRotate':
+    case 'zoomRotate': {
       const zrScale = config.zoomScale || 2
       const rotation = config.rotationDeg || 15
       const zrScaleVal = 1 + (zrScale - 1) * progress
@@ -130,21 +116,23 @@ function getTransitionStyle(
         backgroundColor: 'rgba(0, 0, 0, 1)',
         opacity: progress,
         transform: `scale(${zrScaleVal}) rotate(${rotateVal}deg)`,
-        transformOrigin: originPosition 
+        transformOrigin: originPosition
           ? `${originPosition.x}px ${originPosition.y}px`
-          : 'center center'
+          : 'center center',
       }
+    }
 
-    case 'blur':
+    case 'blur': {
       const blurAmount = config.blurAmount || 30
       return {
         ...baseStyle,
         backgroundColor: `rgba(0, 0, 0, ${progress * 0.7})`,
         backdropFilter: `blur(${blurAmount * progress}px)`,
-        WebkitBackdropFilter: `blur(${blurAmount * progress}px)`
+        WebkitBackdropFilter: `blur(${blurAmount * progress}px)`,
       }
+    }
 
-    case 'portal':
+    case 'portal': {
       const portalScale = config.zoomScale || 3
       const portalBlur = config.blurAmount || 20
       const pScale = 1 + (portalScale - 1) * progress
@@ -152,35 +140,37 @@ function getTransitionStyle(
         ...baseStyle,
         backgroundColor: 'transparent',
         transform: `scale(${pScale})`,
-        transformOrigin: originPosition 
+        transformOrigin: originPosition
           ? `${originPosition.x}px ${originPosition.y}px`
           : 'center center',
         backdropFilter: `blur(${portalBlur * progress}px) brightness(${1 + progress * 0.5})`,
-        WebkitBackdropFilter: `blur(${portalBlur * progress}px) brightness(${1 + progress * 0.5})`
+        WebkitBackdropFilter: `blur(${portalBlur * progress}px) brightness(${1 + progress * 0.5})`,
       }
+    }
 
-    case 'slide':
+    case 'slide': {
       const direction = config.direction || 'left'
       const slideOffset = getSlideOffset(direction, progress)
       return {
         ...baseStyle,
         backgroundColor: 'rgba(0, 0, 0, 1)',
         transform: slideOffset,
-        opacity: 1
+        opacity: 1,
       }
+    }
 
     case 'flash':
     case 'wipe':
       return {
         ...baseStyle,
-        backgroundColor: 'transparent'
+        backgroundColor: 'transparent',
       }
 
     default:
       return {
         ...baseStyle,
         backgroundColor: 'rgba(0, 0, 0, 1)',
-        opacity: progress
+        opacity: progress,
       }
   }
 }
@@ -196,12 +186,11 @@ function getSlideOffset(direction: string, progress: number): string {
   }
 }
 
-// 传送门效果组件
-function PortalEffect({ 
-  progress, 
+function PortalEffect({
+  progress,
   phase,
-  originPosition 
-}: { 
+  originPosition,
+}: {
   progress: number
   phase: TransitionPhase
   originPosition: { x: number; y: number } | null
@@ -209,7 +198,6 @@ function PortalEffect({
   const isExiting = phase === 'exiting' || phase === 'switching'
   const effectProgress = isExiting ? progress : 1 - progress
 
-  // 传送门光环效果
   const ringStyle: React.CSSProperties = {
     position: 'absolute',
     left: originPosition ? originPosition.x : '50%',
@@ -226,10 +214,9 @@ function PortalEffect({
       transparent 100%
     )`,
     opacity: effectProgress,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
   }
 
-  // 内部光点
   const coreStyle: React.CSSProperties = {
     position: 'absolute',
     left: originPosition ? originPosition.x : '50%',
@@ -241,10 +228,9 @@ function PortalEffect({
     background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 40%, transparent 70%)',
     opacity: effectProgress,
     boxShadow: `0 0 ${60 * effectProgress}px ${30 * effectProgress}px rgba(255, 255, 255, 0.5)`,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
   }
 
-  // 旋转光线效果
   const raysStyle: React.CSSProperties = {
     position: 'absolute',
     left: originPosition ? originPosition.x : '50%',
@@ -276,7 +262,7 @@ function PortalEffect({
     )`,
     borderRadius: '50%',
     opacity: effectProgress * 0.8,
-    pointerEvents: 'none'
+    pointerEvents: 'none',
   }
 
   return (
@@ -288,22 +274,20 @@ function PortalEffect({
   )
 }
 
-// 闪光效果组件
-function FlashEffect({ 
-  progress, 
+function FlashEffect({
+  progress,
   phase,
-  color 
-}: { 
+  color,
+}: {
   progress: number
   phase: TransitionPhase
   color: string
 }) {
   const isExiting = phase === 'exiting' || phase === 'switching'
-  
-  // 闪光在中点最亮
+
   let opacity: number
   if (isExiting) {
-    opacity = progress * 2  // 0 -> 1 (实际会超过1但被限制)
+    opacity = progress * 2
   } else {
     opacity = (1 - progress) * 2
   }
@@ -316,18 +300,17 @@ function FlashEffect({
         inset: 0,
         backgroundColor: color,
         opacity,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
       }}
     />
   )
 }
 
-// 擦除效果组件
-function WipeEffect({ 
-  progress, 
+function WipeEffect({
+  progress,
   phase,
-  direction
-}: { 
+  direction,
+}: {
   progress: number
   phase: TransitionPhase
   direction: 'left' | 'right' | 'up' | 'down'
@@ -357,13 +340,12 @@ function WipeEffect({
         inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 1)',
         clipPath: getClipPath(),
-        pointerEvents: 'none'
+        pointerEvents: 'none',
       }}
     />
   )
 }
 
-// 加载指示器
 function LoadingIndicator() {
   return (
     <div
@@ -377,10 +359,9 @@ function LoadingIndicator() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '12px'
+        gap: '12px',
       }}
     >
-      {/* 旋转加载圈 */}
       <div
         style={{
           width: '48px',
@@ -388,7 +369,7 @@ function LoadingIndicator() {
           border: '4px solid rgba(255, 255, 255, 0.3)',
           borderTopColor: '#E64626',
           borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
+          animation: 'spin 1s linear infinite',
         }}
       />
       <span
@@ -396,7 +377,7 @@ function LoadingIndicator() {
           color: 'white',
           fontSize: '14px',
           fontWeight: 500,
-          textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
         }}
       >
         Loading scene...

@@ -2,24 +2,109 @@
 
 import React, { useRef, useState } from 'react'
 
+const MAP_VIEWBOX_WIDTH = 5000
+const MAP_VIEWBOX_HEIGHT = 2000
+const LABEL_MARGIN = 70
+const LABEL_HEIGHT = 190
+const LABEL_OFFSET_X = 260
+const LABEL_OFFSET_Y = 220
+
 type Props = {
   tourFloors: any[]
   currentFloor: any
   currentSceneSlug: string
   tourSlug: string
   isDraft: boolean
+  debugHotspots?: boolean
 }
 
-export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug, isDraft }: Props) {
-  const modalRef = useRef<HTMLDialogElement>(null)
-  const [activeFloorIdx, setActiveFloorIdx] = useState(
-    tourFloors.findIndex((f: any) => f.id === currentFloor.id)
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+
+const getSceneLabel = (mapPoint: any) =>
+  mapPoint?.scene?.title || mapPoint?.scene?.slug || 'Untitled scene'
+
+const getDisplayLabel = (label: string) => {
+  const normalized = label.trim() || 'Untitled scene'
+  return normalized.length > 32 ? `${normalized.slice(0, 29)}...` : normalized
+}
+
+const getCalloutLayout = (mapPoint: any) => {
+  const cx = Number(mapPoint.cx) || 0
+  const cy = Number(mapPoint.cy) || 0
+  const label = getDisplayLabel(getSceneLabel(mapPoint))
+  const labelWidth = clamp(label.length * 52 + 160, 480, 1500)
+
+  let horizontal: 'left' | 'right' =
+    cx + LABEL_OFFSET_X + labelWidth <= MAP_VIEWBOX_WIDTH - LABEL_MARGIN ? 'right' : 'left'
+  if (horizontal === 'left' && cx - LABEL_OFFSET_X - labelWidth < LABEL_MARGIN) {
+    horizontal = 'right'
+  }
+
+  let vertical: 'down' | 'up' =
+    cy - LABEL_OFFSET_Y - LABEL_HEIGHT >= LABEL_MARGIN ? 'up' : 'down'
+  if (vertical === 'down' && cy + LABEL_OFFSET_Y + LABEL_HEIGHT > MAP_VIEWBOX_HEIGHT - LABEL_MARGIN) {
+    vertical = 'up'
+  }
+
+  const labelX = clamp(
+    horizontal === 'right' ? cx + LABEL_OFFSET_X : cx - LABEL_OFFSET_X - labelWidth,
+    LABEL_MARGIN,
+    MAP_VIEWBOX_WIDTH - labelWidth - LABEL_MARGIN,
   )
+  const labelY = clamp(
+    vertical === 'up' ? cy - LABEL_OFFSET_Y - LABEL_HEIGHT : cy + LABEL_OFFSET_Y,
+    LABEL_MARGIN,
+    MAP_VIEWBOX_HEIGHT - LABEL_HEIGHT - LABEL_MARGIN,
+  )
+  const anchorX = horizontal === 'right' ? labelX : labelX + labelWidth
+  const anchorY = vertical === 'up' ? labelY + LABEL_HEIGHT : labelY
+  const elbowX =
+    horizontal === 'right' ? Math.min(cx + 130, anchorX - 80) : Math.max(cx - 130, anchorX + 80)
+
+  return {
+    anchorX,
+    anchorY,
+    cx,
+    cy,
+    elbowX,
+    label,
+    labelWidth,
+    labelX,
+    labelY,
+  }
+}
+
+export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSlug, tourSlug, isDraft, debugHotspots }: Props) {
+  const modalRef = useRef<HTMLDialogElement>(null)
+  const lastPointerTypeRef = useRef('mouse')
+  const initialActiveFloorIdx = tourFloors.findIndex((f: any) => (
+    f.id === currentFloor.id || f.slug === currentFloor.slug
+  ))
+  const [activeFloorIdx, setActiveFloorIdx] = useState(
+    initialActiveFloorIdx >= 0 ? initialActiveFloorIdx : 0
+  )
+  const [hoveredMapPointIdx, setHoveredMapPointIdx] = useState<number | null>(null)
+  const [focusedMapPointIdx, setFocusedMapPointIdx] = useState<number | null>(null)
+  const [tappedMapPointIdx, setTappedMapPointIdx] = useState<number | null>(null)
+
+  const resetMapPointLabel = () => {
+    setHoveredMapPointIdx(null)
+    setFocusedMapPointIdx(null)
+    setTappedMapPointIdx(null)
+  }
 
   const handleMapPointClick = (floorSlug: string, sceneSlug: string) => {
-    const draftQuery = isDraft ? '?draft=true' : ''
-    window.location.assign(`/tour/${tourSlug}/${floorSlug}/${sceneSlug}${draftQuery}`)
+    const query = new URLSearchParams()
+    if (isDraft) query.set('draft', 'true')
+    if (debugHotspots) query.set('debugHotspots', 'true')
+    const queryString = query.toString() ? `?${query.toString()}` : ''
+    window.location.assign(`/tour/${tourSlug}/${floorSlug}/${sceneSlug}${queryString}`)
   }
+
+  const activeFloor = tourFloors[activeFloorIdx]
+  const activeMapPointIdx = hoveredMapPointIdx ?? focusedMapPointIdx ?? tappedMapPointIdx
+  const activeMapPoint = activeFloor?.mapPoints?.[activeMapPointIdx ?? -1]
+  const activeCallout = activeMapPoint ? getCalloutLayout(activeMapPoint) : null
 
   return (
     <>
@@ -35,12 +120,14 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
 
       <dialog ref={modalRef} className="d-modal">
         <div className="d-modal-box relative w-full max-w-5xl bg-white/90">
-          {/* Floor tabs */}
           <div className="d-tabs d-tabs-lift mb-4">
             {tourFloors.map((floor: any, idx: number) => (
               <button
                 key={floor.id}
-                onClick={() => setActiveFloorIdx(idx)}
+                onClick={() => {
+                  setActiveFloorIdx(idx)
+                  resetMapPointLabel()
+                }}
                 className={`d-tab ${activeFloorIdx === idx ? 'd-tab-active' : ''}`}
               >
                 {floor.name}
@@ -48,36 +135,114 @@ export default function FloorMapModal({ tourFloors, currentFloor, currentSceneSl
             ))}
           </div>
 
-          {/* Floor map content */}
-          {tourFloors[activeFloorIdx] && (
+          {activeFloor && (
             <div className="p-4 bg-white rounded-lg">
-              {tourFloors[activeFloorIdx].floorplan ? (
+              {activeFloor.floorplan ? (
                 <div className="relative">
                   <img
-                    src={tourFloors[activeFloorIdx].floorplan}
-                    alt={`${tourFloors[activeFloorIdx].name} floorplan`}
+                    src={activeFloor.floorplan}
+                    alt={`${activeFloor.name} floorplan`}
                     className="w-full h-auto"
                   />
-                  {/* Map points overlay */}
                   <svg className="absolute inset-0 w-full h-full" viewBox="0 0 5000 2000" preserveAspectRatio="xMidYMid meet">
-                    {(tourFloors[activeFloorIdx].mapPoints || []).map((mp: any, i: number) => {
+                    {(activeFloor.mapPoints || []).map((mp: any, i: number) => {
                       const isCurrentScene = mp.scene?.slug === currentSceneSlug
+                      const canNavigate = !isCurrentScene && Boolean(mp.scene?.slug)
+                      const label = getSceneLabel(mp)
+                      const isActive = activeMapPointIdx === i
+
                       return (
                         <circle
                           key={i}
+                          tabIndex={0}
+                          role="button"
+                          aria-current={isCurrentScene ? 'location' : undefined}
+                          aria-label={isCurrentScene ? `Current scene: ${label}` : `Open scene: ${label}`}
                           cx={mp.cx}
                           cy={mp.cy}
                           r={isCurrentScene ? 44 : 32}
                           fill={isCurrentScene ? '#000000' : mp.color}
-                          className={isCurrentScene ? '' : 'cursor-pointer hover:opacity-80'}
-                          onClick={() => {
-                            if (!isCurrentScene && mp.scene?.slug) {
-                              handleMapPointClick(tourFloors[activeFloorIdx].slug, mp.scene.slug)
+                          stroke={isActive ? '#111827' : '#ffffff'}
+                          strokeWidth={isActive ? 14 : 8}
+                          className={canNavigate ? 'cursor-pointer hover:opacity-80' : 'cursor-help'}
+                          onBlur={() => {
+                            if (focusedMapPointIdx === i) setFocusedMapPointIdx(null)
+                          }}
+                          onFocus={() => setFocusedMapPointIdx(i)}
+                          onKeyDown={(event) => {
+                            if (event.key !== 'Enter' && event.key !== ' ') return
+                            event.preventDefault()
+                            if (canNavigate) {
+                              handleMapPointClick(activeFloor.slug, mp.scene.slug)
                             }
+                          }}
+                          onClick={() => {
+                            if (!canNavigate) {
+                              setTappedMapPointIdx(i)
+                              return
+                            }
+
+                            if (lastPointerTypeRef.current === 'touch' || lastPointerTypeRef.current === 'pen') {
+                              if (tappedMapPointIdx === i) {
+                                handleMapPointClick(activeFloor.slug, mp.scene.slug)
+                              } else {
+                                setTappedMapPointIdx(i)
+                              }
+                              return
+                            }
+
+                            handleMapPointClick(activeFloor.slug, mp.scene.slug)
+                          }}
+                          onMouseEnter={() => setHoveredMapPointIdx(i)}
+                          onMouseLeave={() => {
+                            if (hoveredMapPointIdx === i) setHoveredMapPointIdx(null)
+                          }}
+                          onPointerDown={(event) => {
+                            lastPointerTypeRef.current = event.pointerType
                           }}
                         />
                       )
                     })}
+                    {activeCallout && (
+                      <g pointerEvents="none" aria-hidden="true">
+                        <polyline
+                          points={`${activeCallout.cx},${activeCallout.cy} ${activeCallout.elbowX},${activeCallout.anchorY} ${activeCallout.anchorX},${activeCallout.anchorY}`}
+                          fill="none"
+                          stroke="#ffffff"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={28}
+                          opacity={0.88}
+                        />
+                        <polyline
+                          points={`${activeCallout.cx},${activeCallout.cy} ${activeCallout.elbowX},${activeCallout.anchorY} ${activeCallout.anchorX},${activeCallout.anchorY}`}
+                          fill="none"
+                          stroke="#111827"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={10}
+                        />
+                        <rect
+                          x={activeCallout.labelX}
+                          y={activeCallout.labelY}
+                          width={activeCallout.labelWidth}
+                          height={LABEL_HEIGHT}
+                          rx={22}
+                          fill="#111827"
+                          opacity={0.94}
+                        />
+                        <text
+                          x={activeCallout.labelX + 80}
+                          y={activeCallout.labelY + LABEL_HEIGHT / 2}
+                          fill="#ffffff"
+                          fontSize={88}
+                          fontWeight={700}
+                          dominantBaseline="middle"
+                        >
+                          {activeCallout.label}
+                        </text>
+                      </g>
+                    )}
                   </svg>
                 </div>
               ) : (

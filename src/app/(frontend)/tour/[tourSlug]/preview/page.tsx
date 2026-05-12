@@ -2,17 +2,17 @@ import React from 'react'
 import { notFound, redirect } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-import { headers } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
 type Params = Promise<{ tourSlug: string }>
+type SearchParams = Promise<{ debugHotspots?: string }>
 
-export default async function PreviewPage({ params }: { params: Params }) {
+export default async function PreviewPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug } = await params
+  const { debugHotspots } = await searchParams
   const payload = await getPayload({ config })
 
-  // Fetch tour as draft
   const tours = await payload.find({
     collection: 'tours',
     where: { slug: { equals: tourSlug } },
@@ -24,7 +24,6 @@ export default async function PreviewPage({ params }: { params: Params }) {
   const tour = tours.docs[0]
   if (!tour) notFound()
 
-  // Find default floor and redirect to scene viewer
   const defaultFloor = tour.defaultFloor && typeof tour.defaultFloor === 'object'
     ? tour.defaultFloor
     : null
@@ -34,7 +33,9 @@ export default async function PreviewPage({ params }: { params: Params }) {
       ? defaultFloor.initialScene
       : null
     if (initialScene) {
-      redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}?draft=true`)
+      const query = new URLSearchParams({ draft: 'true' })
+      if (debugHotspots === 'true') query.set('debugHotspots', 'true')
+      redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}?${query.toString()}`)
     }
   }
 

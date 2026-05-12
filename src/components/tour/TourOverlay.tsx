@@ -13,14 +13,15 @@ type Props = {
   tourSlug: string
   floorSlug: string
   isDraft: boolean
+  debugHotspots?: boolean
 }
 
-export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft }: Props) {
+export default function TourOverlay({ tour, currentScene, currentFloor, hotspots, tourFloors, tourSlug, floorSlug, isDraft, debugHotspots }: Props) {
   const [descExpanded, setDescExpanded] = useState(false)
+  const homeHref = buildTourHomeHref(tourSlug, isDraft, Boolean(debugHotspots))
 
   return (
     <div className="h-dvh w-dvw absolute pointer-events-none flex flex-col justify-between z-10">
-      {/* Top Bar - Title */}
       <div className="w-full flex flex-row justify-between">
         <div className="w-1/3" />
         <div className="sm:w-1/3 lg:w-1/2 mt-4 text-white text-xl text-center">
@@ -45,24 +46,21 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             )}
           </div>
         </div>
-        {/* Sidebar */}
         <HotspotSidebar
           hotspots={hotspots}
           tourSlug={tourSlug}
           floorSlug={floorSlug}
           isDraft={isDraft}
+          debugHotspots={debugHotspots}
         />
       </div>
 
-      {/* Center spacer */}
       <div />
 
-      {/* Bottom Bar */}
       <div className="w-full flex flex-row">
         <div className="bg-black/60 p-6 pl-4 rounded-r-xl mb-10 pointer-events-auto flex flex-row space-x-2">
-          {/* Home button */}
           <a
-            href={`/tour/${tourSlug}`}
+            href={homeHref}
             className="bg-ochre hover:bg-orange-700 p-2 size-14 rounded-full cursor-pointer flex items-center justify-center"
             title="Back to tour"
           >
@@ -71,16 +69,29 @@ export default function TourOverlay({ tour, currentScene, currentFloor, hotspots
             </svg>
           </a>
 
-          {/* Floor Map */}
           <FloorMapModal
             tourFloors={tourFloors}
             currentFloor={currentFloor}
             currentSceneSlug={currentScene.slug}
             tourSlug={tourSlug}
             isDraft={isDraft}
+            debugHotspots={debugHotspots}
           />
         </div>
       </div>
     </div>
   )
+}
+
+function buildTourHomeHref(
+  tourSlug: string,
+  isDraft: boolean,
+  debugHotspots: boolean,
+) {
+  const query = new URLSearchParams()
+  if (debugHotspots) query.set('debugHotspots', 'true')
+  const queryString = query.toString() ? `?${query.toString()}` : ''
+  return isDraft
+    ? `/tour/${tourSlug}/preview${queryString}`
+    : `/tour/${tourSlug}${queryString}`
 }

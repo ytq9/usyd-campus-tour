@@ -24,18 +24,77 @@ type HotspotRef = {
   sceneLocalId: string
   floorLocalId: string
   hotspot: any
-  sceneDbId: string | number
+  sceneDbId: number
 }
 
-// ID maps use string keys to simplify cross-referencing
-type IdMap = Record<string, string | number>
+// This project uses numeric Postgres IDs. Keep seed relationship values aligned
+// with Payload's generated relationship types.
+type PayloadId = number
+type IdMap = Record<string, PayloadId>
+
+type RichTextValue = {
+  root: {
+    type: string
+    children: {
+      type: any
+      version: number
+      [key: string]: unknown
+    }[]
+    direction: ('ltr' | 'rtl') | null
+    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | ''
+    indent: number
+    version: number
+  }
+  [key: string]: unknown
+}
+
+function createRichText(text: string): RichTextValue {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              text,
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              version: 1,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          textStyle: '',
+          version: 1,
+        },
+      ],
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1,
+    },
+  }
+}
+
+const toNumberId = (id: string | number | null | undefined): number => {
+  const numericId = Number(id)
+  if (!Number.isFinite(numericId)) {
+    throw new Error(`Expected numeric Payload ID, received ${String(id)}`)
+  }
+  return numericId
+}
 
 async function seed() {
   console.log('Starting seed...')
 
   const payload = await getPayload({ config })
 
-  // Create admin user if none exists
   const existingUsers = await payload.find({ collection: 'users', limit: 1 })
   if (existingUsers.totalDocs === 0) {
     await payload.create({
@@ -48,7 +107,6 @@ async function seed() {
     console.log('Created admin user: admin@usyd.edu.au / admin123')
   }
 
-  // Check for seed data
   const tourConfigPath = path.resolve(__dirname, 'data/tour.json')
   if (!fs.existsSync(tourConfigPath)) {
     console.log('No seed data found at src/seed/data/tour.json')
@@ -59,29 +117,24 @@ async function seed() {
     console.log('  4. Copy reference public/tour/ to public/tour/')
     console.log('  5. Re-run this script')
 
-    // Create a sample tour anyway
     console.log('\nCreating sample tour data...')
     await createSampleTour(payload)
     process.exit(0)
   }
 
-  // Load tour config
   const tourConfig = JSON.parse(fs.readFileSync(tourConfigPath, 'utf-8'))
 
-  // Maps for tracking created records
-  const mediaMap: IdMap = {} // filePath -> mediaId
-  const floorMap: IdMap = {} // floorSlug -> floorId
-  const sceneMap: IdMap = {} // "floorSlug/sceneLocalId" -> sceneDbId
-  const hotspotRefs: HotspotRef[] = [] // deferred hotspot creation
+  const mediaMap: IdMap = {}
+  const floorMap: IdMap = {}
+  const sceneMap: IdMap = {}
+  const hotspotRefs: HotspotRef[] = []
 
-  // 1. Upload panorama images and floorplan SVGs
   console.log('Uploading media files...')
   const publicDir = path.resolve(__dirname, '../../public')
 
   for (const floorplan of tourConfig.floorplans) {
     const floorSlug = floorplan.config.replace('.json', '')
 
-    // Upload floorplan SVG
     const svgPath = path.join(publicDir, floorplan.floorplan)
     if (fs.existsSync(svgPath)) {
       const svgFilename = path.basename(svgPath)
@@ -96,14 +149,13 @@ async function seed() {
           data: { alt: `${floorplan.floorName} floorplan` },
           filePath: svgPath,
         })
-        mediaMap[floorplan.floorplan] = media.id
+        mediaMap[floorplan.floorplan] = toNumberId(media.id)
         console.log(`  Uploaded floorplan: ${svgFilename}`)
       } else {
-        mediaMap[floorplan.floorplan] = existing.docs[0].id
+        mediaMap[floorplan.floorplan] = toNumberId(existing.docs[0].id)
       }
     }
 
-    // Upload panorama images for this floor
     const floorConfigPath = path.resolve(__dirname, `data/floorplans/${floorplan.config}`)
     if (fs.existsSync(floorConfigPath)) {
       const floorConfig = JSON.parse(fs.readFileSync(floorConfigPath, 'utf-8'))
@@ -123,35 +175,34 @@ async function seed() {
                 data: { alt: sceneData.title || sceneId },
                 filePath: panoramaPath,
               })
-              mediaMap[sceneData.panorama] = media.id
+              mediaMap[sceneData.panorama] = toNumberId(media.id)
               console.log(`  Uploaded panorama: ${panoramaFilename}`)
             } catch (err) {
               console.error(`  Failed to upload ${panoramaFilename}:`, err)
             }
           } else {
-            mediaMap[sceneData.panorama] = existing.docs[0].id
+            mediaMap[sceneData.panorama] = toNumberId(existing.docs[0].id)
           }
         }
       }
     }
   }
 
-  // 2. Create Tour
   console.log('Creating tour...')
   const tour = await payload.create({
     collection: 'tours',
+    draft: false,
     data: {
       title: tourConfig.landingPageTitle,
       slug: 'shepherd-street-j15',
       welcomeTitle: tourConfig.welcomeTitle,
-      welcomeText: { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: tourConfig.welcomeText }] }] } },
+      welcomeText: createRichText(tourConfig.welcomeText),
       tags: [{ tag: 'engineering' }, { tag: 'campus' }],
       _status: 'published',
     },
   })
   console.log(`  Created tour: ${tour.title}`)
 
-  // 3. Create Floors (without initialScene - will update later)
   console.log('Creating floors...')
   for (let i = 0; i < tourConfig.floorplans.length; i++) {
     const fp = tourConfig.floorplans[i]
@@ -160,8 +211,9 @@ async function seed() {
     const floorData: any = {
       name: fp.floorName,
       slug: floorSlug,
-      tour: tour.id,
+      tour: toNumberId(tour.id),
       order: i,
+      _status: 'published',
     }
 
     if (mediaMap[fp.floorplan]) {
@@ -170,13 +222,13 @@ async function seed() {
 
     const floor = await payload.create({
       collection: 'floors',
+      draft: false,
       data: floorData,
     })
-    floorMap[floorSlug] = floor.id
+    floorMap[floorSlug] = toNumberId(floor.id)
     console.log(`  Created floor: ${fp.floorName}`)
   }
 
-  // 4. Create Scenes (without hotspots - will update later)
   console.log('Creating scenes...')
   for (const fp of tourConfig.floorplans) {
     const floorSlug = fp.config.replace('.json', '')
@@ -188,17 +240,24 @@ async function seed() {
 
     for (const [sceneLocalId, sceneData] of Object.entries(floorConfig) as [string, any][]) {
       const sceneSlug = sceneLocalId.replace(/\./g, '-')
+      const panoramaId = mediaMap[sceneData.panorama]
+
+      if (!panoramaId) {
+        console.warn(`  Skipping scene without panorama media: ${sceneData.title || sceneLocalId}`)
+        continue
+      }
 
       const scene = await payload.create({
         collection: 'scenes',
+        draft: false,
         data: {
           title: sceneData.title || sceneLocalId,
           slug: sceneSlug,
           floor: floorMap[floorSlug],
           description: sceneData.sceneDesc
-            ? { root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: sceneData.sceneDesc }] }] } }
+            ? createRichText(sceneData.sceneDesc)
             : undefined,
-          panorama: mediaMap[sceneData.panorama] || undefined,
+          panorama: panoramaId,
           initialYaw: sceneData.yaw || 0,
           initialPitch: sceneData.pitch || 0,
           initialHfov: sceneData.hfov || 120,
@@ -207,16 +266,15 @@ async function seed() {
         },
       })
 
-      sceneMap[`${floorSlug}/${sceneLocalId}`] = scene.id
+      sceneMap[`${floorSlug}/${sceneLocalId}`] = toNumberId(scene.id)
 
-      // Store hotspot references for later
       if (sceneData.hotSpots) {
         for (const hs of sceneData.hotSpots) {
           hotspotRefs.push({
             sceneLocalId,
             floorLocalId: floorSlug,
             hotspot: hs,
-            sceneDbId: scene.id,
+            sceneDbId: toNumberId(scene.id),
           })
         }
       }
@@ -225,13 +283,13 @@ async function seed() {
     }
   }
 
-  // 5. Update Scenes with hotspots (now that all scenes exist for cross-references)
   console.log('Adding hotspots to scenes...')
   const sceneHotspots: Record<string, any[]> = {}
 
   for (const ref of hotspotRefs) {
-    if (!sceneHotspots[ref.sceneDbId]) {
-      sceneHotspots[ref.sceneDbId] = []
+    const sceneDbId = String(ref.sceneDbId)
+    if (!sceneHotspots[sceneDbId]) {
+      sceneHotspots[sceneDbId] = []
     }
 
     const hs = ref.hotspot
@@ -244,10 +302,8 @@ async function seed() {
     }
 
     if (hs.type === 'scene' || hs.type !== 'info') {
-      // Resolve target scene
       const isNewFloor = hs.navType === 'newFloorScene'
       if (isNewFloor && hs.sceneId) {
-        // sceneId format: "floorSlug/sceneId" for cross-floor
         const parts = hs.sceneId.split('/')
         if (parts.length === 2) {
           const targetFloorSlug = parts[0]
@@ -259,7 +315,6 @@ async function seed() {
           }
         }
       } else if (hs.sceneId) {
-        // Same floor
         const targetSceneDbId = sceneMap[`${ref.floorLocalId}/${hs.sceneId}`]
         if (targetSceneDbId) {
           hotspotData.targetScene = targetSceneDbId
@@ -268,33 +323,28 @@ async function seed() {
     }
 
     if (hs.type === 'info' && hs.description) {
-      hotspotData.infoContent = {
-        root: { type: 'root', children: [{ type: 'paragraph', children: [{ type: 'text', text: hs.description }] }] }
-      }
+      hotspotData.infoContent = createRichText(hs.description)
     }
 
-    sceneHotspots[ref.sceneDbId].push(hotspotData)
+    sceneHotspots[sceneDbId].push(hotspotData)
   }
 
   for (const [sceneId, hotspots] of Object.entries(sceneHotspots)) {
     await payload.update({
       collection: 'scenes',
-      id: sceneId,
+      id: toNumberId(sceneId),
       data: { hotspots },
     })
   }
   console.log(`  Updated ${Object.keys(sceneHotspots).length} scenes with hotspots`)
 
-  // 6. Update Floors with initialScene and mapPoints
   console.log('Updating floors with initial scenes and map points...')
   for (const fp of tourConfig.floorplans) {
     const floorSlug = fp.config.replace('.json', '')
     const floorDbId = floorMap[floorSlug]
 
-    // Resolve initial scene
     const initialSceneDbId = sceneMap[`${floorSlug}/${fp.initialSceneId}`]
 
-    // Resolve map points
     const mapPoints = (fp.hotSpotPoints || [])
       .map((pt: any) => {
         const sceneDbId = sceneMap[`${floorSlug}/${pt.sceneId}`]
@@ -311,15 +361,16 @@ async function seed() {
     await payload.update({
       collection: 'floors',
       id: floorDbId,
+      draft: false,
       data: {
         initialScene: initialSceneDbId || undefined,
         mapPoints,
+        _status: 'published',
       },
     })
     console.log(`  Updated floor: ${fp.floorName}`)
   }
 
-  // 7. Update Tour with floors and defaultFloor
   console.log('Updating tour with floors...')
   const floorIds = tourConfig.floorplans.map((fp: any) => {
     const floorSlug = fp.config.replace('.json', '')
@@ -330,7 +381,7 @@ async function seed() {
 
   await payload.update({
     collection: 'tours',
-    id: tour.id,
+    id: toNumberId(tour.id),
     data: {
       floors: floorIds,
       defaultFloor: floorMap[defaultFloorSlug] || floorIds[0],
@@ -343,9 +394,10 @@ async function seed() {
 }
 
 async function createSampleTour(payload: any) {
-  // Create a minimal sample tour for testing
+  // Keep local setup usable even when the reference data bundle is not present.
   const tour = await payload.create({
     collection: 'tours',
+    draft: false,
     data: {
       title: 'Sample Campus Tour',
       slug: 'sample-tour',
@@ -357,20 +409,22 @@ async function createSampleTour(payload: any) {
 
   const floor = await payload.create({
     collection: 'floors',
+    draft: false,
     data: {
       name: 'Ground Floor',
       slug: 'ground-floor',
-      tour: tour.id,
+      tour: toNumberId(tour.id),
       order: 0,
+      _status: 'published',
     },
   })
 
   await payload.update({
     collection: 'tours',
-    id: tour.id,
+    id: toNumberId(tour.id),
     data: {
-      floors: [floor.id],
-      defaultFloor: floor.id,
+      floors: [toNumberId(floor.id)],
+      defaultFloor: toNumberId(floor.id),
     },
   })
 

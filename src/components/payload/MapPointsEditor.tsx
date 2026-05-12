@@ -1,7 +1,7 @@
 'use client'
 
 import type { ArrayFieldClientComponent } from 'payload'
-import { FieldLabel, useForm, useFormFields } from '@payloadcms/ui'
+import { FieldLabel, useDocumentInfo, useForm, useFormFields } from '@payloadcms/ui'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 type SceneOption = {
@@ -255,10 +255,11 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
   const svgRef = useRef<SVGSVGElement | null>(null)
   const justDraggedRef = useRef(false)
 
-  const { addFieldRow, dispatchFields, removeFieldRow } = useForm()
+  const { id: floorId } = useDocumentInfo()
+  const { addFieldRow, dispatchFields, removeFieldRow, setModified } = useForm()
   const floorplanField = useFormFields(([fields]) => fields.floorplan as FieldState<number | string | MediaValue | null> | undefined)
 
-  // Read live row data directly from form state so markers appear immediately after addFieldRow/dispatchFields
+  // Read live form rows so newly added map markers appear before the document is saved.
   const points = useFormFields(([fields]) => {
     const rows = (fields[path]?.rows ?? []) as unknown[]
     return rows.map((_, i) => ({
@@ -282,12 +283,23 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
   useEffect(() => {
     const controller = new AbortController()
 
+    if (!floorId) {
+      setScenes([])
+      setScenesLoading(false)
+      return () => {
+        controller.abort()
+      }
+    }
+
     setScenesLoading(true)
 
-    void fetch('/api/scenes?limit=100&depth=0', {
-      credentials: 'same-origin',
-      signal: controller.signal,
-    })
+    void fetch(
+      `/api/scenes?limit=100&depth=0&draft=true&where[floor][equals]=${encodeURIComponent(String(floorId))}`,
+      {
+        credentials: 'same-origin',
+        signal: controller.signal,
+      },
+    )
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`Failed to fetch scenes: ${response.status}`)
@@ -310,7 +322,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
     return () => {
       controller.abort()
     }
-  }, [])
+  }, [floorId])
 
   useEffect(() => {
     const floorplanValue = floorplanField?.value
@@ -436,6 +448,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
         type: 'UPDATE',
         value: localPosition.cy,
       })
+      setModified(true)
     }
 
     setDraggingIndex(null)
@@ -493,6 +506,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
         color: { value: DEFAULT_COLOR },
       },
     })
+    setModified(true)
 
     setPendingAdd(null)
   }
@@ -532,6 +546,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
       type: 'UPDATE',
       value: editing.color || DEFAULT_COLOR,
     })
+    setModified(true)
 
     setEditing(null)
   }
@@ -545,6 +560,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
       path,
       rowIndex: editing.index,
     })
+    setModified(true)
     setEditing(null)
   }
 
@@ -677,7 +693,7 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
       <FieldLabel label={field.label || field.name} path={path} required={field.required} />
       <p style={editorStyles.helperText}>
         Drag markers to reposition them. Click the floorplan to add a marker, or click an existing marker to edit
-        its scene and color.
+        its scene and color. Scene choices are scoped to this floor.
       </p>
 
       <div style={editorStyles.panel}>
@@ -751,7 +767,6 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
                 )
               })}
 
-              {/* Preview circle while choosing scene for a new marker */}
               {pendingAdd && (
                 <circle
                   cx={pendingAdd.cx}
@@ -775,7 +790,13 @@ export const MapPointsEditor: ArrayFieldClientComponent = ({ field, path, readOn
 
         <div style={editorStyles.infoBar}>
           <span>{points.length} map point{points.length === 1 ? '' : 's'}</span>
-          <span>{scenesLoading ? 'Loading scenes...' : `${scenes.length} scenes available`}</span>
+          <span>
+            {!floorId
+              ? 'Save this floor before selecting scenes'
+              : scenesLoading
+                ? 'Loading scenes...'
+                : `${scenes.length} scenes available for this floor`}
+          </span>
         </div>
       </div>
     </div>
