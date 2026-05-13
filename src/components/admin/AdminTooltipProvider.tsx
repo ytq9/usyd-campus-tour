@@ -80,10 +80,6 @@ const TOOLTIP_MAP: Record<string, TooltipEntry> = {
     title: 'Default Floor',
     desc: 'The floor visitors land on first when they open this tour. Must be one of the assigned floors.',
   },
-  floors: {
-    title: 'Floors',
-    desc: 'Select which building floors belong to this tour.',
-  },
 
   // ── Floors fields ─────────────────────────────────────────────────────────
   tour: {
