@@ -21,6 +21,12 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      providers: [
+        '@/components/admin/AdminTooltipProvider#AdminTooltipProvider',
+        '@/components/admin/OnboardingTour#OnboardingTour',
+      ],
+    },
     livePreview: {
       url: ({ data, collectionConfig }) => {
         if (collectionConfig?.slug === 'tours') {

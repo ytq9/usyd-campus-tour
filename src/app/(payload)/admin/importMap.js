@@ -1,3 +1,5 @@
+import { AdminTooltipProvider as AdminTooltipProvider_tooltip } from '@/components/admin/AdminTooltipProvider'
+import { OnboardingTour as OnboardingTour_onboarding } from '@/components/admin/OnboardingTour'
 import { MediaBeforeList as MediaBeforeList_ce5186712fb9e7ba723a43fcc1f570c0 } from '@/components/MediaBulkUpload/BeforeListComponent'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -28,6 +30,8 @@ import { default as default_894a722305973334be91b6aae8e52c63 } from '@/component
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
+  "@/components/admin/AdminTooltipProvider#AdminTooltipProvider": AdminTooltipProvider_tooltip,
+  "@/components/admin/OnboardingTour#OnboardingTour": OnboardingTour_onboarding,
   "@/components/MediaBulkUpload/BeforeListComponent#MediaBeforeList": MediaBeforeList_ce5186712fb9e7ba723a43fcc1f570c0,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
