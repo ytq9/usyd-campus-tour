@@ -232,7 +232,7 @@ function resolveTooltip(target: HTMLElement): TooltipEntry | null {
 // ---------------------------------------------------------------------------
 // Timing configuration
 // ---------------------------------------------------------------------------
-const SHOW_DELAY_MS = 100 // require the cursor to dwell this long before showing
+const SHOW_DELAY_MS = 400 // require the cursor to dwell this long before showing
 const HIDE_DELAY_MS = 120 // grace period when leaving so child elements don't flicker
 
 // ---------------------------------------------------------------------------
