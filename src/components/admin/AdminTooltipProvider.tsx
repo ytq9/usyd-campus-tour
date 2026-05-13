@@ -5,10 +5,32 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 // ---------------------------------------------------------------------------
 // Tooltip content map
 // Keys are normalised label/nav text (lowercase, trimmed, no asterisks).
+//
+// A map value can be either:
+//   • a plain TooltipEntry — same description in every context
+//   • a ContextualEntry    — different description for nav vs. field
+//                            ({ default, nav?, field? })
 // ---------------------------------------------------------------------------
 type TooltipEntry = { title: string; desc: string }
 
-const TOOLTIP_MAP: Record<string, TooltipEntry> = {
+type ContextualEntry = {
+  default: TooltipEntry
+  nav?: TooltipEntry
+  field?: TooltipEntry
+}
+
+type MapValue = TooltipEntry | ContextualEntry
+type Context = 'nav' | 'field'
+
+const isContextual = (v: MapValue): v is ContextualEntry =>
+  (v as ContextualEntry).default !== undefined
+
+const resolveEntry = (value: MapValue, context: Context): TooltipEntry => {
+  if (!isContextual(value)) return value
+  return value[context] ?? value.default
+}
+
+const TOOLTIP_MAP: Record<string, MapValue> = {
   // ── Sidebar navigation ───────────────────────────────────────────────────
   media: {
     title: '📸 Media',
@@ -18,9 +40,21 @@ const TOOLTIP_MAP: Record<string, TooltipEntry> = {
     title: '🗺️ Tours',
     desc: 'Define virtual building routes. A tour contains one or more floors for visitors to explore.',
   },
+  // "Floors" appears in two contexts — sidebar module vs. form field —
+  // so it gets a contextual entry with both descriptions.
   floors: {
-    title: '🏢 Floors',
-    desc: 'Represent individual levels inside a building. Each floor holds scenes and a floorplan map.',
+    default: {
+      title: '🏢 Floors',
+      desc: 'Represent individual levels inside a building. Each floor holds scenes and a floorplan map.',
+    },
+    nav: {
+      title: '🏢 Floors',
+      desc: 'Represent individual levels inside a building. Each floor holds scenes and a floorplan map.',
+    },
+    field: {
+      title: 'Floors',
+      desc: 'Select which building floors belong to this tour. A floor can only be assigned to one tour at a time.',
+    },
   },
   scenes: {
     title: '🔮 Scenes',
@@ -142,7 +176,9 @@ function normalise(raw: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Walk up the DOM from the hovered element looking for a label / nav link
+// Walk up the DOM from the hovered element looking for a label / nav link.
+// We track whether we entered through a form <label> or a navigation <a>
+// so contextual entries (e.g. "floors") can return the right description.
 // ---------------------------------------------------------------------------
 function resolveTooltip(target: HTMLElement): TooltipEntry | null {
   let el: HTMLElement | null = target
@@ -151,17 +187,18 @@ function resolveTooltip(target: HTMLElement): TooltipEntry | null {
 
     const tag = el.tagName.toLowerCase()
 
-    // Field labels
+    // Field labels → 'field' context
     if (tag === 'label') {
-      // Use the label's own direct text (ignore nested icons/spans)
       const key = normalise(el.textContent ?? '')
-      if (key && TOOLTIP_MAP[key]) return TOOLTIP_MAP[key]
+      const value = key ? TOOLTIP_MAP[key] : undefined
+      if (value) return resolveEntry(value, 'field')
     }
 
-    // Sidebar nav links — match the innerText so SVG icon title text is excluded
+    // Sidebar nav links → 'nav' context
     if (tag === 'a' || (tag === 'span' && el.getAttribute('role') === 'link')) {
       const key = normalise(el.innerText ?? el.textContent ?? '')
-      if (key && TOOLTIP_MAP[key]) return TOOLTIP_MAP[key]
+      const value = key ? TOOLTIP_MAP[key] : undefined
+      if (value) return resolveEntry(value, 'nav')
     }
 
     el = el.parentElement
