@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 // ---------------------------------------------------------------------------
 // Tooltip content map
@@ -165,20 +165,33 @@ const TOOLTIP_MAP: Record<string, MapValue> = {
 }
 
 // ---------------------------------------------------------------------------
-// Normalise raw text to a lookup key
+// Normalise raw text to a lookup key.
+// Strips required-asterisks, decorative chars, count suffixes like "(0 of 5)",
+// and collapses whitespace.
 // ---------------------------------------------------------------------------
 function normalise(raw: string): string {
   return raw
     .toLowerCase()
-    .replace(/\s*\*\s*$/, '') // strip trailing required-asterisk
+    .replace(/[*()[\]{}]/g, ' ')        // remove decorative chars
     .replace(/\s+/g, ' ')
     .trim()
 }
 
+// Try increasingly shorter prefixes of `text` against TOOLTIP_MAP.
+// e.g. "tags 0 of unlimited" → "tags 0 of unlimited" (miss) → "tags 0 of" → ... → "tags" (hit)
+function lookupByPrefix(text: string): MapValue | undefined {
+  if (TOOLTIP_MAP[text]) return TOOLTIP_MAP[text]
+  const words = text.split(' ')
+  for (let i = words.length - 1; i > 0; i--) {
+    const candidate = words.slice(0, i).join(' ')
+    if (TOOLTIP_MAP[candidate]) return TOOLTIP_MAP[candidate]
+  }
+  return undefined
+}
+
 // ---------------------------------------------------------------------------
-// Walk up the DOM from the hovered element looking for a label / nav link.
-// We track whether we entered through a form <label> or a navigation <a>
-// so contextual entries (e.g. "floors") can return the right description.
+// Walk up the DOM from the hovered element looking for a label / heading / nav.
+// Context (field vs. nav) drives which variant of a ContextualEntry to return.
 // ---------------------------------------------------------------------------
 function resolveTooltip(target: HTMLElement): TooltipEntry | null {
   let el: HTMLElement | null = target
@@ -186,25 +199,41 @@ function resolveTooltip(target: HTMLElement): TooltipEntry | null {
     if (!el) break
 
     const tag = el.tagName.toLowerCase()
+    const role = el.getAttribute('role')
 
-    // Field labels → 'field' context
+    let context: Context | null = null
+
     if (tag === 'label') {
-      const key = normalise(el.textContent ?? '')
-      const value = key ? TOOLTIP_MAP[key] : undefined
-      if (value) return resolveEntry(value, 'field')
+      context = 'field'
+    } else if (tag === 'a' || (tag === 'span' && role === 'link')) {
+      context = 'nav'
+    } else if (/^h[1-5]$/.test(tag) || role === 'heading') {
+      // Array / group field headers in PayloadCMS use <h2>/<h3> not <label>
+      context = 'field'
+    } else if (tag === 'button') {
+      // Collapsible field headers render as <button>; only match if text is short
+      const previewText = el.textContent ?? ''
+      if (previewText.length < 60) context = 'field'
     }
 
-    // Sidebar nav links → 'nav' context
-    if (tag === 'a' || (tag === 'span' && el.getAttribute('role') === 'link')) {
-      const key = normalise(el.innerText ?? el.textContent ?? '')
-      const value = key ? TOOLTIP_MAP[key] : undefined
-      if (value) return resolveEntry(value, 'nav')
+    if (context) {
+      const text = normalise(el.textContent ?? '')
+      if (text && text.length < 80) {
+        const value = lookupByPrefix(text)
+        if (value) return resolveEntry(value, context)
+      }
     }
 
     el = el.parentElement
   }
   return null
 }
+
+// ---------------------------------------------------------------------------
+// Timing configuration
+// ---------------------------------------------------------------------------
+const SHOW_DELAY_MS = 100 // require the cursor to dwell this long before showing
+const HIDE_DELAY_MS = 120 // grace period when leaving so child elements don't flicker
 
 // ---------------------------------------------------------------------------
 // Provider component
@@ -216,39 +245,68 @@ export function AdminTooltipProvider({ children }: { children: React.ReactNode }
     y: number
   } | null>(null)
 
+  const showTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastKey = useRef<string>('')
-
-  const clearHide = useCallback(() => {
-    if (hideTimer.current) {
-      clearTimeout(hideTimer.current)
-      hideTimer.current = null
-    }
-  }, [])
+  const visibleKey = useRef<string>('')   // title of currently-shown tooltip
+  const pendingKey = useRef<string>('')   // title of tooltip about to show
+  const mousePos = useRef({ x: 0, y: 0 }) // latest cursor position
 
   useEffect(() => {
+    const cancelShow = () => {
+      if (showTimer.current) {
+        clearTimeout(showTimer.current)
+        showTimer.current = null
+      }
+      pendingKey.current = ''
+    }
+
+    const cancelHide = () => {
+      if (hideTimer.current) {
+        clearTimeout(hideTimer.current)
+        hideTimer.current = null
+      }
+    }
+
     const handleOver = (e: MouseEvent) => {
+      mousePos.current = { x: e.clientX, y: e.clientY }
       const entry = resolveTooltip(e.target as HTMLElement)
+
       if (entry) {
+        // Hovering a known target — cancel any pending hide
+        cancelHide()
         const key = entry.title
-        clearHide()
-        if (key !== lastKey.current) {
-          lastKey.current = key
-          setTooltip({ entry, x: e.clientX, y: e.clientY })
-        }
+
+        // Already showing this tooltip? mousemove will keep the position fresh
+        if (key === visibleKey.current) return
+        // Already scheduled to show this exact tooltip? don't restart the timer
+        if (key === pendingKey.current) return
+
+        // New target — schedule show after SHOW_DELAY_MS
+        cancelShow()
+        pendingKey.current = key
+        showTimer.current = setTimeout(() => {
+          setTooltip({ entry, x: mousePos.current.x, y: mousePos.current.y })
+          visibleKey.current = key
+          pendingKey.current = ''
+          showTimer.current = null
+        }, SHOW_DELAY_MS)
       } else {
-        // Schedule hide so tooltip doesn't flicker when crossing child elements
-        if (!hideTimer.current) {
+        // Hovered off a known target — abandon any pending show
+        cancelShow()
+
+        // Schedule hide if a tooltip is currently visible
+        if (visibleKey.current && !hideTimer.current) {
           hideTimer.current = setTimeout(() => {
             setTooltip(null)
-            lastKey.current = ''
+            visibleKey.current = ''
             hideTimer.current = null
-          }, 120)
+          }, HIDE_DELAY_MS)
         }
       }
     }
 
     const handleMove = (e: MouseEvent) => {
+      mousePos.current = { x: e.clientX, y: e.clientY }
       setTooltip((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : null))
     }
 
@@ -258,9 +316,10 @@ export function AdminTooltipProvider({ children }: { children: React.ReactNode }
     return () => {
       document.removeEventListener('mouseover', handleOver)
       document.removeEventListener('mousemove', handleMove)
-      clearHide()
+      cancelShow()
+      cancelHide()
     }
-  }, [clearHide])
+  }, [])
 
   // Keep tooltip inside the viewport
   const pos = (() => {
