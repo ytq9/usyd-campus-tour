@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { getInfoContentTextBlocks } from './infoContentText'
+import { hasRichTextContent } from './infoContentText'
 import RichTextContent from './RichTextContent'
 
 type InfoVideo = {
@@ -19,8 +19,8 @@ type Props = {
 export default function InfoHotspotContent({ dialogRef, hotspot }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoError, setVideoError] = useState(false)
-  const contentBlocks = useMemo(
-    () => getInfoContentTextBlocks(hotspot?.infoContent),
+  const hasContent = useMemo(
+    () => hasRichTextContent(hotspot?.infoContent),
     [hotspot?.infoContent],
   )
   const video = getInfoVideo(hotspot?.infoVideo)
@@ -82,7 +82,7 @@ export default function InfoHotspotContent({ dialogRef, hotspot }: Props) {
         </div>
       )}
 
-      {contentBlocks.length > 0 ? (
+      {hasContent ? (
         <RichTextContent value={hotspot?.infoContent} />
       ) : !video?.url ? (
         <p>{hotspot?.text}</p>

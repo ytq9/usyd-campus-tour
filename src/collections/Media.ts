@@ -9,6 +9,7 @@ export const Media: CollectionConfig = {
     read: () => true,
   },
   upload: {
+    bulkUpload: false,
     mimeTypes: ['image/*', 'image/svg+xml', ...VIDEO_MIME_TYPES],
     imageSizes: [
       { name: 'thumbnail', width: 400, height: undefined, position: 'centre' },

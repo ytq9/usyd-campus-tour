@@ -32,3 +32,21 @@ nav a:hover,
   text-decoration: underline dotted rgba(148, 163, 184, 0.5);
   text-underline-offset: 3px;
 }
+
+/* ── Media list custom uploader ────────────────────────────────
+   The media collection uses a custom uploader. Hide Payload's
+   default Create New/Bulk Upload header actions before hydration
+   so they do not flash during refresh.
+   ─────────────────────────────────────────────────────────── */
+.collection-list--media {
+  .list-create-new-doc__create-new-button,
+  .list-header__title-actions [aria-label='Bulk Upload'],
+  .list-header__title-actions [aria-label='Bulk upload'],
+  .no-results__actions {
+    display: none !important;
+  }
+}
+
+.media-bulk-upload-panel {
+  margin: 0 var(--gutter-h) calc(var(--base) * 0.75);
+}

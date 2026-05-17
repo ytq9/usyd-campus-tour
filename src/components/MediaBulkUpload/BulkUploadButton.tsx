@@ -8,6 +8,8 @@ type FileWithPath = {
   relativePath?: string
 }
 
+type MediaKind = 'all' | 'image' | 'video'
+
 type QueueItem = {
   localId: string
   file: File
@@ -113,7 +115,11 @@ const isImageFile = (file: File): boolean =>
 const isVideoFile = (file: File): boolean =>
   VIDEO_MIME_TYPES.has(file.type) || VIDEO_EXTENSIONS.has(fileExtension(file.name))
 
-const isAllowedMediaFile = (file: File): boolean => isImageFile(file) || isVideoFile(file)
+const isAllowedMediaFile = (file: File, kind: MediaKind = 'all'): boolean => {
+  if (kind === 'image') return isImageFile(file)
+  if (kind === 'video') return isVideoFile(file)
+  return isImageFile(file) || isVideoFile(file)
+}
 
 const makeLocalId = (): string => {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -145,9 +151,9 @@ const enableDirectoryPicker = (input: HTMLInputElement | null): void => {
 const queueKey = (item: QueueItem): string =>
   `${item.relativePath || item.filename}:${item.file.size}:${item.file.lastModified}`
 
-const toQueueItems = (files: FileWithPath[]): QueueItem[] =>
+const toQueueItems = (files: FileWithPath[], kind: MediaKind = 'all'): QueueItem[] =>
   files
-    .filter(({ file }) => isAllowedMediaFile(file))
+    .filter(({ file }) => isAllowedMediaFile(file, kind))
     .map(({ file, relativePath }) => {
       const path = relativePath || getRelativePath(file)
       const folderName = topFolderFromPath(path)
@@ -676,6 +682,7 @@ export const BulkUploadButton: React.FC = () => {
   const router = useRouter()
   const folderInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -698,11 +705,12 @@ export const BulkUploadButton: React.FC = () => {
     input?.click()
   }, [])
 
-  const appendToQueue = useCallback((incomingFiles: FileWithPath[]) => {
-    const incoming = toQueueItems(incomingFiles)
+  const appendToQueue = useCallback((incomingFiles: FileWithPath[], kind: MediaKind = 'all') => {
+    const incoming = toQueueItems(incomingFiles, kind)
 
     if (incoming.length === 0) {
-      alert('No image, MP4, or WebM files found.')
+      const fileType = kind === 'image' ? 'image files' : kind === 'video' ? 'MP4 or WebM videos' : 'image, MP4, or WebM files'
+      alert(`No ${fileType} found.`)
       return
     }
 
@@ -924,7 +932,7 @@ export const BulkUploadButton: React.FC = () => {
       void (async () => {
         try {
           const files = await getFilesFromDrop(dataTransfer)
-          appendToQueue(files)
+          appendToQueue(files, 'all')
         } catch {
           alert('Unable to read dropped files.')
         }
@@ -939,7 +947,7 @@ export const BulkUploadButton: React.FC = () => {
         file,
         relativePath: getRelativePath(file),
       }))
-      appendToQueue(files)
+      appendToQueue(files, 'all')
       event.target.value = ''
     },
     [appendToQueue],
@@ -948,7 +956,16 @@ export const BulkUploadButton: React.FC = () => {
   const handleImageInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(event.target.files || []).map((file) => ({ file }))
-      appendToQueue(files)
+      appendToQueue(files, 'image')
+      event.target.value = ''
+    },
+    [appendToQueue],
+  )
+
+  const handleVideoInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(event.target.files || []).map((file) => ({ file }))
+      appendToQueue(files, 'video')
       event.target.value = ''
     },
     [appendToQueue],
@@ -1000,11 +1017,21 @@ export const BulkUploadButton: React.FC = () => {
         <input
           ref={imageInputRef}
           type="file"
-          accept="image/*,video/mp4,video/webm"
+          accept="image/*"
           multiple
           style={{ display: 'none' }}
           onClick={(event) => event.stopPropagation()}
           onChange={handleImageInputChange}
+          disabled={isUploading}
+        />
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/mp4,video/webm"
+          multiple
+          style={{ display: 'none' }}
+          onClick={(event) => event.stopPropagation()}
+          onChange={handleVideoInputChange}
           disabled={isUploading}
         />
 
@@ -1027,7 +1054,27 @@ export const BulkUploadButton: React.FC = () => {
               opacity: isUploading ? 0.6 : 1,
             }}
           >
-            Upload Media
+            Upload Images
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              videoInputRef.current?.click()
+            }}
+            disabled={isUploading}
+            style={{
+              padding: '9px 14px',
+              background: BLUE,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: isUploading ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              opacity: isUploading ? 0.6 : 1,
+            }}
+          >
+            Upload Video
           </button>
           <button
             type="button"

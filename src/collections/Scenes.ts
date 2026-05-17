@@ -145,15 +145,24 @@ export const Scenes: CollectionConfig = {
           name: 'targetScene',
           type: 'relationship',
           relationTo: 'scenes',
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'scene',
+          },
         },
         {
           name: 'targetFloor',
           type: 'relationship',
           relationTo: 'floors',
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'scene',
+          },
         },
         {
           name: 'infoContent',
           type: 'richText',
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'info',
+          },
         },
         {
           name: 'infoVideo',
