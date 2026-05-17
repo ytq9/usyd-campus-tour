@@ -212,7 +212,6 @@ async function seed() {
       name: fp.floorName,
       slug: floorSlug,
       tour: toNumberId(tour.id),
-      order: i,
       _status: 'published',
     }
 
@@ -414,7 +413,6 @@ async function createSampleTour(payload: any) {
       name: 'Ground Floor',
       slug: 'ground-floor',
       tour: toNumberId(tour.id),
-      order: 0,
       _status: 'published',
     },
   })

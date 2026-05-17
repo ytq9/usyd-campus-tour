@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
+const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm']
+
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
     read: () => true,
   },
   upload: {
-    mimeTypes: ['image/*', 'image/svg+xml'],
+    mimeTypes: ['image/*', 'image/svg+xml', ...VIDEO_MIME_TYPES],
     imageSizes: [
       { name: 'thumbnail', width: 400, height: undefined, position: 'centre' },
       { name: 'preview', width: 1200, height: undefined, position: 'centre' },
@@ -83,6 +85,20 @@ export const Media: CollectionConfig = {
         if (floorsUsingMedia.totalDocs > 0) {
           throw new Error(
             `Cannot delete: this media is used as a floorplan in floor "${floorsUsingMedia.docs[0].name}". Remove the reference first.`,
+          )
+        }
+        const scenesUsingInfoVideo = await payload.find({
+          collection: 'scenes',
+          where: { 'hotspots.infoVideo': { equals: id } },
+          limit: 1,
+          depth: 0,
+          draft: true,
+          overrideAccess: true,
+          req,
+        })
+        if (scenesUsingInfoVideo.totalDocs > 0) {
+          throw new Error(
+            `Cannot delete: this media is used as an info hotspot video in scene "${scenesUsingInfoVideo.docs[0].title}". Remove the reference first.`,
           )
         }
       },

@@ -32,6 +32,7 @@ type HotspotRow = {
   targetScene?: number | string | null | { id: number | string }
   targetFloor?: number | string | null | { id: number | string }
   infoContent?: unknown
+  infoVideo?: unknown
   iconColor?: string | null
   iconSize?: 'sm' | 'md' | 'lg' | null
 }
@@ -46,6 +47,14 @@ type SceneSummary = {
   panoramaUrl: string | null
 }
 
+type VideoMediaSummary = {
+  id: number | string
+  alt?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  url?: string | null
+}
+
 const SEED_HFOV = 100
 const DRAG_DEGREES_PER_SCREEN = 1
 const WHEEL_HFOV_SENSITIVITY = 0.05
@@ -54,6 +63,7 @@ const HOTSPOTS_SCHEMA_PATH = 'scenes.hotspots'
 const INFO_CONTENT_FIELDS = [
   { name: 'infoContent', type: 'richText', label: 'Info Content' },
 ] as ClientField[]
+const INFO_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm']
 
 const sizePx = (s?: string | null) => (s === 'sm' ? 16 : s === 'lg' ? 28 : 22)
 const defaultColorFor = (type?: string) => (type === 'scene' ? '#1a6ef5' : '#ff4444')
@@ -98,6 +108,7 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
         targetScene: fields[`${HOTSPOTS_PATH}.${i}.targetScene`]?.value as any,
         targetFloor: fields[`${HOTSPOTS_PATH}.${i}.targetFloor`]?.value as any,
         infoContent: fields[`${HOTSPOTS_PATH}.${i}.infoContent`]?.value,
+        infoVideo: fields[`${HOTSPOTS_PATH}.${i}.infoVideo`]?.value,
         iconColor: fields[`${HOTSPOTS_PATH}.${i}.iconColor`]?.value as any,
         iconSize: fields[`${HOTSPOTS_PATH}.${i}.iconSize`]?.value as any,
       })
@@ -1111,6 +1122,7 @@ function SidePanel({
               border: '1px solid #2a2a2a',
               borderRadius: 4,
               padding: 8,
+              marginBottom: 12,
             }}>
               <RenderFields
                 fields={INFO_CONTENT_FIELDS}
@@ -1127,10 +1139,18 @@ function SidePanel({
               padding: 8, background: '#181818',
               border: '1px dashed #333', borderRadius: 4,
               fontSize: 11, color: '#999', lineHeight: 1.5,
+              marginBottom: 12,
             }}>
               Rich text editor is not ready for this row yet. Save the scene or use the fallback Hotspots row below.
             </div>
           )}
+
+          <InfoVideoPicker
+            inputStyle={inputStyle}
+            labelStyle={labelStyle}
+            onChange={(value) => onChange('infoVideo', value)}
+            value={hotspot.infoVideo}
+          />
         </div>
       )}
 
@@ -1158,6 +1178,158 @@ function SidePanel({
           </select>
         </div>
       </div>
+    </div>
+  )
+}
+
+function InfoVideoPicker({
+  inputStyle,
+  labelStyle,
+  onChange,
+  value,
+}: {
+  inputStyle: React.CSSProperties
+  labelStyle: React.CSSProperties
+  onChange: (value: string | number | null) => void
+  value: unknown
+}) {
+  const selectedId = idOf(value)
+  const selectedFromValue = useMemo<VideoMediaSummary | null>(() => {
+    if (!value || typeof value !== 'object') return null
+    const media = value as VideoMediaSummary
+    if (media.id == null) return null
+    return media
+  }, [value])
+  const [videos, setVideos] = useState<VideoMediaSummary[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  const loadVideos = useCallback(() => {
+    const controller = new AbortController()
+    setIsLoading(true)
+    setLoadError(null)
+
+    fetch('/api/media?limit=200&depth=0&sort=filename', {
+      credentials: 'same-origin',
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Unable to load media.')
+        return res.json()
+      })
+      .then((data) => {
+        const docs = Array.isArray(data?.docs) ? data.docs : []
+        setVideos(
+          docs
+            .filter((doc: any) => typeof doc?.mimeType === 'string' && doc.mimeType.startsWith('video/'))
+            .map((doc: any) => ({
+              id: doc.id,
+              alt: doc.alt ?? null,
+              filename: doc.filename ?? null,
+              mimeType: doc.mimeType ?? null,
+              url: doc.url ?? null,
+            })),
+        )
+      })
+      .catch((err) => {
+        if (err?.name !== 'AbortError') setLoadError('Unable to load video media.')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false)
+      })
+
+    return controller
+  }, [])
+
+  useEffect(() => {
+    const controller = loadVideos()
+    return () => controller.abort()
+  }, [loadVideos])
+
+  const selectedVideo =
+    videos.find((video) => String(video.id) === selectedId) ??
+    (selectedFromValue && String(selectedFromValue.id) === selectedId ? selectedFromValue : null)
+  const playableVideos = videos.filter((video) =>
+    typeof video.mimeType === 'string' && INFO_VIDEO_MIME_TYPES.includes(video.mimeType),
+  )
+  const selectedIsPlayable =
+    !selectedVideo?.mimeType || INFO_VIDEO_MIME_TYPES.includes(selectedVideo.mimeType)
+  const includeSelectedUnsupported = Boolean(
+    selectedVideo &&
+      !selectedIsPlayable &&
+      !playableVideos.some((video) => String(video.id) === String(selectedVideo.id)),
+  )
+  const options = includeSelectedUnsupported && selectedVideo
+    ? [selectedVideo, ...playableVideos]
+    : playableVideos
+
+  const labelFor = (video: VideoMediaSummary) =>
+    video.filename || video.alt || `Media ${String(video.id)}`
+
+  return (
+    <div>
+      <label style={labelStyle}>Info Video</label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <select
+          value={selectedId || ''}
+          onChange={(e) => onChange(e.target.value ? toPayloadId(e.target.value) : null)}
+          style={inputStyle}
+        >
+          <option value="">No video</option>
+          {options.map((video) => {
+            const playable =
+              typeof video.mimeType === 'string' && INFO_VIDEO_MIME_TYPES.includes(video.mimeType)
+            return (
+              <option key={video.id} value={String(video.id)}>
+                {playable ? labelFor(video) : `Unsupported: ${labelFor(video)}`}
+              </option>
+            )
+          })}
+        </select>
+        <button
+          type="button"
+          onClick={() => {
+            const controller = loadVideos()
+            setTimeout(() => controller.abort(), 15000)
+          }}
+          style={{
+            padding: '6px 10px',
+            background: '#262626',
+            border: '1px solid #444',
+            borderRadius: 4,
+            color: '#ddd',
+            cursor: 'pointer',
+            flexShrink: 0,
+            fontSize: 12,
+          }}
+        >
+          Refresh
+        </button>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 5 }}>
+        <span style={{ color: '#777', fontSize: 10 }}>
+          {isLoading
+            ? 'Loading videos...'
+            : loadError ||
+              (playableVideos.length === 0
+                ? 'Upload MP4 or WebM in Media, then refresh.'
+                : 'Only MP4 and WebM are selectable for public playback.')}
+        </span>
+        <a
+          href="/admin/collections/media"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: '#79a8ff', flexShrink: 0, fontSize: 10 }}
+        >
+          Media
+        </a>
+      </div>
+      {selectedVideo && !selectedIsPlayable && (
+        <div style={{ color: '#ffb36b', fontSize: 10, lineHeight: 1.4, marginTop: 6 }}>
+          The selected file is {selectedVideo.mimeType || 'not a browser video type'}.
+          Replace it with MP4 or WebM for reliable playback.
+        </div>
+      )}
     </div>
   )
 }

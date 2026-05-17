@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { publishedOrAdmin } from '../access/publishedOrAdmin'
 
+const IMAGE_MEDIA_FILTER = { mimeType: { like: 'image/' } }
+
 type RelationshipRef =
   | string
   | number
@@ -237,6 +239,7 @@ export const Floors: CollectionConfig = {
       name: 'floorplan',
       type: 'upload',
       relationTo: 'media',
+      filterOptions: IMAGE_MEDIA_FILTER,
     },
     {
       name: 'initialScene',
@@ -246,12 +249,6 @@ export const Floors: CollectionConfig = {
       admin: {
         description: 'Only scenes assigned to this floor are available. Save a new floor before selecting its initial scene.',
       },
-    },
-    {
-      name: 'order',
-      type: 'number',
-      defaultValue: 0,
-      admin: { position: 'sidebar' },
     },
     {
       name: 'mapPoints',

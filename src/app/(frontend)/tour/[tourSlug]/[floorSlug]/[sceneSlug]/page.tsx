@@ -12,6 +12,47 @@ type SearchParams = Promise<{ draft?: string; debugHotspots?: string }>
 const valueOrFallback = (value: unknown, fallback: string): string =>
   typeof value === 'string' && value.length > 0 ? value : fallback
 
+const serializeInfoVideo = (value: unknown) => {
+  if (!value || typeof value !== 'object') return null
+
+  const video = value as {
+    alt?: unknown
+    filename?: unknown
+    mimeType?: unknown
+    url?: unknown
+  }
+  const url = typeof video.url === 'string' ? video.url : ''
+  if (!url) return null
+
+  const mimeType = typeof video.mimeType === 'string' ? video.mimeType : null
+  if (mimeType && !mimeType.startsWith('video/')) return null
+
+  return {
+    alt: typeof video.alt === 'string' ? video.alt : null,
+    filename: typeof video.filename === 'string' ? video.filename : null,
+    mimeType,
+    url,
+  }
+}
+
+const serializeHotspot = (hs: any) => ({
+  type: hs.type,
+  pitch: hs.pitch,
+  yaw: hs.yaw,
+  text: hs.text,
+  targetScene: hs.targetScene && typeof hs.targetScene === 'object'
+    ? { slug: hs.targetScene.slug, title: hs.targetScene.title }
+    : null,
+  targetFloor: hs.targetFloor && typeof hs.targetFloor === 'object'
+    ? { slug: hs.targetFloor.slug }
+    : null,
+  infoContent: hs.infoContent || null,
+  infoVideo: serializeInfoVideo(hs.infoVideo),
+  cssClass: hs.cssClass || '',
+  iconColor: hs.iconColor || '',
+  iconSize: hs.iconSize || 'md',
+})
+
 export default async function SceneViewerPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
   const { tourSlug, floorSlug, sceneSlug } = await params
   const { draft: draftParam, debugHotspots: debugHotspotsParam } = await searchParams
@@ -108,22 +149,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       initialPitch: scene.initialPitch || 0,
       initialHfov: scene.initialHfov || 120,
       rotation: scene.rotation || 0,
-      hotspots: (scene.hotspots || []).map((hs: any) => ({
-        type: hs.type,
-        pitch: hs.pitch,
-        yaw: hs.yaw,
-        text: hs.text,
-        targetScene: hs.targetScene && typeof hs.targetScene === 'object'
-          ? { slug: hs.targetScene.slug, title: hs.targetScene.title }
-          : null,
-        targetFloor: hs.targetFloor && typeof hs.targetFloor === 'object'
-          ? { slug: hs.targetFloor.slug }
-          : null,
-        infoContent: hs.infoContent || null,
-        cssClass: hs.cssClass || '',
-        iconColor: hs.iconColor || '',
-        iconSize: hs.iconSize || 'md',
-      })),
+      hotspots: (scene.hotspots || []).map(serializeHotspot),
     },
     floorScenes: floorScenes.docs.map((s: any) => ({
       id: s.id,
@@ -134,22 +160,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       initialPitch: s.initialPitch || 0,
       initialHfov: s.initialHfov || 120,
       rotation: s.rotation || 0,
-      hotspots: (s.hotspots || []).map((hs: any) => ({
-        type: hs.type,
-        pitch: hs.pitch,
-        yaw: hs.yaw,
-        text: hs.text,
-        targetScene: hs.targetScene && typeof hs.targetScene === 'object'
-          ? { slug: hs.targetScene.slug, title: hs.targetScene.title }
-          : null,
-        targetFloor: hs.targetFloor && typeof hs.targetFloor === 'object'
-          ? { slug: hs.targetFloor.slug }
-          : null,
-        infoContent: hs.infoContent || null,
-        cssClass: hs.cssClass || '',
-        iconColor: hs.iconColor || '',
-        iconSize: hs.iconSize || 'md',
-      })),
+      hotspots: (s.hotspots || []).map(serializeHotspot),
     })),
     tourFloors: tourFloors.map((f: any) => ({
       id: f.id,

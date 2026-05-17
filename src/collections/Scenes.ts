@@ -1,6 +1,9 @@
 import type { CollectionConfig } from 'payload'
 import { publishedOrAdmin } from '../access/publishedOrAdmin'
 
+const IMAGE_MEDIA_FILTER = { mimeType: { like: 'image/' } }
+const VIDEO_MEDIA_FILTER = { mimeType: { in: ['video/mp4', 'video/webm'] } }
+
 type RelationshipRef =
   | string
   | number
@@ -67,6 +70,7 @@ export const Scenes: CollectionConfig = {
       name: 'panorama',
       type: 'upload',
       relationTo: 'media',
+      filterOptions: IMAGE_MEDIA_FILTER,
       required: true,
     },
     {
@@ -150,6 +154,16 @@ export const Scenes: CollectionConfig = {
         {
           name: 'infoContent',
           type: 'richText',
+        },
+        {
+          name: 'infoVideo',
+          type: 'upload',
+          relationTo: 'media',
+          filterOptions: VIDEO_MEDIA_FILTER,
+          admin: {
+            condition: (_, siblingData) => siblingData?.type === 'info',
+            description: 'Optional MP4 or WebM video attachment for this info item.',
+          },
         },
         {
           name: 'iconColor',

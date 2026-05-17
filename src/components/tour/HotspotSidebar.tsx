@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { getInfoContentPreview, getInfoContentTextBlocks } from './infoContentText'
+import InfoHotspotContent from './InfoHotspotContent'
+import { getInfoContentPreview } from './infoContentText'
 
 type Props = {
   hotspots: any[]
@@ -15,7 +16,6 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
   const [isOpen, setIsOpen] = useState(false)
   const [selectedInfoHotspot, setSelectedInfoHotspot] = useState<any | null>(null)
   const infoModalRef = useRef<HTMLDialogElement>(null)
-  const selectedInfoContentBlocks = getInfoContentTextBlocks(selectedInfoHotspot?.infoContent)
 
   const handleNavigate = async (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
@@ -62,7 +62,9 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
       <div className={`${isOpen ? 'block' : 'hidden'} lg:block pointer-events-auto mt-2 mr-2`}>
         <div className="space-y-2 w-64 lg:w-80 bg-black/50 p-4 rounded-md border-2 border-white/20 max-h-[70vh] overflow-y-auto">
           {hotspots.map((hs, i) => {
-            const infoPreview = hs.type === 'info' ? getInfoContentPreview(hs.infoContent) : ''
+            const infoPreview = hs.type === 'info'
+              ? getInfoContentPreview(hs.infoContent) || (hs.infoVideo?.url ? 'Video attachment' : '')
+              : ''
 
             return (
               <button
@@ -102,17 +104,7 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
               <button className="d-btn d-btn-sm d-btn-circle d-btn-ghost">✕</button>
             </form>
           </div>
-          <div className="py-4 prose text-gray-700">
-            {selectedInfoContentBlocks.length > 0 ? (
-              <div>
-                {selectedInfoContentBlocks.map((block, index) => (
-                  <p key={index}>{block}</p>
-                ))}
-              </div>
-            ) : (
-              <p>{selectedInfoHotspot?.text}</p>
-            )}
-          </div>
+          <InfoHotspotContent dialogRef={infoModalRef} hotspot={selectedInfoHotspot} />
         </div>
         <form method="dialog" className="d-modal-backdrop">
           <button>close</button>

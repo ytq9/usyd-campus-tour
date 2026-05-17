@@ -2,6 +2,13 @@
 
 import type { PerspectiveCamera } from 'three'
 
+export type InfoVideoData = {
+  alt?: string | null
+  filename?: string | null
+  mimeType?: string | null
+  url?: string | null
+}
+
 export type HotspotData = {
   type: 'scene' | 'info'
   pitch?: number
@@ -10,6 +17,7 @@ export type HotspotData = {
   targetScene?: { slug?: string; title?: string } | null
   targetFloor?: { slug?: string } | null
   infoContent?: any
+  infoVideo?: InfoVideoData | null
   cssClass?: string
   iconColor?: string
   iconSize?: 'sm' | 'md' | 'lg' | string

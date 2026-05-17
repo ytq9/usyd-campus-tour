@@ -1,7 +1,8 @@
 import React from 'react'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import TourLanding from '@/components/tour/TourLanding'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,28 +25,12 @@ export default async function PreviewPage({ params, searchParams }: { params: Pa
   const tour = tours.docs[0]
   if (!tour) notFound()
 
-  const defaultFloor = tour.defaultFloor && typeof tour.defaultFloor === 'object'
-    ? tour.defaultFloor
-    : null
-
-  if (defaultFloor) {
-    const initialScene = defaultFloor.initialScene && typeof defaultFloor.initialScene === 'object'
-      ? defaultFloor.initialScene
-      : null
-    if (initialScene) {
-      const query = new URLSearchParams({ draft: 'true' })
-      if (debugHotspots === 'true') query.set('debugHotspots', 'true')
-      redirect(`/tour/${tourSlug}/${defaultFloor.slug}/${initialScene.slug}?${query.toString()}`)
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Preview: {tour.title}</h1>
-        <p className="text-gray-400">This tour has no default floor/scene configured yet.</p>
-        <p className="text-gray-500 mt-2">Set a default floor with an initial scene in the admin panel.</p>
-      </div>
-    </div>
+    <TourLanding
+      tour={tour}
+      tourSlug={tourSlug}
+      isDraft
+      debugHotspots={debugHotspots === 'true'}
+    />
   )
 }

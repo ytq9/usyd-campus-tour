@@ -1,6 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { publishedOrAdmin } from '../access/publishedOrAdmin'
 
+const IMAGE_MEDIA_FILTER = { mimeType: { like: 'image/' } }
+
 type RelationshipRef =
   | string
   | number
@@ -335,11 +337,11 @@ export const Tours: CollectionConfig = {
       unique: true,
       admin: { position: 'sidebar' },
     },
-    { name: 'description', type: 'richText' },
     {
       name: 'coverImage',
       type: 'upload',
       relationTo: 'media',
+      filterOptions: IMAGE_MEDIA_FILTER,
     },
     {
       name: 'tags',

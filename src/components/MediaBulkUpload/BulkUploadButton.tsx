@@ -10,6 +10,10 @@ interface UploadResult {
   message?: string
 }
 
+const isAllowedMediaFile = (file: File) =>
+  file.type.startsWith('image/') ||
+  ['video/mp4', 'video/webm'].includes(file.type)
+
 export const BulkUploadButton: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -103,9 +107,9 @@ export const BulkUploadButton: React.FC = () => {
 
   const uploadFiles = useCallback(
     async (files: File[]) => {
-      const imageFiles = files.filter((f) => f.type.startsWith('image/'))
-      if (imageFiles.length === 0) {
-        alert('Please select image files.')
+      const mediaFiles = files.filter(isAllowedMediaFile)
+      if (mediaFiles.length === 0) {
+        alert('Please select image, MP4, or WebM files.')
         return
       }
 
@@ -115,7 +119,7 @@ export const BulkUploadButton: React.FC = () => {
       // Keep existing uploads safe by asking before duplicate filenames are sent.
       const duplicates: string[] = []
       const uniqueFilesList: File[] = []
-      for (const file of imageFiles) {
+      for (const file of mediaFiles) {
         const isDupe = await checkDuplicate(file.name)
         if (isDupe) {
           duplicates.push(file.name)
@@ -126,11 +130,11 @@ export const BulkUploadButton: React.FC = () => {
 
       if (duplicates.length > 0) {
         setDuplicateFiles(duplicates)
-        setOriginalFiles(imageFiles)
+        setOriginalFiles(mediaFiles)
         setUniqueFiles(uniqueFilesList)
         setShowDuplicateModal(true)
       } else {
-        setProgress({ current: 0, total: imageFiles.length })
+        setProgress({ current: 0, total: mediaFiles.length })
 
         const results: UploadResult[] = []
         let completed = 0
@@ -140,11 +144,11 @@ export const BulkUploadButton: React.FC = () => {
           const result = await uploadOne(file)
           results.push(result)
           completed++
-          setProgress({ current: completed, total: imageFiles.length })
+          setProgress({ current: completed, total: mediaFiles.length })
         }
 
-        for (let i = 0; i < imageFiles.length; i += CONCURRENCY) {
-          const batch = imageFiles.slice(i, i + CONCURRENCY)
+        for (let i = 0; i < mediaFiles.length; i += CONCURRENCY) {
+          const batch = mediaFiles.slice(i, i + CONCURRENCY)
           await Promise.all(batch.map(uploadOneWithProgress))
         }
 
@@ -229,7 +233,7 @@ export const BulkUploadButton: React.FC = () => {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/mp4,video/webm"
           multiple
           style={{ display: 'none' }}
           onChange={handleFileChange}
@@ -252,7 +256,7 @@ export const BulkUploadButton: React.FC = () => {
             whiteSpace: 'nowrap',
           }}
         >
-          {isUploading ? `Uploading... ${progress?.current}/${progress?.total}` : 'Bulk Upload Images'}
+          {isUploading ? `Uploading... ${progress?.current}/${progress?.total}` : 'Bulk Upload Media'}
         </button>
 
         <span style={{ color: '#9ca3af', fontSize: '13px' }}>
@@ -260,7 +264,7 @@ export const BulkUploadButton: React.FC = () => {
             ? 'Release to upload'
             : isUploading
               ? `Uploading ${progress?.current} of ${progress?.total} — filenames will be used as Alt text`
-              : 'Or drag & drop multiple images here · Filename will be used as Alt text automatically'}
+              : 'Or drag & drop images, MP4, or WebM here · Filename will be used as Alt text automatically'}
         </span>
       </div>
 
@@ -285,7 +289,7 @@ export const BulkUploadButton: React.FC = () => {
             />
           </div>
           <div style={{ marginTop: '4px', fontSize: '12px', color: '#6b7280', textAlign: 'right' }}>
-            {progressPercent}% — {progress.current} / {progress.total} images
+            {progressPercent}% — {progress.current} / {progress.total} files
           </div>
         </div>
       )}
