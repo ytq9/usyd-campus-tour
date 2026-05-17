@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { getInfoContentPreview, getInfoContentTextBlocks } from './infoContentText'
+import { getInfoContentPreview } from './infoContentText'
+import RichTextContent from './RichTextContent'
 
 type Props = {
   hotspots: any[]
@@ -15,7 +16,6 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
   const [isOpen, setIsOpen] = useState(false)
   const [selectedInfoHotspot, setSelectedInfoHotspot] = useState<any | null>(null)
   const infoModalRef = useRef<HTMLDialogElement>(null)
-  const selectedInfoContentBlocks = getInfoContentTextBlocks(selectedInfoHotspot?.infoContent)
 
   const handleNavigate = async (hs: any) => {
     if (hs.type === 'scene' && hs.targetScene?.slug) {
@@ -103,15 +103,10 @@ export default function HotspotSidebar({ hotspots, tourSlug, floorSlug, isDraft,
             </form>
           </div>
           <div className="py-4 prose text-gray-700">
-            {selectedInfoContentBlocks.length > 0 ? (
-              <div>
-                {selectedInfoContentBlocks.map((block, index) => (
-                  <p key={index}>{block}</p>
-                ))}
-              </div>
-            ) : (
-              <p>{selectedInfoHotspot?.text}</p>
-            )}
+            <RichTextContent
+              value={selectedInfoHotspot?.infoContent}
+              fallback={<p>{selectedInfoHotspot?.text}</p>}
+            />
           </div>
         </div>
         <form method="dialog" className="d-modal-backdrop">

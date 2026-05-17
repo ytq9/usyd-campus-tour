@@ -2,8 +2,8 @@
 
 import React, { useRef } from 'react'
 import type { InfoHotspotFocusHandler } from './three/types'
-import { getInfoContentTextBlocks } from './infoContentText'
 import { HotspotIcon } from './hotspotIcons'
+import RichTextContent from './RichTextContent'
 
 type Props = {
   hotspot: any
@@ -12,7 +12,6 @@ type Props = {
 
 export default function InfoHotspot({ hotspot, onFocus }: Props) {
   const modalRef = useRef<HTMLDialogElement>(null)
-  const contentBlocks = getInfoContentTextBlocks(hotspot.infoContent)
 
   const modalId = `info_modal_${(hotspot.text || '').replace(/[^a-zA-Z0-9]/g, '_')}`
   const openModal = () => {
@@ -66,15 +65,7 @@ export default function InfoHotspot({ hotspot, onFocus }: Props) {
             </form>
           </div>
           <div className="py-4 prose text-gray-700">
-            {contentBlocks.length > 0 ? (
-              <div>
-                {contentBlocks.map((block, index) => (
-                  <p key={index}>{block}</p>
-                ))}
-              </div>
-            ) : (
-              <p>{hotspot.text}</p>
-            )}
+            <RichTextContent value={hotspot.infoContent} fallback={<p>{hotspot.text}</p>} />
           </div>
         </div>
         <form method="dialog" className="d-modal-backdrop">

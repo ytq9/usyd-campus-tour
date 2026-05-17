@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { hasRichTextContent } from '@/components/tour/infoContentText'
+import RichTextContent from '@/components/tour/RichTextContent'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +29,8 @@ export default async function TourLandingPage({ params, searchParams }: { params
 
   const tour = tours.docs[0]
   if (!tour) notFound()
+  const hasDescription = hasRichTextContent(tour.description)
+  const hasWelcomeText = hasRichTextContent(tour.welcomeText)
 
   const defaultFloor = tour.defaultFloor && typeof tour.defaultFloor === 'object'
     ? tour.defaultFloor
@@ -83,12 +87,14 @@ export default async function TourLandingPage({ params, searchParams }: { params
         {tour.welcomeTitle && (
           <h2 className="text-2xl font-bold mb-4">{tour.welcomeTitle}</h2>
         )}
-        {tour.welcomeText && (
-          <div className="prose prose-invert prose-lg max-w-none">
-            {/* Payload rich text is stored as Lexical JSON; keep this fallback until a renderer is added. */}
-            <p className="text-gray-300">
-              {typeof tour.welcomeText === 'string' ? tour.welcomeText : 'Welcome to the tour!'}
-            </p>
+        {hasWelcomeText && (
+          <div className="prose prose-invert prose-lg max-w-none text-gray-300">
+            <RichTextContent value={tour.welcomeText} />
+          </div>
+        )}
+        {hasDescription && (
+          <div className="prose prose-invert max-w-none text-gray-300 mt-8">
+            <RichTextContent value={tour.description} />
           </div>
         )}
 
