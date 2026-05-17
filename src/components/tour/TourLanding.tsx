@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import type { Floor, Media, Scene, Tour } from '@/payload-types'
-import { getInfoContentTextBlocks } from './infoContentText'
+import { hasRichTextContent } from './infoContentText'
+import RichTextContent from './RichTextContent'
 
 type Props = {
   tour: Tour
@@ -30,7 +31,8 @@ export default function TourLanding({
 }: Props) {
   const coverImage = isPopulatedMedia(tour.coverImage) ? tour.coverImage : null
   const defaultFloor = isPopulatedFloor(tour.defaultFloor) ? tour.defaultFloor : null
-  const welcomeTextBlocks = getInfoContentTextBlocks(tour.welcomeText)
+  const hasWelcomeText = hasRichTextContent(tour.welcomeText)
+  const hasDescription = hasRichTextContent(tour.description)
 
   const buildViewerHref = (floor: Floor, scene: Scene) => {
     const floorSlug = valueOrFallback(floor.slug, String(floor.id))
@@ -87,13 +89,14 @@ export default function TourLanding({
         {tour.welcomeTitle && (
           <h2 className="text-2xl font-bold mb-4">{tour.welcomeTitle}</h2>
         )}
-        {welcomeTextBlocks.length > 0 && (
-          <div className="prose prose-invert prose-lg max-w-none">
-            {welcomeTextBlocks.map((block, index) => (
-              <p key={index} className="text-gray-300">
-                {block}
-              </p>
-            ))}
+        {hasWelcomeText && (
+          <div className="prose prose-invert prose-lg max-w-none text-gray-300">
+            <RichTextContent value={tour.welcomeText} />
+          </div>
+        )}
+        {hasDescription && (
+          <div className="prose prose-invert max-w-none text-gray-300 mt-8">
+            <RichTextContent value={tour.description} />
           </div>
         )}
 

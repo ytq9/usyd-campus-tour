@@ -16,6 +16,11 @@ import {
 } from '@/components/tour/three/threePanoramaMath'
 import { useThreeSceneTexture } from '@/components/tour/three/useThreeSceneTexture'
 import { useAdminPanoramaMedia } from './useAdminPanoramaMedia'
+import {
+  HotspotIcon,
+  HOTSPOT_ICON_OPTIONS,
+  type HotspotIconKey,
+} from '@/components/tour/hotspotIcons'
 
 type Props = {
   path?: string
@@ -35,6 +40,7 @@ type HotspotRow = {
   infoVideo?: unknown
   iconColor?: string | null
   iconSize?: 'sm' | 'md' | 'lg' | null
+  iconStyle?: HotspotIconKey | string | null
 }
 
 type SceneSummary = {
@@ -111,6 +117,7 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
         infoVideo: fields[`${HOTSPOTS_PATH}.${i}.infoVideo`]?.value,
         iconColor: fields[`${HOTSPOTS_PATH}.${i}.iconColor`]?.value as any,
         iconSize: fields[`${HOTSPOTS_PATH}.${i}.iconSize`]?.value as any,
+        iconStyle: fields[`${HOTSPOTS_PATH}.${i}.iconStyle`]?.value as any,
       })
     }
     return list
@@ -302,6 +309,7 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
             yaw: { value: ny },
             text: { value: 'New Hotspot' },
             iconSize: { value: 'md' },
+            iconStyle: { value: 'default' },
           },
         })
         setModified(true)
@@ -625,7 +633,13 @@ export default function ThreeSceneHotspotEditor(_props: Props) {
                   textShadow: '0 1px 2px rgba(0,0,0,0.6)',
                 }}
               >
-                {isPortal ? '→' : 'i'}
+                <HotspotIcon
+                  iconKey={hs.iconStyle}
+                  hotspotType={hs.type}
+                  size={Math.round(size * 0.7)}
+                  color="#fff"
+                  strokeWidth={2.2}
+                />
               </div>
             )
           })}
@@ -1153,6 +1167,49 @@ function SidePanel({
           />
         </div>
       )}
+
+      <div style={fieldRow}>
+        <label style={labelStyle}>Icon</label>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: 6,
+          }}
+        >
+          {HOTSPOT_ICON_OPTIONS.map((opt) => {
+            const active = (hotspot.iconStyle || 'default') === opt.value
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                title={opt.label}
+                onClick={() => onChange('iconStyle', opt.value)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 36,
+                  background: active ? '#1a3a5c' : '#141414',
+                  border: active ? '2px solid #7dd3fc' : '1px solid #2a2a2a',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  color: '#fff',
+                  padding: 0,
+                }}
+              >
+                {opt.value === 'default' ? (
+                  <span style={{ fontSize: 11, color: '#aaa', letterSpacing: 0.5 }}>
+                    Auto
+                  </span>
+                ) : (
+                  <HotspotIcon iconKey={opt.value} size={20} color="#fff" />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
       <div style={{ ...fieldRow, display: 'flex', gap: 8 }}>
         <div style={{ flex: 1 }}>

@@ -51,6 +51,7 @@ const serializeHotspot = (hs: any) => ({
   cssClass: hs.cssClass || '',
   iconColor: hs.iconColor || '',
   iconSize: hs.iconSize || 'md',
+  iconStyle: hs.iconStyle || 'default',
 })
 
 export default async function SceneViewerPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
@@ -155,6 +156,7 @@ export default async function SceneViewerPage({ params, searchParams }: { params
       id: s.id,
       slug: valueOrFallback(s.slug, String(s.id)),
       title: s.title,
+      description: s.description || null,
       panoramaUrl: s.panorama && typeof s.panorama === 'object' ? (s.panorama.url ?? '') : '',
       initialYaw: s.initialYaw || 0,
       initialPitch: s.initialPitch || 0,

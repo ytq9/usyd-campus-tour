@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { APIError } from 'payload'
 import { publishedOrAdmin } from '../access/publishedOrAdmin'
 
 const IMAGE_MEDIA_FILTER = { mimeType: { like: 'image/' } }
@@ -337,6 +338,7 @@ export const Tours: CollectionConfig = {
       unique: true,
       admin: { position: 'sidebar' },
     },
+    { name: 'description', type: 'richText' },
     {
       name: 'coverImage',
       type: 'upload',
@@ -521,8 +523,9 @@ export const Tours: CollectionConfig = {
         }
 
         if (errors.length > 0) {
-          throw new Error(
+          throw new APIError(
             `Cannot publish tour. Fix the following issues first:\n\n${errors.map((e) => `• ${e}`).join('\n')}`,
+            400,
           )
         }
 

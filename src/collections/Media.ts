@@ -4,6 +4,7 @@ const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm']
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  defaultSort: '-updatedAt',
   access: {
     read: () => true,
   },

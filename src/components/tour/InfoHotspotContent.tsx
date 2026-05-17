@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { getInfoContentTextBlocks } from './infoContentText'
+import RichTextContent from './RichTextContent'
 
 type InfoVideo = {
   alt?: string | null
@@ -82,11 +83,7 @@ export default function InfoHotspotContent({ dialogRef, hotspot }: Props) {
       )}
 
       {contentBlocks.length > 0 ? (
-        <div>
-          {contentBlocks.map((block, index) => (
-            <p key={index}>{block}</p>
-          ))}
-        </div>
+        <RichTextContent value={hotspot?.infoContent} />
       ) : !video?.url ? (
         <p>{hotspot?.text}</p>
       ) : null}

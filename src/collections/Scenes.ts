@@ -166,6 +166,22 @@ export const Scenes: CollectionConfig = {
           },
         },
         {
+          name: 'iconStyle',
+          type: 'select',
+          defaultValue: 'default',
+          options: [
+            { label: 'Default (Arrow / Info)', value: 'default' },
+            { label: 'Arrow', value: 'arrow' },
+            { label: 'Info', value: 'info' },
+            { label: 'Pin', value: 'pin' },
+            { label: 'Star', value: 'star' },
+            { label: 'Building', value: 'building' },
+            { label: 'Academic', value: 'academic' },
+            { label: 'Camera', value: 'camera' },
+            { label: 'Question', value: 'question' },
+          ],
+        },
+        {
           name: 'iconColor',
           type: 'text',
         },

@@ -25,6 +25,8 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { TourPublishButton as TourPublishButton_db5b9d1f1d871e14e2deb3c3e702f938 } from '@/components/admin/TourPublishButton'
 import { MapPointsEditor as MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c } from '@/components/payload/MapPointsEditor'
 import { default as default_894a722305973334be91b6aae8e52c63 } from '@/components/admin/three/ThreeSceneHotspotEditor'
+import { AdminTooltipProvider as AdminTooltipProvider_7c5012d107aa83d6c62beb6488540a95 } from '@/components/admin/AdminTooltipProvider'
+import { OnboardingTour as OnboardingTour_b5a5470765b9cea82ca5aa7cd688abb7 } from '@/components/admin/OnboardingTour'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 export const importMap = {
@@ -55,5 +57,7 @@ export const importMap = {
   "@/components/admin/TourPublishButton#TourPublishButton": TourPublishButton_db5b9d1f1d871e14e2deb3c3e702f938,
   "@/components/payload/MapPointsEditor#MapPointsEditor": MapPointsEditor_44111aff8edba47bb0cd32bc64f1da4c,
   "@/components/admin/three/ThreeSceneHotspotEditor#default": default_894a722305973334be91b6aae8e52c63,
+  "@/components/admin/AdminTooltipProvider#AdminTooltipProvider": AdminTooltipProvider_7c5012d107aa83d6c62beb6488540a95,
+  "@/components/admin/OnboardingTour#OnboardingTour": OnboardingTour_b5a5470765b9cea82ca5aa7cd688abb7,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

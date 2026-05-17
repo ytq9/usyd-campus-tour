@@ -365,7 +365,7 @@ async function seed() {
         initialScene: initialSceneDbId || undefined,
         mapPoints,
         _status: 'published',
-      },
+      } as any,
     })
     console.log(`  Updated floor: ${fp.floorName}`)
   }
